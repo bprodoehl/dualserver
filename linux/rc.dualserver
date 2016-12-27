@@ -1,0 +1,102 @@
+#!/bin/bash
+#chkconfig: 2345 20 80
+#description: #start/stop dualserver
+#Originally Contributed by sharne, slightly modified.
+### BEGIN INIT INFO
+# Provides:          dualserverd
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+##### Modify 3 line below for location of executive and other files #####
+EXEFILE=/opt/dualserver/dualserverd
+INIFILE=/opt/dualserver/dualserver.ini
+LOGFILE=/opt/dualserver/log/dualserver%Y%m%d.log
+##### There is generally no need to modify anything below this line #####
+
+# Get pid
+getpid() {
+pidnum=$( ps -eaf | grep -v grep | grep -w dualserverd | awk '{ print $3,$2 }' | sort | head -1 | awk '{ print $2 }' )
+}
+
+# Start dualserver:
+dualserver_start() {
+${EXEFILE} -i ${INIFILE} -l ${LOGFILE}
+sleep 1
+getpid
+if [ -n "$pidnum" ]; then
+echo "Dual Server started"
+else
+echo "Dual Server failed to start"
+fi
+}
+
+# Stop dualserver:
+dualserver_stop() {
+kill $pidnum
+while [ true ]
+do
+getpid
+if [ -z "$pidnum" ] ; then
+echo "Dual Server stopped"
+break
+fi
+sleep 1
+done
+}
+
+case "$1" in
+'start')
+getpid
+if [ -z "$pidnum" ] ; then
+dualserver_start
+RETVAL=0
+else
+echo "Dual Server is already running - Try restart"
+RETVAL=1
+fi
+;;
+'stop')
+getpid
+if [ -z "$pidnum" ] ; then
+echo "Dual Server is not running"
+RETVAL=1
+else
+dualserver_stop
+RETVAL=0
+fi
+;;
+'restart')
+getpid
+if [ -z "$pidnum" ] ; then
+echo "Dual Server is not running"
+dualserver_start
+else
+dualserver_stop
+dualserver_start
+fi
+RETVAL=0
+;;
+'status')
+getpid
+if [ -z "$pidnum" ] ; then
+echo "Dual Server is stopped"
+RETVAL=1
+else
+echo "Dual Server is running - Pid : $pidnum"
+RETVAL=0
+fi
+;;
+*)
+echo "Usage $0 { start | stop | restart | status }"
+RETVAL=1
+;;
+esac
+exit $RETVAL
+
+# Enjoy!
+

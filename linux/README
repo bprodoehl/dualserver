@@ -1,0 +1,241 @@
+This release 7.29 is a Stable Release
+
+ENHANCEMENTS in 7.29
+
+1) Major Debug and Code Fix for Zone Replication under heavy load
+
+ENHANCEMENTS in 7.10
+
+1) Subnet Selection can now be manually configured.
+2) Target Relay Agent can be overridden.
+3) HTTP Interface can be restricted.
+4) HTTP Interface blocking fixed
+5) Bug DNS Receive failure was fixed.
+6) PDF Manual was included.
+
+DOWNLOAD
+
+The latest version can be downloaded from http://dhcp-dns-server.sourceforge.net/
+
+INSTALLATION
+
+This program if installed on a machine, which is static configured for IP Address,
+DNS & router, it detects these settings from server machine (If you want different
+setting for clients, edit ini file) and uses them for configuring other machines
+on local network.
+
+Expand the GZ archive to any directory (like /opt/dualserver )
+Change the permissions of file dualserver with chmod 755 dualserver
+
+test run as root:-
+#<installDirecory>/dualserverd -v
+You should see something similar to:-
+
+Forwarding DNS Server: 192.168.0.1
+DHCP Range: 192.168.0.1-192.168.0.254/255.255.255.0
+DNS Service Permitted Hosts: 192.168.0.1 - 192.168.0.254
+Expiry: 360000 (sec)
+Domain Name: workgroup
+Server Name: Knoppix
+Listening On: 192.168.0.2
+
+Now try getting IP Address for another machine, it should work.
+
+RUNNING
+
+This program runs in two modes:-
+a) Verbatim Mode (using -v argument)
+b) Daemon (not using -v argument)
+
+This program uses 2 or 3 helper files:-
+i)   -i[inifile], where configuration settings can be specified,
+     default is ./etc/dualserver.ini
+ii)  -s[statefile] saves current leases, default is /etc/dualserver.state 
+iii) -l[logfile] dumps log to this file in daemon mode, default is syslog
+
+You can start/run as:-
+
+<installDirecory>/dualserverd (daemon with default files)
+<installDirecory>/dualserverd -v (verbatim with default files)
+<installDirecory>/dualserverd -i inifile -s statefile -l logfile (as daemon)
+<installDirecory>/dualserverd -i inifile -s statefile (as daemon)
+<installDirecory>/dualserverd  -v -i inifile -s statefile as verbatim
+
+Please include %Y for full year or %y for 2 digit year, %m for month, %d for day
+of month like:-
+
+<installDirecory>/dualserverd -l <installDirecory>/log/dualserver%Y%m%d.log -i<installDirecory>/dualserverd.ini
+
+Order of %Y %m %d is not important. You can also include just %m and %Y if you want monthly log file like:-
+
+<installDirecory>/dualserver -l <logDirecory>/dualserver%Y%m.log -i<someDirecory>/dualserver.ini
+
+As shown above if you use separate directory for log file, you should manually create this directory
+
+DAEMONIZING
+
+If your system supports chkconfig command, you can use the enclosed
+rc.dualserver file to add the service. Just create a symbolic link to /etc/init.d/dualserver
+in init.d and make it executable. Also change the file paths (depending on where you
+have installed the executive and log file directory) in this file.
+Then you can use chkconfig command to add the daemon:-
+
+#ln -s <installDirecory>/rc.dualserver /etc/init.d/dualserver
+#chmod 755 /etc/init.d/dualserver
+#chkconfig --add dualserver
+#chkconfig dualserver on
+Thats all you may need.
+
+If you dont have chkconfig command, you can manually modify boot scripts
+in /etc/rc.d/rc.local file or /etc/inittab file or /etc/rc.d/rc.inet2
+file (prefered). Also you need to do following changes:-
+
+Add the enclosed rc.dualserver script in /etc/rc.d and make it executable (755).
+Also change the file paths (depending on where you have installed the executive
+and log file directory) in this file. Finally you need to add the lines:-
+
+# Start the Dual DHCP DNS Server daemon:
+if [ -x /etc/rc.d/rc.dualserver ]; then
+/etc/rc.d/rc.dualserver start
+fi
+
+to any of above scripts (preferably to /etc/rc.d/rc.inet2)
+
+RECOMPILING
+
+Recompiling is not generally needed on 32 bit Intel/Linux systems.
+For other system, you can try:-
+
+#g++ dualserverd.cpp -odualserverd -lpthread
+#g++ dualserverd.cpp -odualserverd -lpthread -lgcc_s
+
+You need C++ compiler for Versions 3 onwards, as these versions use STL
+If you have only C Compiler, you need to download and use Version 2.1 only.
+
+CONFIGURATION
+
+1) Configuration of Server
+
+   The program automatically picks up settings of Server computer and 
+   no configuration is required if:-
+
+   a) Server machine is configured for DNS Servers and Gateway servers.
+   b) You use IP range 192.168.0.1 - 192.168.0.255 (Server is automatically excluded).
+   c) Lease Time is 360000 secs/100 hours.
+   
+   You can change any of these settings in dualserver.ini file.
+   
+2) Configuration of Clients.
+   
+   a. You can use Windows/Linux/Unix mix of clients.
+   b. The clients should be set to get IP Address automatically.
+   c. Do not configure the clients for Dynamic DNS Update, as this server automatically
+      does this.
+
+GENERAL
+   
+1) This document is for guidance and is also covered under GNU public license.
+
+INTERNET CONNECTION SHARING.
+
+Internet connection sharing needs 3 services a) DNS Server b) DHCP Service c) Gateway Service.
+DNS and DHCP Service is provided by this server. However gateway service is provided by 
+Operating System itself.
+
+To enable Internet connection sharing, please look at instruction at /etc/rc.d/rc.ip_forward file.
+
+DEBUG
+
+If program is not assigning addresses or resolve them check:-
+
+1) Ensure that you run this program as root only.
+2) Check network hardware and ensure that client machines has different host names from server and
+   each other.
+3) No other service should be running on Server on ports 53 and 67.
+4) If you get error like port 67 already in use means some other DHCP program or proxy server with DHCP 
+   service is running. If you get error port 53 already in use means some other DNS Server or proxy server
+   with DNS Service is already running. Use netstat command to detect which program is
+   listening on these ports. It is also possible that another copy of dualserver itself is running.
+5) If you get error Static Interfaces/Listening Ports not available, it may be because of 1) Another
+   DHCP/DNS Server is running or Interfaces specified on [LISTEN_ON] section are not available.
+   or you have just restated the server and TCP port is not yet closed, then wait for some time.
+6) Look at log file (if running as service) or Run in standalone mode, it will provide all debug
+   information as it verbatim the activities.
+7) If you use Broadband router, which also has DHCP Server, this program may still run, but some hosts
+   configured by other DHCP Server may not use this DNS Service.
+8) Often you will find that other machines can resolve each other and server, but server resolves
+   nothing. This is because server's DNS Server may be different. To resolve machines from server,
+   specify (forwarding) DNS Servers in ini file and set server's DNS Server to itself.
+9) Zone Transfer and Replication, if used on multihomed servers, make sure the IPs for Primary and Secondary
+   server can be pinged from Each Other.
+10)dualserver.state file backs up current leases and is read back when server restarts. If you want to 
+   clean previous leases, you may delete this file /tmp/dualserver.state and restart the server.
+11) Errors like "libstdc++.so.?: cannot open shared object file: No such file or directory" 
+   are possible in some Linux flavors. Please recompile the program or create symbolic links:-
+	ln -s /usr/local/lib/libstdc++.so.? /usr/lib/libstdc++.so.? 
+	ln -s /usr/local/lib/libgcc_s.so.? /usr/lib/libgcc_s.so.?
+   (? is library version as reported in error)
+   or add the library path (directory where above file is) to env variable LD_LIBRARY_PATH.
+12)If you are not able to receive DHCP Discover messages from clients, make sure that Dual DHCP DNS Server
+   and client are on same physical network (not separated by routers). If it is separated by routers and it
+   is same subnet, please allow routers to pass broadcast messages to Server on Port 67. If these are 
+   different subnets, use the BOOTP relay agents or let routers provide this functionality.
+13) Make sure that firewall is allowing packets on ports 53 and 67.
+14) If you have upgraded from previous version and program just dies or fails to start, please
+    delete /tmp/dualserver.state file and retry.
+    
+UNINSTALLATION
+
+	Just remove the program directory. You should also remove entries from initialize scripts of 
+	your machine. If you have used chkconfig, use the same command to remove the service.
+
+REPLICATION (for advance users only)
+
+	Release 5.0 onwards support zone replication. Please read the ZONE REPLICATION file.
+
+Domain Name Server and Child Zones. (for advance users only)
+
+	If you have a domain with multiple child zones, each zone having its own DNS/DHCP or DNS server, You
+	can use a multizone DNS Server like bind as Main Domain Name Server, which would transfer different
+	zones from child servers. Dual Server can be very well used as Child Zone Servers with DHCP/DNS for
+	zone and Domain Name Server would have all the zones transferred from Child Servers.
+
+	Dual Server, being single zone server, still provides a way to work as main Domain Name Server for
+	whole domain. It works differently but with same results, without even the need to transfer child zones.
+	You can configure 1 or more Dual Servers as Master DNS Server (Domain DNS Server) for whole domain
+	and these will forward queries to specific zone servers based on zone match. Queries not matching to zones
+	specified in [CHILD-ZONES] section will be forwarded to default forwarding DNS Servers. One query will
+	be forwarded only once to Child server and then cache is used to resolve unless it has expired.
+	Please see the [CHILD-ZONES] section of ini file.
+	
+	Entries in [CHILD-ZONES] behave differently than forwarding server entries in [DNS-SERVERS] section.
+	Child Servers are basically meant for child  zones queries. For correct behavior you should specify
+	child zone servers in [CHILD-ZONES] like:-
+	
+	[CHILD-ZONES]
+	childzone1.workgroup.com=xxx.xxx.xxx.xxx, xxx.xxx.xxx.xxx
+	1.168.192.in-addr-arpa=xxx.xxx.xxx.xxx, xxx.xxx.xxx.xxx
+	childzone2.workgroup.com=xxx.xxx.xxx.xxx
+	2.168.192.in-addr-arpa=xxx.xxx.xxx.xxx
+
+	The child zone can have just one DNS Server or can have primary and secondary with zone replication between 
+	them. Domain Server would contact primary or secondary child zone server, whichever is available. You can
+	specify one server also, if child zone has only 1 server.
+
+ 	Main Domain Name servers should be specified as forwarding servers in child zone dns servers, so that
+	each zone can also resolve entries in sibling child zones through main Domain Name Server. ISP or Public
+	DNS Servers should only be specified in main Domain Name Servers.
+
+	If you need full backup, minimum 2 DualServers should be used as main Domain Name Server for main domain
+	with identical configuration and each child zone should have 2 DualServers, with zone replication between
+	them only.
+	
+BUGS
+	If you find any problem with this program or need more features, please send mail to achaldhir@gmail.com.
+	You may also send thanks email if it works fine for you.
+
+DONATIONS
+
+	If you find that this program is suitable for your office environment and you are using it, Please consider
+	some donation for this project. $10-$50 do not make any difference to office, but it does make difference
+	to Project.

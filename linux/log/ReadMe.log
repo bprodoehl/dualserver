@@ -1,0 +1,8 @@
+Logging will be done only if run as Service.
+LogLevels can be set as None, Normal or All
+Logging Level has be specified separately for DHCP and DNS
+It is advisable to keep logging to Normal, Normal include errors 
+and DHCP Lease renewal messages. Normal is defaul logging also.
+Log file should be specified at command line.
+Log file name should include %Y%m%d, %Y will be replaced
+by Current Year, %m by current month and %d by current year.
