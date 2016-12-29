@@ -8279,6 +8279,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 		closesocket(req.sock);
 		return 0;
 	}
+  return 0;
 }
 
 bool getSecondary()
@@ -9433,8 +9434,6 @@ void __cdecl init(void *lpParam)
 			char localhost[] = "localhost";
 			add2Cache(localhost, inet_addr("127.0.0.1"), INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
 
-			bool ifspecified = false;
-
 			for (int i = 0; i < MAX_SERVERS && network.listenServers[i]; i++)
 			{
 				if (isLocal(network.listenServers[i]))
@@ -9632,7 +9631,6 @@ void __cdecl init(void *lpParam)
 
 		network.maxFD = cfig.dhcpReplConn.sock;
 
-		bool ifSpecified = false;
 		bool bindfailed = false;
 
 		if (dhcpService)
@@ -10022,7 +10020,7 @@ bool detectChange()
 		return true;
 	}
 
-	DWORD ret = NotifyAddrChange(NULL, NULL);
+	NotifyAddrChange(NULL, NULL);
 
 	if ((errno = WSAGetLastError()) && errno != WSA_IO_PENDING)
 	{
