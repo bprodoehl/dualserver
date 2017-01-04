@@ -1485,11 +1485,11 @@ void addRRPtr(data5 *req)
 			req->dp += pULong(req->dp, cfig.lease);
 
 			if (!cache->hostname[0])
-				strcpy(req->cname, cfig.zone);
+				strcpy_s(req->cname,sizeof(req->cname), cfig.zone);
 			else if (!strchr(cache->hostname, '.'))
 				sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
 			else
-				strcpy(req->cname, cache->hostname);
+				strcpy_s(req->cname,sizeof(req->cname), cache->hostname);
 
 			req->dp += pUShort(req->dp, qLen(req->cname));
 			req->dp += pQu(req->dp, req->cname);
@@ -1626,9 +1626,9 @@ void addRRAny(data5 *req)
 					req->dp += pULong(req->dp, cfig.lease);
 
 					if (!cache->hostname[0])
-						strcpy(req->extbuff, cfig.zone);
+						strcpy_s(req->extbuff, sizeof(req->extbuff), cfig.zone);
 					else if (!strchr(cache->hostname, '.'))
-						strcpy(req->extbuff, cache->hostname);
+						strcpy_s(req->extbuff, sizeof(req->extbuff), cache->hostname);
 					else
 						sprintf(req->extbuff, "%s.%s", cache->hostname, cfig.zone);
 
@@ -1876,11 +1876,11 @@ void addRRPtrOne(data5 *req)
 		req->dp += pULong(req->dp, cfig.lease);
 
 		if (!cache->hostname[0])
-			strcpy(req->cname, cfig.zone);
+			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 		else if (!strchr(cache->hostname, '.'))
 			sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
 		else
-			strcpy(req->cname, cache->hostname);
+			strcpy_s(req->cname, sizeof(req->cname), cache->hostname);
 
 		req->dp += pUShort(req->dp, qLen(req->cname));
 		req->dp += pQu(req->dp, req->cname);
@@ -1896,11 +1896,11 @@ void addRRSTAOne(data5 *req)
 		req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
 
 		if (!cache->name[0])
-			strcpy(req->cname, cfig.zone);
+			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 		else if (!strchr(cache->name, '.'))
 			sprintf(req->cname, "%s.%s", cache->name, cfig.zone);
 		else
-			strcpy(req->cname, cache->name);
+			strcpy_s(req->cname, sizeof(req->cname), cache->name);
 
 		req->dp += pQu(req->dp, req->cname);
 		req->dp += pUShort(req->dp, DNS_TYPE_A);
@@ -1919,9 +1919,9 @@ void addRRCNOne(data5 *req)
 		req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
 
 		if (!cache->name[0])
-			strcpy(req->cname, cfig.zone);
+			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 		else if (strchr(cache->name, '.'))
-			strcpy(req->cname, cache->name);
+			strcpy_s(req->cname, sizeof(req->cname), cache->name);
 		else
 			sprintf(req->cname, "%s.%s", cache->name, cfig.zone);
 
@@ -1931,9 +1931,9 @@ void addRRCNOne(data5 *req)
 		req->dp += pULong(req->dp, cfig.lease);
 
 		if (!cache->hostname[0])
-			strcpy(req->cname, cfig.zone);
+			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 		else if (strchr(cache->hostname, '.'))
-			strcpy(req->cname, cache->hostname);
+			strcpy_s(req->cname, sizeof(req->cname), cache->hostname);
 		else
 			sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
 
@@ -2122,7 +2122,7 @@ void sendStatus(data19 *req)
 
 			if (dhcpEntry->hostname[0])
 			{
-				strcpy(tempbuff, dhcpEntry->hostname);
+				strcpy_s(tempbuff, sizeof(tempbuff), dhcpEntry->hostname);
 				tempbuff[20] = 0;
 				fp += sprintf(fp, td200, tempbuff);
 			}
@@ -3113,16 +3113,16 @@ MYWORD scanloc(data5 *req)
 			case CTYPE_EXT_CNAME:
 
 				if (!cache->hostname[0])
-					strcpy(req->cname, cfig.zone);
+					strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 				else if (strchr(cache->hostname, '.'))
-					strcpy(req->cname, cache->hostname);
+					strcpy_s(req->cname, sizeof(req->cname), cache->hostname);
 				else
 					sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
 
 				//sprintf(logBuff, "cType=%u, name=%s, hostname=%s", cache->cType, cache->name, cache->hostname);
 				//logMess(logBuff, 2);
 
-				strcpy(req->mapname, cache->hostname);
+				strcpy_s(req->mapname, sizeof(req->mapname), cache->hostname);
 				myLower(req->mapname);
 				continue;
 
@@ -3528,7 +3528,7 @@ MYWORD frdnmess(data5 *req)
 		}
 
 		memcpy(&req->remote, queue->addr, sizeof(req->remote));
-		strcpy(req->query, queue->query);
+		strcpy_s(req->query, sizeof(req->query), queue->query);
 		req->sockInd = queue->sockInd;
 		req->dnsIndex = queue->dnsIndex;
 		req->dnsType = queue->dnsType;
@@ -6348,7 +6348,9 @@ void loadDHCP()
 					dhcpData.local = dhcpEntry->local;
 
 					if (dhcpEntry->hostname)
-						strcpy(dhcpData.hostname, dhcpEntry->hostname);
+					{
+						strcpy_s(dhcpData.hostname, sizeof(dhcpData.hostname), dhcpEntry->hostname);
+					}
 
 					cfig.dhcpInd++;
 					dhcpData.dhcpInd = cfig.dhcpInd;
@@ -9534,7 +9536,7 @@ void __cdecl init(void *lpParam)
 
 					token.dhcpp.header.bp_op = BOOTP_REQUEST;
 					token.dhcpp.header.bp_xid = t;
-					strcpy(token.dhcpp.header.bp_sname, cfig.servername);
+					strcpy_s(token.dhcpp.header.bp_sname, sizeof(token.dhcpp.header.bp_sname), cfig.servername);
 					token.dhcpp.header.bp_magic_num[0] = 99;
 					token.dhcpp.header.bp_magic_num[1] = 130;
 					token.dhcpp.header.bp_magic_num[2] = 83;
@@ -10291,7 +10293,7 @@ void __cdecl updateStateFile(void *lpParam)
 	dhcpData.ip = dhcpEntry->ip;
 	dhcpData.expiry = dhcpEntry->expiry;
 	dhcpData.local = dhcpEntry->local;
-	strcpy(dhcpData.hostname, dhcpEntry->hostname);
+	strcpy_s(dhcpData.hostname, sizeof(dhcpData.hostname), dhcpEntry->hostname);
 	WaitForSingleObject(fEvent, INFINITE);
 
 	if (dhcpEntry->dhcpInd)
@@ -10516,7 +10518,7 @@ void debug(int i)
 void debug(const char *mess)
 {
 	char t[254];
-	strcpy(t, mess);
+	strcpy_s(t,sizeof(t), mess);
 	logMess(t, 1);
 }
 
