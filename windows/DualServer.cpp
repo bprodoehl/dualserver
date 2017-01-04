@@ -2084,8 +2084,9 @@ void sendStatus(data19 *req)
 
 	char *fp = req->dp;
 	char *maxData = req->dp + (req->memSize - 512);
-	tm *ttm = gmtime(&t);
-	strftime(tempbuff, sizeof(tempbuff), "%a, %d %b %Y %H:%M:%S GMT", ttm);
+	tm ttm;
+	gmtime_s(&ttm, &t);
+	strftime(tempbuff, sizeof(tempbuff), "%a, %d %b %Y %H:%M:%S GMT", &ttm);
 	fp += sprintf_s(fp,sizeof(fp), send200, tempbuff, tempbuff);
 	char *contentStart = fp;
 	fp += sprintf_s(fp,sizeof(fp), htmlStart, htmlTitle);
@@ -2115,8 +2116,9 @@ void sendStatus(data19 *req)
 				fp += sprintf_s(fp,sizeof(fp), td200, "Infinity");
 			else
 			{
-				tm *ttm = localtime(&dhcpEntry->expiry);
-				strftime(tempbuff, sizeof(tempbuff), "%d-%b-%y %X", ttm);
+				tm ttm;
+				localtime_s(&ttm, &dhcpEntry->expiry);
+				strftime(tempbuff, sizeof(tempbuff), "%d-%b-%y %X", &ttm);
 				fp += sprintf_s(fp,sizeof(fp), td200, tempbuff);
 			}
 
@@ -3778,7 +3780,7 @@ char* getResult(data5 *req)
 
 	req->tempname[0] = 0;
 	char *raw = &req->dnsp->data;
-	MYWORD queueIndex;
+	//MYWORD queueIndex;
 
 	for (int i = 1; i <= ntohs(req->dnsp->header.qdcount); i++)
 	{
@@ -4480,7 +4482,6 @@ void addOptions(data9 *req)
 	//debug("addOptions");
 
 	data3 op;
-	int i;
 
 	if (req->req_type && req->resp_type)
 	{
@@ -4845,7 +4846,7 @@ void holdIP(MYDWORD ip)
 void __cdecl sendToken(void *lpParam)
 {
 	//debug("Send Token");
-	char logBuff[512];
+//	char logBuff[512];
 	Sleep(1000 * 10);
 
 	while (kRunning)
@@ -7794,7 +7795,7 @@ MYWORD recvTcpDnsMess(char *target, SOCKET sock, MYWORD targetSize)
 void emptyCache(MYBYTE ind)
 {
 	//debug("emptyCache");
-	char logBuff[512];
+	//char logBuff[512];
 	data7 *cache = NULL;
 
 	//sprintf_s(logBuff,sizeof(logBuff), "Emptying cache[%d] Start %d=%d",ind, dnsCache[ind].size(), dnsAge[ind].size());
@@ -10522,9 +10523,10 @@ void debug(const char *mess)
 
 void logDirect(char *mess)
 {
-	tm *ttm = localtime(&t);
+	tm ttm;
+	localtime_s(&ttm,&t);
 	char buffer[_MAX_PATH];
-	strftime(buffer, sizeof(buffer), logFile, ttm);
+	strftime(buffer, sizeof(buffer), logFile, &ttm);
 
 	if (strcmp(cfig.logFileName, buffer))
 	{
@@ -10557,7 +10559,7 @@ void logDirect(char *mess)
 
 	if (0== fopen_s(&f,cfig.logFileName, "at"))
 	{
-		strftime(buffer, sizeof(buffer), "%d-%b-%y %X", ttm);
+		strftime(buffer, sizeof(buffer), "%d-%b-%y %X", &ttm);
 		fprintf(f, "[%s] %s\n", buffer, mess);
 		fclose(f);
 	}
@@ -10575,9 +10577,10 @@ void __cdecl logThread(void *lpParam)
 	WaitForSingleObject(lEvent, INFINITE);
 	char *mess = (char*)lpParam;
 	time_t t = time(NULL);
-	tm *ttm = localtime(&t);
+	tm ttm;
+	localtime_s(&ttm,&t);
 	char buffer[_MAX_PATH];
-	strftime(buffer, sizeof(buffer), logFile, ttm);
+	strftime(buffer, sizeof(buffer), logFile, &ttm);
 
 	if (strcmp(cfig.logFileName, buffer))
 	{
@@ -10610,7 +10613,7 @@ void __cdecl logThread(void *lpParam)
 
 	if (0 == fopen_s(&f, cfig.logFileName, "at"))
 	{
-		strftime(buffer, sizeof(buffer), "%d-%b-%y %X", ttm);
+		strftime(buffer, sizeof(buffer), "%d-%b-%y %X", &ttm);
 		fprintf(f, "[%s] %s\n", buffer, mess);
 		fclose(f);
 	}
