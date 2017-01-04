@@ -27,6 +27,7 @@
 #include <iphlpapi.h>
 #include <process.h>
 #include <math.h>
+#include <VersionHelpers.h>
 #include "DualServer.h"
 
 //Global Variables
@@ -54,14 +55,15 @@ char displayName[] = "Dual DHCP DNS Service";
 //char extbuff[512];
 //char logBuff[512];
 char htmlTitle[256] = "";
-char filePATH[_MAX_PATH];
-char iniFile[_MAX_PATH];
-char leaFile[_MAX_PATH];
-char logFile[_MAX_PATH];
-char htmFile[_MAX_PATH];
-char lnkFile[_MAX_PATH];
-char tempFile[_MAX_PATH];
-char cliFile[_MAX_PATH];
+char filePATH[_MAX_PATH] = "";
+char iniFile[_MAX_PATH] = "";
+char leaFile[_MAX_PATH] = "";
+char logFile[_MAX_PATH] = "";
+char logPath[_MAX_PATH] = "";
+char htmFile[_MAX_PATH] = "";
+char lnkFile[_MAX_PATH] = "";
+char tempFile[_MAX_PATH] = "";
+char cliFile[_MAX_PATH] = "";
 char arpa[] = ".in-addr.arpa";
 char ip6arpa[] = ".ip6.arpa";
 bool dhcpService = true;
@@ -741,11 +743,8 @@ void uninstallService()
 
 int main(int argc, TCHAR* argv[])
 {
-	OSVERSIONINFO osvi;
-	osvi.dwOSVersionInfoSize = sizeof(osvi);
-	bool result = GetVersionEx(&osvi);
 
-	if (result && osvi.dwPlatformId >= VER_PLATFORM_WIN32_NT)
+	if (IsWindowsXPOrGreater())
 	{
 		if (argc > 1 && lstrcmpi(argv[1], TEXT("-i")) == 0)
 		{
@@ -770,6 +769,65 @@ int main(int argc, TCHAR* argv[])
 					CloseServiceHandle(service);
 				}
 				CloseServiceHandle(serviceControlManager);
+			}
+
+			if (argc > 2)
+			{
+				int lastArg = 2;
+				while (lastArg < argc)
+				{
+					if (argc > lastArg + 1 && lstrcmpi(argv[lastArg], TEXT("-i")) == 0)
+					{
+						char tmpIniPath[1024];
+						int lastPos = 0;
+						int i = lastArg + 1;
+						for (; i < argc; i++)
+						{
+							if (argv[i][0] == '-') break;
+							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
+							strcpy(tmpIniPath + lastPos, argv[i]);
+							lastPos += strlen(argv[i]);
+						}
+						lastArg = i;
+						tmpIniPath[lastPos] = '\0';
+						printf("Using ini file at %s\n", tmpIniPath);
+						strcpy(iniFile, tmpIniPath);
+					}
+					else if (argc > lastArg + 1 && lstrcmpi(argv[lastArg], TEXT("-s")) == 0)
+					{
+						char tmpIniPath[1024];
+						int lastPos = 0;
+						int i = lastArg + 1;
+						for (; i < argc; i++)
+						{
+							if (argv[i][0] == '-') break;
+							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
+							strcpy(tmpIniPath + lastPos, argv[i]);
+							lastPos += strlen(argv[i]);
+						}
+						lastArg = i;
+						tmpIniPath[lastPos] = '\0';
+						printf("Using state file at %s\n", tmpIniPath);
+						strcpy(leaFile, tmpIniPath);
+					}
+					else if (argc > lastArg + 1 && lstrcmpi(argv[lastArg], TEXT("-l")) == 0)
+					{
+						char tmpIniPath[1024];
+						int lastPos = 0;
+						int i = lastArg + 1;
+						for (; i < argc; i++)
+						{
+							if (argv[i][0] == '-') break;
+							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
+							strcpy(tmpIniPath + lastPos, argv[i]);
+							lastPos += strlen(argv[i]);
+						}
+						lastArg = i;
+						tmpIniPath[lastPos] = '\0';
+						printf("Using log path at %s\n", tmpIniPath);
+						strcpy(logPath, tmpIniPath);
+					}
+				}
 			}
 
 			if (serviceStopped)
