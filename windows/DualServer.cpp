@@ -1951,7 +1951,7 @@ void addRRMXOne(data5 *req, MYBYTE m)
 	req->dp += pUShort(req->dp, DNS_TYPE_MX);
 	req->dp += pUShort(req->dp, DNS_CLASS_IN);
 	req->dp += pULong(req->dp, cfig.lease);
-	req->dp += pUShort(req->dp, strlen(cfig.mxServers[currentInd][m].hostname) + 4);
+	req->dp += pUShort(req->dp, (unsigned short)(strlen(cfig.mxServers[currentInd][m].hostname) + 4));
 	req->dp += pUShort(req->dp, cfig.mxServers[currentInd][m].pref);
 	req->dp += pQu(req->dp, cfig.mxServers[currentInd][m].hostname);
 	//req->bytes = req->dp - req->raw;
@@ -2437,7 +2437,7 @@ void procTCP(data5 *req)
 	for (int i = 1; i <= ntohs(req->dnsp->header.qdcount); i++)
 	{
 		req->dp += fQu(req->query, req->dnsp, req->dp);
-		req->dnsType = fUShort(req->dp);
+		req->dnsType = (unsigned char)fUShort(req->dp);
 		req->dp += 2;
 		req->qclass = fUShort(req->dp);
 		req->dp += 2;
@@ -2466,7 +2466,7 @@ void procTCP(data5 *req)
 	strcpy_s(req->cname, sizeof(req->cname), req->query);
 	strcpy_s(req->mapname, sizeof(req->mapname), req->query);
 	myLower(req->mapname);
-	req->qLen = strlen(req->cname);
+	req->qLen = (unsigned short)strlen(req->cname);
 	req->qType = makeLocal(req->mapname);
 
 	if (req->qType == QTYPE_A_EXT && req->qLen > cfig.zLen)
@@ -2861,7 +2861,7 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 	for (int i = 1; i <= ntohs(req->dnsp->header.qdcount); i++)
 	{
 		req->dp += fQu(req->query, req->dnsp, req->dp);
-		req->dnsType = fUShort(req->dp);
+		req->dnsType = (unsigned char)fUShort(req->dp);
 		req->dp += 2;
 		req->qclass = fUShort(req->dp);
 		req->dp += 2;
@@ -3182,7 +3182,7 @@ MYWORD fdnmess(data5 *req)
 	//printf("before qType=%d %d\n", req->qType, QTYPE_A_SUBZONE);
 	char ipbuff[32];
 	char logBuff[512];
-	req->qLen = strlen(req->cname);
+	req->qLen = (unsigned short)strlen(req->cname);
 	MYBYTE zoneDNS;
 	int nRet = -1;
 
@@ -3424,7 +3424,7 @@ MYWORD frdnmess(data5 *req)
 	{
 		req->dp += fQu(req->cname, req->dnsp, req->dp);
 		strcpy_s(req->mapname, sizeof(req->mapname), req->cname);
-		dnsType = fUShort(req->dp);
+		dnsType = (unsigned char)fUShort(req->dp);
 		req->dp += 4; //type and class
 
 		if (dnsType == DNS_TYPE_PTR)
@@ -3635,7 +3635,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 				addEntry(cache);
 
 				if (cfig.replication != 2 && (pType == CTYPE_LOCAL_PTR_AUTH || pType == CTYPE_SERVER_PTR_AUTH))
-					cfig.serial2 = t;
+					cfig.serial2 = (unsigned int)t;
 			}
 		}
 		else if (cache->expiry < expiry)
@@ -3700,7 +3700,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 				addEntry(cache);
 
 				if (cfig.replication != 2 && (aType == CTYPE_LOCAL_A || aType == CTYPE_SERVER_A_AUTH))
-					cfig.serial1 = t;
+					cfig.serial1 = (unsigned int)t;
 			}
 
 		}
@@ -4580,7 +4580,7 @@ void addOptions(data9 *req)
 			pvdata(req, &op);
 
 			op.opt_code = DHCP_OPTION_DOMAINNAME;
-			op.size = strlen(cfig.zone) + 1;
+			op.size = (unsigned char)(strlen(cfig.zone) + 1);
 			memcpy(op.value, cfig.zone, op.size);
 			pvdata(req, &op);
 
@@ -4714,7 +4714,7 @@ void pvdata(data9 *req, data3 *op)
 				if (char *ptr = strchr(req->hostname, '.'))
 					*ptr = 0;
 
-				op->size = strlen(req->hostname);
+				op->size = (unsigned char)strlen(req->hostname);
 			}
 
 			MYWORD tsize = op->size + 2;
@@ -4730,7 +4730,7 @@ void updateDNS(data9 *req)
 	MYDWORD expiry = INT_MAX;
 
 	if (req->lease < (MYDWORD)(INT_MAX - t))
-		expiry = t + req->lease;
+		expiry = (unsigned int)(t + req->lease);
 
 	if (req->dhcpEntry && cfig.replication != 2)
 	{
@@ -4907,7 +4907,7 @@ MYDWORD sendRepl(data9 *req)
 	if (req->hostname[0] && !req->opAdded[DHCP_OPTION_HOSTNAME])
 	{
 		op.opt_code = DHCP_OPTION_HOSTNAME;
-		op.size = strlen(req->hostname);
+		op.size = (unsigned char)strlen(req->hostname);
 		memcpy(op.value, req->hostname, op.size);
 		pvdata(req, &op);
 	}
@@ -5271,7 +5271,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 			myTrim(value, value);
 
 			if (strlen(value) <= UCHAR_MAX)
-				valSize = strlen(value);
+				valSize = (unsigned char)strlen(value);
 			else
 			{
 				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s value too big, option ignored", sectionName, raw);
@@ -5288,7 +5288,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 			if (errorPos)
 			{
 				valType = 1;
-				valSize = strlen(value);
+				valSize = (unsigned char)strlen(value);
 			}
 			else
 				memcpy(value, hoption, valSize);
@@ -5334,7 +5334,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				else
 				{
 					valType = 1;
-					valSize = strlen(value);
+					valSize = (unsigned char)strlen(value);
 				}
 			}
 		}
@@ -5342,7 +5342,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 		{
 			if (strlen(value) <= UCHAR_MAX)
 			{
-				valSize = strlen(value);
+				valSize = (unsigned char)strlen(value);
 				valType = 1;
 			}
 			else
@@ -5629,7 +5629,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				if (valType == 2 && valSize == 2)
 					j = fUShort(value);
 				else if (valType == 5 || valType == 6)
-					j = atol(value);
+					j = atoi(value);
 				else
 				{
 					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, value should be between 0 & %u or 2 bytes, option ignored", sectionName, name, USHRT_MAX);
@@ -5661,7 +5661,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				if (valType == 2 && valSize == 1)
 					j = *value;
 				else if (valType == 6)
-					j = atol(value);
+					j = atoi(value);
 				else
 				{
 					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, value should be between 0 & %u or single byte, option ignored", sectionName, name, UCHAR_MAX);
@@ -7141,7 +7141,7 @@ char *getHexValue(MYBYTE *target, char *source, MYBYTE *size)
 char *myUpper(char *string)
 {
 	char diff = 'a' - 'A';
-	MYWORD len = strlen(string);
+	MYWORD len = (unsigned short)strlen(string);
 	for (int i = 0; i < len; i++)
 		if (string[i] >= 'a' && string[i] <= 'z')
 			string[i] -= diff;
@@ -7151,7 +7151,7 @@ char *myUpper(char *string)
 char *myLower(char *string)
 {
 	char diff = 'a' - 'A';
-	MYWORD len = strlen(string);
+	MYWORD len = (unsigned short)strlen(string);
 	for (int i = 0; i < len; i++)
 		if (string[i] >= 'A' && string[i] <= 'Z')
 			string[i] += diff;
@@ -7365,9 +7365,9 @@ void checkSize()
 			if (cfig.replication != 2)
 			{
 				if (cache->cType == CTYPE_LOCAL_A)
-					cfig.serial1 = t;
+					cfig.serial1 = (unsigned int)t;
 				else if (cache->cType == CTYPE_LOCAL_PTR_AUTH)
-					cfig.serial2 = t;
+					cfig.serial2 = (unsigned int)t;
 			}
 
 			//sprintf_s(logBuff,sizeof(logBuff), "Data Type=%u Cache Size=%u, Age Size=%u, Entry %s being deleted", cache->cType, dnsCache[currentInd].size(), dnsAge[currentInd].size(), cache->name);
@@ -7646,7 +7646,7 @@ MYDWORD getSerial(char *zone)
 			for (int i = 1; i <= ntohs(req.dnsp->header.ancount); i++)
 			{
 				req.dp += fQu(tempbuff, req.dnsp, req.dp);
-				req.dnsType = fUShort(req.dp);
+				req.dnsType = (unsigned char)fUShort(req.dp);
 				req.dp += 2; //type
 				req.qclass = fUShort(req.dp);
 				req.dp += 2; //class
@@ -8140,7 +8140,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 				//sprintf_s(logBuff,sizeof(logBuff), "%u=%s\n", pktSize, req.mapname);
 				//logMess(logBuff, 2);
 
-				req.dnsType = fUShort(req.dp);
+				req.dnsType = (unsigned char)fUShort(req.dp);
 				req.dp += 2; //type
 				req.qclass = fUShort(req.dp);
 				req.dp += 2; //class
@@ -8436,7 +8436,7 @@ bool getSecondary()
 					return  false;
 				}
 
-				req.dnsType = fUShort(req.dp);
+				req.dnsType = (unsigned char)fUShort(req.dp);
 				req.dp += 2; //type
 				req.qclass = fUShort(req.dp);
 				req.dp += 2; //class
@@ -8469,7 +8469,7 @@ bool getSecondary()
 								if (ip == dhcpEntry->ip && !strcasecmp(req.cname, dhcpEntry->hostname))
 								{
 									if (expiry < (MYDWORD)(INT_MAX - t))
-										expiry += t;
+										expiry += (unsigned int)t;
 									else
 										expiry = INT_MAX;
 
@@ -8743,9 +8743,9 @@ void __cdecl init(void *lpParam)
 					else if (!strcasecmp(name, "Minimum"))
 						cfig.minimum = atol(value);
 					else if (!strcasecmp(name, "MinCacheTime"))
-						cfig.minCache = atol(value);
+						cfig.minCache = atoi(value);
 					else if (!strcasecmp(name, "MaxCacheTime"))
-						cfig.maxCache = atol(value);
+						cfig.maxCache = atoi(value);
 					else
 					{
 						sprintf_s(logBuff,sizeof(logBuff), "Section [TIMINGS], Invalid Entry: %s ignored", raw);
@@ -8843,7 +8843,7 @@ void __cdecl init(void *lpParam)
 				if (!strcasecmp(value, arpa + 1))
 				{
 					strcat_s(cfig.authority,sizeof(cfig.authority), arpa + 1);
-					cfig.aLen = strlen(cfig.authority);
+					cfig.aLen = (unsigned char)strlen(cfig.authority);
 					calcRangeLimits(network.ip, mask.ip, &cfig.rangeStart, &cfig.rangeEnd);
 					//IP2String(logBuff, htonl(cfig.rangeStart));
 					//logMess(logBuff, 1);
@@ -8863,7 +8863,7 @@ void __cdecl init(void *lpParam)
 			if (chkQu(name))
 			{
 				strcpy_s(cfig.zone, sizeof(cfig.zone), name);
-				cfig.zLen = strlen(cfig.zone);
+				cfig.zLen = (unsigned char)strlen(cfig.zone);
 			}
 			else
 			{
@@ -9282,7 +9282,7 @@ void __cdecl init(void *lpParam)
 									if (isIP(value) && isIP(value1))
 									{
 										strcpy_s(cfig.dnsRoutes[i].zone, sizeof(cfig.dnsRoutes[i].zone), name);
-										cfig.dnsRoutes[i].zLen = strlen(cfig.dnsRoutes[i].zone);
+										cfig.dnsRoutes[i].zLen = (unsigned short)strlen(cfig.dnsRoutes[i].zone);
 										cfig.dnsRoutes[i].dns[0] = ip;
 										cfig.dnsRoutes[i].dns[1] = ip1;
 										i++;
@@ -9301,7 +9301,7 @@ void __cdecl init(void *lpParam)
 									if (isIP(value))
 									{
 										strcpy_s(cfig.dnsRoutes[i].zone, sizeof(cfig.dnsRoutes[i].zone), name);
-										cfig.dnsRoutes[i].zLen = strlen(cfig.dnsRoutes[i].zone);
+										cfig.dnsRoutes[i].zLen = (unsigned short)strlen(cfig.dnsRoutes[i].zone);
 										cfig.dnsRoutes[i].dns[0] = ip;
 										i++;
 									}
@@ -9459,8 +9459,8 @@ void __cdecl init(void *lpParam)
 				}
 			}
 
-			cfig.serial1 = t;
-			cfig.serial2 = t;
+			cfig.serial1 = (unsigned int)t;
+			cfig.serial2 = (unsigned int)t;
 			cfig.expireTime = INT_MAX;
 			char localhost[] = "localhost";
 			unsigned __int32 ipTmp;
@@ -9478,8 +9478,8 @@ void __cdecl init(void *lpParam)
 		else
 		{
 			strcpy_s(cfig.nsP, sizeof(cfig.nsP), cfig.servername_fqn);
-			cfig.serial1 = t;
-			cfig.serial2 = t;
+			cfig.serial1 = (unsigned int)t;
+			cfig.serial2 = (unsigned int)t;
 			cfig.expireTime = INT_MAX;
 			char localhost[] = "localhost";
 			unsigned __int32 ipTmp;
@@ -9548,7 +9548,7 @@ void __cdecl init(void *lpParam)
 						token.remote.sin_addr.s_addr = cfig.zoneServers[0];
 
 					token.dhcpp.header.bp_op = BOOTP_REQUEST;
-					token.dhcpp.header.bp_xid = t;
+					token.dhcpp.header.bp_xid = (unsigned int)t;
 					strcpy_s(token.dhcpp.header.bp_sname, sizeof(token.dhcpp.header.bp_sname), cfig.servername);
 					token.dhcpp.header.bp_magic_num[0] = 99;
 					token.dhcpp.header.bp_magic_num[1] = 130;
@@ -10270,13 +10270,13 @@ void getInterfaces(data1 *network)
 		if (!cfig.zone[0])
 		{
 			strcpy_s(cfig.zone, sizeof(cfig.zone), FixedInfo->DomainName);
-			cfig.zLen = strlen(cfig.zone);
+			cfig.zLen = (unsigned char)strlen(cfig.zone);
 		}
 
 		if (!cfig.zone[0] || cfig.zone[0] == NBSP)
 		{
 			strcpy_s(cfig.zone, sizeof(cfig.zone), "workgroup");
-			cfig.zLen = strlen(cfig.zone);
+			cfig.zLen = (unsigned char)strlen(cfig.zone);
 		}
 
 		if (!cfig.specifiedDnsServers[0])
@@ -10810,7 +10810,7 @@ void logTCPMess(data5 *req, char *logBuff, MYBYTE logLevel)
 
 data7 *createCache(data71 *lump)
 {
-	MYWORD dataSize = 4 + sizeof(data7) + strlen(lump->mapname);
+	MYWORD dataSize = (unsigned short)(4 + sizeof(data7) + strlen(lump->mapname));
 	data7 *cache = NULL;
 
 	switch (lump->cType)
@@ -10848,7 +10848,7 @@ data7 *createCache(data71 *lump)
 		case CTYPE_QUEUE:
 		{
 			//debug("about to create queue");
-			dataSize += strlen(lump->query);
+			dataSize += (unsigned short)strlen(lump->query);
 			dataSize +=  sizeof(SOCKADDR_IN);
 			cache = (data7*)calloc(1, dataSize);
 
@@ -10910,7 +10910,7 @@ data7 *createCache(data71 *lump)
 		case CTYPE_LOCAL_CNAME:
 		case CTYPE_EXT_CNAME:
 		{
-			dataSize += strlen(lump->hostname);
+			dataSize += (unsigned short)strlen(lump->hostname);
 			cache = (data7*)calloc(1, dataSize);
 
 			if (!cache)
