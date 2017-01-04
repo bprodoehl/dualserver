@@ -1,0 +1,4 @@
+/windows/*.user
+/windows/Release
+/windows/x64
+/windows/Debug
