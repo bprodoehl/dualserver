@@ -3974,7 +3974,7 @@ MYDWORD resad(data9 *req)
 	if (dnsService && req->hostname[0])
 	{
 		char hostname[128];
-		strcpy(hostname, req->hostname);
+		strcpy_s(hostname,sizeof(hostname), req->hostname);
 		myLower(hostname);
 		hostMap::iterator it = dnsCache[currentInd].find(hostname);
 
@@ -4481,7 +4481,7 @@ void addOptions(data9 *req)
 
 	if (req->dhcpEntry && req->resp_type != DHCP_MESS_DECLINE && req->resp_type != DHCP_MESS_NAK)
 	{
-		strcpy(req->dhcpp.header.bp_sname, cfig.servername);
+		strcpy_s(req->dhcpp.header.bp_sname,sizeof(req->dhcpp.header.bp_sname), cfig.servername);
 
 		if (req->dhcpEntry->fixed)
 		{
@@ -5893,7 +5893,7 @@ void addVendClass(MYBYTE rangeSetInd, char *vendClass, MYBYTE vendClassSize)
 
 	MYBYTE i = 0;
 
-	for (; i <= MAX_RANGE_FILTERS && rangeSet->vendClassSize[i]; i++);
+	for (; i < MAX_RANGE_FILTERS && rangeSet->vendClassSize[i]; i++);
 
 	if (i >= MAX_RANGE_FILTERS || !vendClassSize)
 		return;
@@ -5922,7 +5922,7 @@ void addUserClass(MYBYTE rangeSetInd, char *userClass, MYBYTE userClassSize)
 
 	MYBYTE i = 0;
 
-	for (; i <= MAX_RANGE_FILTERS && rangeSet->userClassSize[i]; i++);
+	for (; i < MAX_RANGE_FILTERS && rangeSet->userClassSize[i]; i++);
 
 	if (i >= MAX_RANGE_FILTERS || !userClassSize)
 		return;
@@ -5953,7 +5953,7 @@ void addMacRange(MYBYTE rangeSetInd, char *macRange)
 
 		MYBYTE i = 0;
 
-		for (; i <= MAX_RANGE_FILTERS && rangeSet->macSize[i]; i++);
+		for (; i < MAX_RANGE_FILTERS && rangeSet->macSize[i]; i++);
 
 		if (i >= MAX_RANGE_FILTERS)
 			return;
@@ -6124,6 +6124,7 @@ void loadDHCP()
 			MYBYTE hexValue[UCHAR_MAX];
 			MYBYTE hexValueSize = sizeof(hexValue);
 			data20 optionData;
+			memset(&optionData, 0, sizeof(optionData));
 
 			if (strlen(sectionName) <= 48 && !getHexValue(hexValue, sectionName, &hexValueSize))
 			{
@@ -6156,7 +6157,10 @@ void loadDHCP()
 							dhcpEntry = createCache(&lump);
 
 							if (!dhcpEntry)
+							{
+								fclose(ff);
 								return;
+							}
 /*
 							dhcpEntry = (data7*)calloc(1, sizeof(data7));
 
@@ -6164,6 +6168,7 @@ void loadDHCP()
 							{
 								sprintf(logBuff, "Host Options Load, Memory Allocation Error");
 								logDHCPMess(logBuff, 1);
+								fclose(ff);
 								return;
 							}
 
@@ -6173,6 +6178,7 @@ void loadDHCP()
 							{
 								sprintf(logBuff, "Host Data Load, Memory Allocation Error");
 								logDHCPMess(logBuff, 1);
+								fclose(ff);
 								return;
 							}
 */
@@ -6263,6 +6269,7 @@ void loadDHCP()
 					{
 						sprintf(logBuff, "Loading Existing Leases, Memory Allocation Error");
 						logDHCPMess(logBuff, 1);
+						fclose(ff);
 						return;
 					}
 
@@ -6273,6 +6280,7 @@ void loadDHCP()
 						sprintf(logBuff, "Loading Existing Leases, Memory Allocation Error");
 						free(dhcpEntry);
 						logDHCPMess(logBuff, 1);
+						fclose(ff);
 						return;
 					}
 */
@@ -9606,7 +9614,7 @@ void __cdecl init(void *lpParam)
 
 		//char temp[128];
 
-		for (int i = 0; i <= MAX_DNS_RANGES && cfig.dnsRanges[i].rangeStart; i++)
+		for (int i = 0; i < MAX_DNS_RANGES && cfig.dnsRanges[i].rangeStart; i++)
 		{
 			char *logPtr = logBuff;
 			logPtr += sprintf(logPtr, "%s", "DNS Service Permitted Hosts: ");
@@ -10199,7 +10207,7 @@ void getInterfaces(data1 *network)
 	if (!GetNetworkParams(FixedInfo, &ulOutBufLen))
 	{
 		if (!cfig.servername[0])
-			strcpy(cfig.servername, FixedInfo->HostName);
+			strcpy_s(cfig.servername, sizeof(cfig.servername), FixedInfo->HostName);
 
 		//printf("d=%u=%s", strlen(FixedInfo->DomainName), FixedInfo->DomainName);
 
