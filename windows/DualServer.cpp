@@ -6608,70 +6608,70 @@ char *strquery(data5 *req)
 	switch (req->dnsType)
 	{
 		case 1:
-			strcat(req->extbuff, " A");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " A");
 			break;
 		case 2:
-			strcat(req->extbuff, " NS");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " NS");
 			break;
 		case 3:
-			strcat(req->extbuff, " MD");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MD");
 			break;
 		case 4:
-			strcat(req->extbuff, " MF");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MF");
 			break;
 		case 5:
-			strcat(req->extbuff, " CNAME");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " CNAME");
 			break;
 		case 6:
-			strcat(req->extbuff, " SOA");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " SOA");
 			break;
 		case 7:
-			strcat(req->extbuff, " MB");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MB");
 			break;
 		case 8:
-			strcat(req->extbuff, " MG");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MG");
 			break;
 		case 9:
-			strcat(req->extbuff, " MR");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MR");
 			break;
 		case 10:
-			strcat(req->extbuff, " NULL");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " NULL");
 			break;
 		case 11:
-			strcat(req->extbuff, " WKS");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " WKS");
 			break;
 		case 12:
-			strcat(req->extbuff, " PTR");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " PTR");
 			break;
 		case 13:
-			strcat(req->extbuff, " HINFO");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " HINFO");
 			break;
 		case 14:
-			strcat(req->extbuff, " MINFO");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MINFO");
 			break;
 		case 15:
-			strcat(req->extbuff, " MX");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MX");
 			break;
 		case 16:
-			strcat(req->extbuff, " TXT");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " TXT");
 			break;
 		case 28:
-			strcat(req->extbuff, " AAAA");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " AAAA");
 			break;
 		case 251:
-			strcat(req->extbuff, " IXFR");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " IXFR");
 			break;
 		case 252:
-			strcat(req->extbuff, " AXFR");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " AXFR");
 			break;
 		case 253:
-			strcat(req->extbuff, " MAILB");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MAILB");
 			break;
 		case 254:
-			strcat(req->extbuff, " MAILA");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " MAILA");
 			break;
 		case 255:
-			strcat(req->extbuff, " ANY");
+			strcat_s(req->extbuff,sizeof(req->extbuff), " ANY");
 			break;
 	}
 	return req->extbuff;
@@ -6705,7 +6705,7 @@ sprintf_s(tempbuff,sizeof(tempbuff), "%u.%u", data.octate[1], data.octate[0]);
 else
 sprintf_s(tempbuff,sizeof(tempbuff), "%u", data.octate[0]);
 
-strcat(tempbuff, arpa);
+strcat_s(tempbuff,sizeof(tempbuff), arpa);
 return tempbuff;
 }
 */
@@ -8526,7 +8526,7 @@ void __cdecl init(void *lpParam)
 	fileExt++;
 	sprintf_s(logFile,sizeof(logFile), "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
 	sprintf_s(cliFile,sizeof(cliFile), "%s\\log\\%%s.log", filePATH);
-	strcat(filePATH, "\\");
+	strcat_s(filePATH,sizeof(filePATH), "\\");
 
 	//printf("log=%s\n", logFile);
 
@@ -8827,8 +8827,8 @@ void __cdecl init(void *lpParam)
 
 						mask.octate[0] = UCHAR_MAX;
 						network.octate[0] = atoi(left);
-						strcat(cfig.authority, left);
-						strcat(cfig.authority, ".");
+						strcat_s(cfig.authority,sizeof(cfig.authority), left);
+						strcat_s(cfig.authority,sizeof(cfig.authority), ".");
 					}
 					else
 						break;
@@ -8839,7 +8839,7 @@ void __cdecl init(void *lpParam)
 
 				if (!strcasecmp(value, arpa + 1))
 				{
-					strcat(cfig.authority, arpa + 1);
+					strcat_s(cfig.authority,sizeof(cfig.authority), arpa + 1);
 					cfig.aLen = strlen(cfig.authority);
 					calcRangeLimits(network.ip, mask.ip, &cfig.rangeStart, &cfig.rangeEnd);
 					//IP2String(logBuff, htonl(cfig.rangeStart));
@@ -9211,8 +9211,8 @@ void __cdecl init(void *lpParam)
 
 							if (!strchr(name, '.'))
 							{
-								strcat(name, ".");
-								strcat(name, cfig.zone);
+								strcat_s(name,sizeof(name), ".");
+								strcat_s(name,sizeof(name), cfig.zone);
 							}
 
 							strcpy_s(cfig.mxServers[0][cfig.mxCount[0]].hostname,sizeof(cfig.mxServers[0][cfig.mxCount[0]].hostname), name);
@@ -9444,8 +9444,8 @@ void __cdecl init(void *lpParam)
 
 				if (cfig.nsS[0])
 				{
-					strcat(cfig.nsS, ".");
-					strcat(cfig.nsS, cfig.zone);
+					strcat_s(cfig.nsS,sizeof(cfig.nsS), ".");
+					strcat_s(cfig.nsS,sizeof(cfig.nsS), cfig.zone);
 				}
 			}
 
