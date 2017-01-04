@@ -6106,10 +6106,8 @@ void loadDHCP()
 		else
 			break;
 	}
-
-	ff = fopen(iniFile, "rt");
-
-	if (ff)
+	
+	if (0 == fopen_s(&ff, iniFile, "rt"))
 	{
 		char sectionName[512];
 
@@ -6238,9 +6236,8 @@ void loadDHCP()
 		fclose(ff);
 	}
 
-	ff = fopen(leaFile, "rb");
 
-	if (ff)
+	if (0== fopen_s(&ff, leaFile, "rb"))
 	{
 		data8 dhcpData;
 
@@ -6329,10 +6326,9 @@ void loadDHCP()
 
 		fclose(ff);
 
-		ff = fopen(leaFile, "wb");
 		cfig.dhcpInd = 0;
 
-		if (ff)
+		if (0== fopen_s(&ff,leaFile, "wb"))
 		{
 			dhcpMap::iterator p = dhcpCache.begin();
 
@@ -6369,11 +6365,11 @@ bool getSection(const char *sectionName, char *buffer, MYBYTE serial, char *file
 	char section[128];
 	sprintf_s(section,sizeof(section), "[%s]", sectionName);
 	myUpper(section);
-	FILE *f = fopen(fileName, "rt");
+	FILE *f;
 	char buff[512];
 	MYBYTE found = 0;
 
-	if (f)
+	if (0== fopen_s(&f,fileName, "rt"))
 	{
 		while (fgets(buff, 511, f))
 		{
@@ -6419,9 +6415,8 @@ FILE *openSection(const char *sectionName, MYBYTE serial)
 	sprintf_s(section,sizeof(section), "[%s]", sectionName);
 	myUpper(section);
 	FILE *f = NULL;
-	f = fopen(iniFile, "rt");
 
-	if (f)
+	if (0== fopen_s(&f, iniFile, "rt"))
 	{
 		//printf("opened %s=%d\n", tempbuff, f);
 		char buff[512];
@@ -6456,10 +6451,8 @@ FILE *openSection(const char *sectionName, MYBYTE serial)
 								strcpy_s(tempbuff, sizeof(tempbuff), buff);
 							else
 								sprintf_s(tempbuff,sizeof(tempbuff), "%s%s", filePATH, buff);
-
-							f = fopen(tempbuff, "rt");
-
-							if (f)
+							
+							if (0== fopen_s(&f,tempbuff, "rt"))
 								return f;
 							else
 							{
@@ -7919,12 +7912,16 @@ FILE *pullZone(SOCKET sock)
     char target[4096];
     timeval tv1;
     fd_set readfds1;
-    FILE *f = fopen(tempFile, "wb");
+    FILE *f;
 
-    if (f)
+    if (0== fopen_s(&f,tempFile, "wb"))
     {
         fclose(f);
-        f = fopen(tempFile, "ab");
+		if (0!= fopen_s(&f,tempFile, "ab"))
+		{
+			closesocket(sock);
+			return NULL;
+		}
     }
     else
     {
@@ -7975,8 +7972,9 @@ FILE *pullZone(SOCKET sock)
 
 	closesocket(sock);
 	fclose(f);
-    f = fopen(tempFile, "rb");
-    return f;
+    if (0== fopen_s(&f,tempFile, "rb"))
+		return f;
+	return 0;
 }
 
 MYDWORD getZone(MYBYTE ind, char *zone)
@@ -10004,9 +10002,9 @@ void __cdecl init(void *lpParam)
 		{
 			sprintf_s(logBuff,sizeof(logBuff), "Lease Status URL: http://%s:%u", IP2String(ipbuff, network.httpConn.server), network.httpConn.port);
 			logDHCPMess(logBuff, 1);
-			FILE *f = fopen(htmFile, "wt");
+			FILE *f;
 
-			if (f)
+			if (0== fopen_s(&f,htmFile, "wt"))
 			{
 				fprintf(f, "<html><head><meta http-equiv=\"refresh\" content=\"0;url=http://%s:%u\"</head></html>", IP2String(ipbuff, network.httpConn.server), network.httpConn.port);
 				fclose(f);
@@ -10014,9 +10012,9 @@ void __cdecl init(void *lpParam)
 		}
 		else
 		{
-			FILE *f = fopen(htmFile, "wt");
+			FILE *f;
 
-			if (f)
+			if (0== fopen_s(&f,htmFile, "wt"))
 			{
 				fprintf(f, "<html><body><h2>DHCP/HTTP Service is not running</h2></body></html>");
 				fclose(f);
@@ -10299,9 +10297,9 @@ void __cdecl updateStateFile(void *lpParam)
 	if (dhcpEntry->dhcpInd)
 	{
 		dhcpData.dhcpInd = dhcpEntry->dhcpInd;
-		FILE *f = fopen(leaFile, "rb+");
+		FILE *f;
 
-		if (f)
+		if (0== fopen_s(&f,leaFile, "rb+"))
 		{
 			if (fseek(f, (dhcpData.dhcpInd - 1)*sizeof(data8), SEEK_SET) >= 0)
 				fwrite(&dhcpData, sizeof(data8), 1, f);
@@ -10314,9 +10312,9 @@ void __cdecl updateStateFile(void *lpParam)
 		cfig.dhcpInd++;
 		dhcpEntry->dhcpInd = cfig.dhcpInd;
 		dhcpData.dhcpInd = cfig.dhcpInd;
-		FILE *f = fopen(leaFile, "ab");
+		FILE *f;
 
-		if (f)
+		if (0== fopen_s(&f,leaFile, "ab"))
 		{
 			fwrite(&dhcpData, sizeof(data8), 1, f);
 			fclose(f);
@@ -10532,18 +10530,17 @@ void logDirect(char *mess)
 	{
 		if (cfig.logFileName[0])
 		{
-			FILE *f = fopen(cfig.logFileName, "at");
+			FILE *f;
 
-			if (f)
+			if (0 == fopen_s(&f,cfig.logFileName, "at"))
 			{
 				fprintf(f, "Logging Continued on file %s\n", buffer);
 				fclose(f);
 			}
 
 			strcpy_s(cfig.logFileName, sizeof(cfig.logFileName), buffer);
-			f = fopen(cfig.logFileName, "at");
 
-			if (f)
+			if (0 == fopen_s(&f, cfig.logFileName, "at"))
 			{
 				fprintf(f, "%s\n\n", sVersion);
 				fclose(f);
@@ -10556,9 +10553,9 @@ void logDirect(char *mess)
 		WritePrivateProfileString("InternetShortcut","IconFile", buffer, lnkFile);
 	}
 
-	FILE *f = fopen(cfig.logFileName, "at");
+	FILE *f;
 
-	if (f)
+	if (0== fopen_s(&f,cfig.logFileName, "at"))
 	{
 		strftime(buffer, sizeof(buffer), "%d-%b-%y %X", ttm);
 		fprintf(f, "[%s] %s\n", buffer, mess);
@@ -10586,18 +10583,17 @@ void __cdecl logThread(void *lpParam)
 	{
 		if (cfig.logFileName[0])
 		{
-			FILE *f = fopen(cfig.logFileName, "at");
+			FILE *f;
 
-			if (f)
+			if (0== fopen_s(&f, cfig.logFileName, "at"))
 			{
 				fprintf(f, "Logging Continued on file %s\n", buffer);
 				fclose(f);
 			}
 
 			strcpy_s(cfig.logFileName, sizeof(cfig.logFileName), buffer);
-			f = fopen(cfig.logFileName, "at");
 
-			if (f)
+			if (0== fopen_s(&f, cfig.logFileName, "at"))
 			{
 				fprintf(f, "%s\n\n", sVersion);
 				fclose(f);
@@ -10610,9 +10606,9 @@ void __cdecl logThread(void *lpParam)
 		WritePrivateProfileString("InternetShortcut","IconFile", buffer, lnkFile);
 	}
 
-	FILE *f = fopen(cfig.logFileName, "at");
+	FILE *f;
 
-	if (f)
+	if (0 == fopen_s(&f, cfig.logFileName, "at"))
 	{
 		strftime(buffer, sizeof(buffer), "%d-%b-%y %X", ttm);
 		fprintf(f, "[%s] %s\n", buffer, mess);
