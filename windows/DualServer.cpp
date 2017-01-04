@@ -5236,16 +5236,16 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 		{
 			if (!strcasecmp(sectionName, GLOBALOPTIONS) || !strcasecmp(sectionName, RANGESET))
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			else if (!isIP(value) && strcasecmp(value, "0.0.0.0"))
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option Invalid IP Addr %s option ignored", sectionName, value);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option Invalid IP Addr %s option ignored", sectionName, value);
 				logDHCPMess(logBuff, 1);
 			}
 			else
-				optionData->ip = inet_addr(value);
+				inet_pton(AF_INET, value, &(optionData->ip));
 
 			continue;
 		}
@@ -5843,8 +5843,8 @@ void addDHCPRange(char *dp)
 
 	if (isIP(name) && isIP(value))
 	{
-		rs = htonl(inet_addr(name));
-		re = htonl(inet_addr(value));
+		inet_pton(AF_INET, name, &rs);
+		inet_pton(AF_INET, value, &re);
 
 		if (rs && re && rs <= re)
 		{
@@ -6050,7 +6050,7 @@ void loadDHCP()
 	}
 
 	if (!cfig.mask)
-		cfig.mask = inet_addr("255.255.255.0");
+		inet_pton(AF_INET, "255.255.255.0", &(cfig.mask));
 
 	for (MYBYTE i = 1; i <= MAX_RANGE_SETS ; i++)
 	{
@@ -6781,7 +6781,8 @@ bool isIP(char *str)
 	if (!str || !(*str))
 		return false;
 
-	MYDWORD ip = inet_addr(str);
+	MYDWORD ip;
+	inet_pton(AF_INET,str,&ip);
 
 	if (ip == INADDR_NONE || ip == INADDR_ANY)
 		return false;
@@ -8009,7 +8010,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 
 	if (cache)
 	{
-		cache->ip = ntohl(inet_addr(localhost_ip));
+		inet_pton(AF_INET, localhost_ip, &(cache->ip));
 		cache->expiry = INT_MAX;
 		dnsCache[ind].insert(pair<string, data7*>(cache->mapname, cache));
 	}
@@ -8454,7 +8455,7 @@ bool getSecondary()
 					if (dp)
 					{
 						*dp = 0;
-						ip = ntohl(inet_addr(req.mapname));
+						inet_pton(AF_INET, req.mapname, &ip);
 						fQu(req.cname, req.dnsp, data);
 						makeLocal(req.cname);
 
@@ -8649,7 +8650,8 @@ void __cdecl init(void *lpParam)
 			{
 				if (isIP(raw))
 				{
-					MYDWORD addr = inet_addr(raw);
+					MYDWORD addr;
+					inet_pton(AF_INET, raw, &addr);
 					addServer(cfig.specifiedDnsServers, MAX_SERVERS, addr);
 				}
 				else
@@ -8701,7 +8703,8 @@ void __cdecl init(void *lpParam)
 		{
 			if (isIP(raw))
 			{
-				MYDWORD addr = inet_addr(raw);
+				MYDWORD addr;
+				inet_pton(AF_INET, raw, &addr);
 				addServer(cfig.specifiedServers, MAX_SERVERS, addr);
 			}
 			else
@@ -8896,12 +8899,12 @@ void __cdecl init(void *lpParam)
 					if (chkQu(name) && !isIP(name) && isIP(value))
 					{
 						if (!strcasecmp(name, "Primary"))
-							cfig.zoneServers[0] = inet_addr(value);
+							inet_pton(AF_INET, value, &(cfig.zoneServers[0]));
 						else if (!strcasecmp(name, "Secondary"))
-							cfig.zoneServers[1] = inet_addr(value);
+							inet_pton(AF_INET, value, &(cfig.zoneServers[1]));
 						else if (dnsService && !strcasecmp(name, "AXFRClient"))
 						{
-							cfig.zoneServers[i] = inet_addr(value);
+							inet_pton(AF_INET, value, &(cfig.zoneServers[i]));
 							i++;
 						}
 						else
@@ -9029,12 +9032,12 @@ void __cdecl init(void *lpParam)
 
 					if (isIP(name) && isIP(value))
 					{
-						rs = htonl(inet_addr(name));
-						re = htonl(inet_addr(value));
+						inet_pton(AF_INET, name, &rs);
+						inet_pton(AF_INET, value, &re);
 					}
 					else if (isIP(name) && !value[0])
 					{
-						rs = htonl(inet_addr(name));
+						inet_pton(AF_INET, name, &rs);
 						re = rs;
 					}
 
@@ -9065,7 +9068,8 @@ void __cdecl init(void *lpParam)
 				{
 					if (chkQu(name) && !isIP(name))
 					{
-						MYDWORD ip = inet_addr(value);
+						MYDWORD ip;
+						inet_pton(AF_INET, value, &ip);
 						MYBYTE nameType = makeLocal(name);
 						bool ipLocal = isLocal(ip);
 
@@ -9270,8 +9274,10 @@ void __cdecl init(void *lpParam)
 									*value1 = 0;
 									value1++;
 
-									MYDWORD ip = inet_addr(myTrim(value, value));
-									MYDWORD ip1 = inet_addr(myTrim(value1, value1));
+									MYDWORD ip;
+									inet_pton(AF_INET, myTrim(value, value), &ip);
+									MYDWORD ip1;
+									inet_pton(AF_INET, myTrim(value1, value1), &ip1);
 
 									if (isIP(value) && isIP(value1))
 									{
@@ -9289,7 +9295,8 @@ void __cdecl init(void *lpParam)
 								}
 								else
 								{
-									MYDWORD ip = inet_addr(value);
+									MYDWORD ip;
+									inet_pton(AF_INET, value, &ip);
 
 									if (isIP(value))
 									{
@@ -9335,7 +9342,8 @@ void __cdecl init(void *lpParam)
 					{
 						if (chkQu(name) && (isIP(value) || !strcasecmp(value, "0.0.0.0")))
 						{
-							MYDWORD ip = inet_addr(value);
+							MYDWORD ip;
+							inet_pton(AF_INET, value, &ip);
 							strcpy_s(cfig.wildHosts[i].wildcard,sizeof(cfig.wildHosts[i].wildcard), name);
 							myLower(cfig.wildHosts[i].wildcard);
 							cfig.wildHosts[i].ip = ip;
@@ -9417,7 +9425,9 @@ void __cdecl init(void *lpParam)
 							break;
 
 						case CTYPE_STATIC_PTR_AUTH:
-							holdIP(htonl(inet_addr(cache->mapname)));
+							unsigned __int32 ipTmp;
+							inet_pton(AF_INET, cache->mapname, &ipTmp);
+							holdIP(ipTmp);
 							break;
 					}
 
@@ -9453,7 +9463,9 @@ void __cdecl init(void *lpParam)
 			cfig.serial2 = t;
 			cfig.expireTime = INT_MAX;
 			char localhost[] = "localhost";
-			add2Cache(localhost, inet_addr("127.0.0.1"), INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
+			unsigned __int32 ipTmp;
+			inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+			add2Cache(localhost, ipTmp, INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
 
 			if (isLocal(cfig.zoneServers[0]))
 				add2Cache(cfig.servername, cfig.zoneServers[0], INT_MAX, CTYPE_SERVER_A_AUTH, CTYPE_SERVER_PTR_AUTH);
@@ -9470,7 +9482,9 @@ void __cdecl init(void *lpParam)
 			cfig.serial2 = t;
 			cfig.expireTime = INT_MAX;
 			char localhost[] = "localhost";
-			add2Cache(localhost, inet_addr("127.0.0.1"), INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
+			unsigned __int32 ipTmp;
+			inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+			add2Cache(localhost, ipTmp, INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
 
 			for (int i = 0; i < MAX_SERVERS && network.listenServers[i]; i++)
 			{
@@ -9729,7 +9743,7 @@ void __cdecl init(void *lpParam)
 			}
 
 			network.httpConn.port = 6789;
-			network.httpConn.server = inet_addr("127.0.0.1");
+			inet_pton(AF_INET,"127.0.0.1",&(network.httpConn.server));
 
 			if (f = openSection("HTTP_INTERFACE", 1))
 			{
@@ -9743,7 +9757,7 @@ void __cdecl init(void *lpParam)
 
 						if (isIP(name))
 						{
-							network.httpConn.server = inet_addr(name);
+							inet_pton(AF_INET, name, &(network.httpConn.server));
 						}
 						else
 						{
@@ -9764,7 +9778,9 @@ void __cdecl init(void *lpParam)
 							}
 						}
 
-						if (network.httpConn.server != inet_addr("127.0.0.1") && !findServer(network.allServers, MAX_SERVERS, network.httpConn.server))
+						unsigned __int32 ipTmp;
+						inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+						if (network.httpConn.server != ipTmp && !findServer(network.allServers, MAX_SERVERS, network.httpConn.server))
 						{
 							bindfailed = true;
 							network.httpConn.loaded = false;
@@ -9775,7 +9791,11 @@ void __cdecl init(void *lpParam)
 					else if (!strcasecmp(name, "HTTPClient"))
 					{
 						if (isIP(value))
-							addServer(cfig.httpClients, 8, inet_addr(value));
+						{
+							unsigned __int32 ipTmp;
+							inet_pton(AF_INET, value, &ipTmp);
+							addServer(cfig.httpClients, 8, ipTmp);
+						}
 						else
 						{
 							sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], invalid client IP %s, ignored", raw);
@@ -10137,7 +10157,8 @@ void getInterfaces(data1 *network)
 				IP_ADDR_STRING *sList = &pAdapter->IpAddressList;
 				while (sList)
 				{
-					MYDWORD iaddr = inet_addr(sList->IpAddress.String);
+					MYDWORD iaddr;
+					inet_pton(AF_INET,sList->IpAddress.String,&iaddr);
 
 					if (iaddr)
 					{
@@ -10148,7 +10169,7 @@ void getInterfaces(data1 *network)
 							else if (!network->staticServers[k])
 							{
 								network->staticServers[k] = iaddr;
-								network->staticMasks[k] = inet_addr(sList->IpMask.String);
+								inet_pton(AF_INET, sList->IpMask.String, &network->staticMasks[k]);
 								break;
 							}
 						}
@@ -10159,7 +10180,8 @@ void getInterfaces(data1 *network)
 //				IP_ADDR_STRING *rList = &pAdapter->GatewayList;
 //				while (rList)
 //				{
-//					MYDWORD trouter = inet_addr(rList->IpAddress.String);
+//					MYDWORD trouter;
+//					inet_pton(AF_INET,rList->IpAddress.String,&trouter);
 //					addServer(cfig.routers, trouter);
 //					rList = rList->Next;
 //				}
@@ -10263,7 +10285,8 @@ void getInterfaces(data1 *network)
 
 			while (pIPAddr)
 			{
-				MYDWORD addr = inet_addr(pIPAddr->IpAddress.String);
+				MYDWORD addr;
+				inet_pton(AF_INET, pIPAddr->IpAddress.String, &addr);
 
 				if (!dnsService || !findServer(network->allServers, MAX_SERVERS, addr))
 					addServer(network->dns, MAX_SERVERS, addr);
@@ -10763,7 +10786,9 @@ void logDNSMess(data5 *req, char *logBuff, MYBYTE logLevel)
 	if (logLevel <= cfig.dnsLogLevel)
 	{
 		char *mess = (char*)calloc(1, 512);
-		sprintf_s(mess,sizeof(mess), "Client %s, %s", inet_ntoa(req->remote.sin_addr), logBuff);
+		char ipBuf[16];
+		inet_ntop(AF_INET, &(req->remote.sin_addr), ipBuf, sizeof(ipBuf));
+		sprintf_s(mess,sizeof(mess), "Client %s, %s", ipBuf, logBuff);
 		_beginthread(logThread, 0, mess);
 	}
 }
@@ -10776,7 +10801,9 @@ void logTCPMess(data5 *req, char *logBuff, MYBYTE logLevel)
 	if (logLevel <= cfig.dnsLogLevel)
 	{
 		char *mess = (char*)calloc(1, 512);
-		sprintf_s(mess,sizeof(mess), "TCP Client %s, %s", inet_ntoa(req->remote.sin_addr), logBuff);
+		char ipBuf[16];
+		inet_ntop(AF_INET, &(req->remote.sin_addr), ipBuf, sizeof(ipBuf));
+		sprintf_s(mess,sizeof(mess), "TCP Client %s, %s", ipBuf, logBuff);
 		_beginthread(logThread, 0, mess);
 	}
 }
