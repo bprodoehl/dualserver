@@ -1435,7 +1435,7 @@ void addRRCache(data5 *req, data7 *cache)
 void addRRA(data5 *req)
 {
 	if (req->qType == QTYPE_A_BARE && req->cType != CTYPE_NONE)
-		sprintf(req->cname, "%s.%s", req->query, cfig.zone);
+		sprintf_s(req->cname,sizeof(req->cname), "%s.%s", req->query, cfig.zone);
 
 	if (strcasecmp(req->query, req->cname))
 	{
@@ -1487,7 +1487,7 @@ void addRRPtr(data5 *req)
 			if (!cache->hostname[0])
 				strcpy_s(req->cname,sizeof(req->cname), cfig.zone);
 			else if (!strchr(cache->hostname, '.'))
-				sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
+				sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->hostname, cfig.zone);
 			else
 				strcpy_s(req->cname,sizeof(req->cname), cache->hostname);
 
@@ -1501,7 +1501,7 @@ void addRRPtr(data5 *req)
 void addRRServerA(data5 *req)
 {
 	if (req->qType == QTYPE_A_BARE)
-		sprintf(req->cname, "%s.%s", req->query, cfig.zone);
+		sprintf_s(req->cname,sizeof(req->cname), "%s.%s", req->query, cfig.zone);
 
 	if (strcasecmp(req->query, req->cname))
 	{
@@ -1608,7 +1608,7 @@ void addRRAny(data5 *req)
 					req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
 					req->dp += pUShort(req->dp, DNS_CLASS_IN);
 					req->dp += pULong(req->dp, cfig.lease);
-					sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
+					sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->hostname, cfig.zone);
 					req->dp += pUShort(req->dp, qLen(req->cname));
 					req->dp += pQu(req->dp, req->cname);
 					req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
@@ -1630,7 +1630,7 @@ void addRRAny(data5 *req)
 					else if (!strchr(cache->hostname, '.'))
 						strcpy_s(req->extbuff, sizeof(req->extbuff), cache->hostname);
 					else
-						sprintf(req->extbuff, "%s.%s", cache->hostname, cfig.zone);
+						sprintf_s(req->extbuff,sizeof(req->extbuff), "%s.%s", cache->hostname, cfig.zone);
 
 					req->dp += pUShort(req->dp, qLen(req->extbuff));
 					req->dp += pQu(req->dp, req->extbuff);
@@ -1736,7 +1736,7 @@ void addRRSOA(data5 *req)
 		char *data = req->dp;
 		req->dp += 2;
 		req->dp += pQu(req->dp, cfig.nsP);
-		sprintf(req->extbuff, "hostmaster.%s", cfig.zone);
+		sprintf_s(req->extbuff,sizeof(req->extbuff), "hostmaster.%s", cfig.zone);
 		req->dp += pQu(req->dp, req->extbuff);
 
 		if (req->qType == QTYPE_P_LOCAL || req->qType == QTYPE_P_EXT || req->qType == QTYPE_P_ZONE)
@@ -1850,7 +1850,7 @@ void addRRAOne(data5 *req)
 		if (!cache->name[0])
 			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 		else if (!strchr(cache->name, '.'))
-			sprintf(req->cname, "%s.%s", cache->name, cfig.zone);
+			sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->name, cfig.zone);
 		else
 			strcpy_s(req->cname, sizeof(req->cname), cache->name);
 
@@ -1869,7 +1869,7 @@ void addRRPtrOne(data5 *req)
 	if (data7 *cache = req->iterBegin->second)
 	{
 		req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-		sprintf(req->cname, "%s%s", cache->name, arpa);
+		sprintf_s(req->cname,sizeof(req->cname), "%s%s", cache->name, arpa);
 		req->dp += pQu(req->dp, req->cname);
 		req->dp += pUShort(req->dp, DNS_TYPE_PTR);
 		req->dp += pUShort(req->dp, DNS_CLASS_IN);
@@ -1878,7 +1878,7 @@ void addRRPtrOne(data5 *req)
 		if (!cache->hostname[0])
 			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 		else if (!strchr(cache->hostname, '.'))
-			sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
+			sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->hostname, cfig.zone);
 		else
 			strcpy_s(req->cname, sizeof(req->cname), cache->hostname);
 
@@ -1898,7 +1898,7 @@ void addRRSTAOne(data5 *req)
 		if (!cache->name[0])
 			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 		else if (!strchr(cache->name, '.'))
-			sprintf(req->cname, "%s.%s", cache->name, cfig.zone);
+			sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->name, cfig.zone);
 		else
 			strcpy_s(req->cname, sizeof(req->cname), cache->name);
 
@@ -1923,7 +1923,7 @@ void addRRCNOne(data5 *req)
 		else if (strchr(cache->name, '.'))
 			strcpy_s(req->cname, sizeof(req->cname), cache->name);
 		else
-			sprintf(req->cname, "%s.%s", cache->name, cfig.zone);
+			sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->name, cfig.zone);
 
 		req->dp += pQu(req->dp, req->cname);
 		req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
@@ -1935,7 +1935,7 @@ void addRRCNOne(data5 *req)
 		else if (strchr(cache->hostname, '.'))
 			strcpy_s(req->cname, sizeof(req->cname), cache->hostname);
 		else
-			sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
+			sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->hostname, cfig.zone);
 
 		req->dp += pUShort(req->dp, qLen(req->cname));
 		req->dp += pQu(req->dp, req->cname);
@@ -2016,7 +2016,7 @@ void procHTTP(data19 *req)
 
 		req->dp = (char*)calloc(1, sizeof(send403));
 		req->memSize = sizeof(send403);
-		req->bytes = sprintf(req->dp, send403);
+		req->bytes = sprintf_s(req->dp,sizeof(req->dp), send403);
 		_beginthread(sendHTTP, 0, (void*)req);
 		return;
 	}
@@ -2051,7 +2051,7 @@ void procHTTP(data19 *req)
 		}
 
 		req->dp = (char*)calloc(1, sizeof(send404));
-		req->bytes = sprintf(req->dp, send404);
+		req->bytes = sprintf_s(req->dp,sizeof(req->dp), send404);
 		req->memSize = sizeof(send404);
 		_beginthread(sendHTTP, 0, (void*)req);
 		return;
@@ -2086,68 +2086,68 @@ void sendStatus(data19 *req)
 	char *maxData = req->dp + (req->memSize - 512);
 	tm *ttm = gmtime(&t);
 	strftime(tempbuff, sizeof(tempbuff), "%a, %d %b %Y %H:%M:%S GMT", ttm);
-	fp += sprintf(fp, send200, tempbuff, tempbuff);
+	fp += sprintf_s(fp,sizeof(fp), send200, tempbuff, tempbuff);
 	char *contentStart = fp;
-	fp += sprintf(fp, htmlStart, htmlTitle);
-	fp += sprintf(fp, bodyStart, sVersion);
-	fp += sprintf(fp, "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp,sizeof(fp), htmlStart, htmlTitle);
+	fp += sprintf_s(fp,sizeof(fp), bodyStart, sVersion);
+	fp += sprintf_s(fp,sizeof(fp), "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
 
 	if (cfig.dhcpRepl > t)
 	{
-		fp += sprintf(fp, "<tr><th colspan=\"5\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
-		fp += sprintf(fp, "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th><th>Server</th></tr>\n");
+		fp += sprintf_s(fp,sizeof(fp), "<tr><th colspan=\"5\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
+		fp += sprintf_s(fp,sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th><th>Server</th></tr>\n");
 	}
 	else
 	{
-		fp += sprintf(fp, "<tr><th colspan=\"4\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
-		fp += sprintf(fp, "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th></tr>\n");
+		fp += sprintf_s(fp,sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
+		fp += sprintf_s(fp,sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th></tr>\n");
 	}
 
 	for (p = dhcpCache.begin(); kRunning && p != dhcpCache.end() && fp < maxData; p++)
 	{
 		if ((dhcpEntry = p->second) && dhcpEntry->display && dhcpEntry->expiry >= t)
 		{
-			fp += sprintf(fp, "<tr>");
-			fp += sprintf(fp, td200, dhcpEntry->mapname);
-			fp += sprintf(fp, td200, IP2String(tempbuff, dhcpEntry->ip));
+			fp += sprintf_s(fp,sizeof(fp), "<tr>");
+			fp += sprintf_s(fp,sizeof(fp), td200, dhcpEntry->mapname);
+			fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, dhcpEntry->ip));
 
 			if (dhcpEntry->expiry >= INT_MAX)
-				fp += sprintf(fp, td200, "Infinity");
+				fp += sprintf_s(fp,sizeof(fp), td200, "Infinity");
 			else
 			{
 				tm *ttm = localtime(&dhcpEntry->expiry);
 				strftime(tempbuff, sizeof(tempbuff), "%d-%b-%y %X", ttm);
-				fp += sprintf(fp, td200, tempbuff);
+				fp += sprintf_s(fp,sizeof(fp), td200, tempbuff);
 			}
 
 			if (dhcpEntry->hostname[0])
 			{
 				strcpy_s(tempbuff, sizeof(tempbuff), dhcpEntry->hostname);
 				tempbuff[20] = 0;
-				fp += sprintf(fp, td200, tempbuff);
+				fp += sprintf_s(fp,sizeof(fp), td200, tempbuff);
 			}
 			else
-				fp += sprintf(fp, td200, "&nbsp;");
+				fp += sprintf_s(fp,sizeof(fp), td200, "&nbsp;");
 
 			if (cfig.dhcpRepl > t)
 			{
 				if (dhcpEntry->local && cfig.replication == 1)
-					fp += sprintf(fp, td200, "Primary");
+					fp += sprintf_s(fp,sizeof(fp), td200, "Primary");
 				else if (dhcpEntry->local && cfig.replication == 2)
-					fp += sprintf(fp, td200, "Secondary");
+					fp += sprintf_s(fp,sizeof(fp), td200, "Secondary");
 				else if (cfig.replication == 1)
-					fp += sprintf(fp, td200, "Secondary");
+					fp += sprintf_s(fp,sizeof(fp), td200, "Secondary");
 				else
-					fp += sprintf(fp, td200, "Primary");
+					fp += sprintf_s(fp,sizeof(fp), td200, "Primary");
 			}
 
-			fp += sprintf(fp, "</tr>\n");
+			fp += sprintf_s(fp,sizeof(fp), "</tr>\n");
 		}
 	}
 
 /*
-	fp += sprintf(fp, "</table>\n<br>\n<table border=\"1\" width=\"640\" cellpadding=\"1\" bgcolor=\"#b8b8b8\">\n");
-	fp += sprintf(fp, "<tr><th colspan=\"5\"><font size=\"5\"><i>Free Dynamic Leases</i></font></th></tr>\n");
+	fp += sprintf_s(fp,sizeof(fp), "</table>\n<br>\n<table border=\"1\" width=\"640\" cellpadding=\"1\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp,sizeof(fp), "<tr><th colspan=\"5\"><font size=\"5\"><i>Free Dynamic Leases</i></font></th></tr>\n");
 	MYBYTE colNum = 0;
 
 	for (char rangeInd = 0; kRunning && rangeInd < cfig.rangeCount && fp < maxData; rangeInd++)
@@ -2158,28 +2158,28 @@ void sendStatus(data19 *req)
 			{
 				if (!colNum)
 				{
-					fp += sprintf(fp, "<tr>");
+					fp += sprintf_s(fp,sizeof(fp), "<tr>");
 					colNum = 1;
 				}
 				else if (colNum < 5)
 					colNum++;
 				else
 				{
-					fp += sprintf(fp, "</tr>\n<tr>");
+					fp += sprintf_s(fp,sizeof(fp), "</tr>\n<tr>");
 					colNum = 1;
 				}
 
-				fp += sprintf(fp, td200, IP2String(tempbuff, htonl(iip)));
+				fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, htonl(iip)));
 			}
 		}
 	}
 
 	if (colNum)
-		fp += sprintf(fp, "</tr>\n");
+		fp += sprintf_s(fp,sizeof(fp), "</tr>\n");
 */
-	fp += sprintf(fp, "</table>\n<br>\n<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
-	fp += sprintf(fp, "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Dynamic Leases</i></font></th></tr>\n");
-	fp += sprintf(fp, "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>Available Leases</b></td><td align=\"right\"><b>Free Leases</b></td></tr>\n");
+	fp += sprintf_s(fp,sizeof(fp), "</table>\n<br>\n<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp,sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Dynamic Leases</i></font></th></tr>\n");
+	fp += sprintf_s(fp,sizeof(fp), "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>Available Leases</b></td><td align=\"right\"><b>Free Leases</b></td></tr>\n");
 
 	for (char rangeInd = 0; kRunning && rangeInd < cfig.rangeCount && fp < maxData; rangeInd++)
 	{
@@ -2197,12 +2197,12 @@ void sendStatus(data19 *req)
 
 		IP2String(tempbuff, ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
 		IP2String(ipbuff, ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
-		fp += sprintf(fp, "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td></tr>\n", tempbuff, ipbuff, (ipused + ipfree), ipfree);
+		fp += sprintf_s(fp,sizeof(fp), "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td></tr>\n", tempbuff, ipbuff, (ipused + ipfree), ipfree);
 	}
 
-	fp += sprintf(fp, "</table>\n<br>\n<table border=\"1\" width=\"640\" cellpadding=\"1\" bgcolor=\"#b8b8b8\">\n");
-	fp += sprintf(fp, "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Static Leases</i></font></th></tr>\n");
-	fp += sprintf(fp, "<tr><th>Mac Address</th><th>IP</th><th>Mac Address</th><th>IP</th></tr>\n");
+	fp += sprintf_s(fp,sizeof(fp), "</table>\n<br>\n<table border=\"1\" width=\"640\" cellpadding=\"1\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp,sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Static Leases</i></font></th></tr>\n");
+	fp += sprintf_s(fp,sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Mac Address</th><th>IP</th></tr>\n");
 
 	MYBYTE colNum = 0;
 
@@ -2212,7 +2212,7 @@ void sendStatus(data19 *req)
 		{
 			if (!colNum)
 			{
-				fp += sprintf(fp, "<tr>");
+				fp += sprintf_s(fp,sizeof(fp), "<tr>");
 				colNum = 1;
 			}
 			else if (colNum == 1)
@@ -2221,20 +2221,20 @@ void sendStatus(data19 *req)
 			}
 			else if (colNum == 2)
 			{
-				fp += sprintf(fp, "</tr>\n<tr>");
+				fp += sprintf_s(fp,sizeof(fp), "</tr>\n<tr>");
 				colNum = 1;
 			}
 
-			fp += sprintf(fp, td200, dhcpEntry->mapname);
-			fp += sprintf(fp, td200, IP2String(tempbuff, dhcpEntry->ip));
+			fp += sprintf_s(fp,sizeof(fp), td200, dhcpEntry->mapname);
+			fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, dhcpEntry->ip));
 		}
 	}
 
 	if (colNum)
-		fp += sprintf(fp, "</tr>\n");
+		fp += sprintf_s(fp,sizeof(fp), "</tr>\n");
 
-	fp += sprintf(fp, "</table>\n</body>\n</html>");
-	MYBYTE x = sprintf(tempbuff, "%u", (fp - contentStart));
+	fp += sprintf_s(fp,sizeof(fp), "</table>\n</body>\n</html>");
+	MYBYTE x = sprintf_s(tempbuff,sizeof(tempbuff), "%u", (fp - contentStart));
 	memcpy((contentStart - 12), tempbuff, x);
 	req->bytes = fp - req->dp;
 
@@ -2264,13 +2264,13 @@ void sendScopeStatus(data19 *req)
 	char *maxData = req->dp + (req->memSize - 512);
 	tm *ttm = gmtime(&t);
 	strftime(tempbuff, sizeof(tempbuff), "%a, %d %b %Y %H:%M:%S GMT", ttm);
-	fp += sprintf(fp, send200, tempbuff, tempbuff);
+	fp += sprintf_s(fp,sizeof(fp), send200, tempbuff, tempbuff);
 	char *contentStart = fp;
-	fp += sprintf(fp, htmlStart, htmlTitle);
-	fp += sprintf(fp, bodyStart, sVersion);
-	fp += sprintf(fp, "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
-	fp += sprintf(fp, "<tr><th colspan=\"4\"><font size=\"5\"><i>Scope Status</i></font></th></tr>\n");
-	fp += sprintf(fp, "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>IPs Used</b></td><td align=\"right\"><b>IPs Free</b></td><td align=\"right\"><b>%% Free</b></td></tr>\n");
+	fp += sprintf_s(fp,sizeof(fp), htmlStart, htmlTitle);
+	fp += sprintf_s(fp,sizeof(fp), bodyStart, sVersion);
+	fp += sprintf_s(fp,sizeof(fp), "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp,sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Scope Status</i></font></th></tr>\n");
+	fp += sprintf_s(fp,sizeof(fp), "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>IPs Used</b></td><td align=\"right\"><b>IPs Free</b></td><td align=\"right\"><b>%% Free</b></td></tr>\n");
 	MYBYTE colNum = 0;
 
 	for (char rangeInd = 0; kRunning && rangeInd < cfig.rangeCount && fp < maxData; rangeInd++)
@@ -2289,11 +2289,11 @@ void sendScopeStatus(data19 *req)
 
 		IP2String(tempbuff, ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
 		IP2String(req->extbuff, ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
-		fp += sprintf(fp, "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td><td align=\"right\">%2.2f</td></tr>\n", tempbuff, req->extbuff, ipused, ipfree, ((ipfree * 100)/(ipused + ipfree)));
+		fp += sprintf_s(fp,sizeof(fp), "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td><td align=\"right\">%2.2f</td></tr>\n", tempbuff, req->extbuff, ipused, ipfree, ((ipfree * 100)/(ipused + ipfree)));
 	}
 
-	fp += sprintf(fp, "</table>\n</body>\n</html>");
-	memcpy((contentStart - 12), tempbuff, sprintf(tempbuff, "%u", (fp - contentStart)));
+	fp += sprintf_s(fp,sizeof(fp), "</table>\n</body>\n</html>");
+	memcpy((contentStart - 12), tempbuff, sprintf_s(tempbuff,sizeof(tempbuff), "%u", (fp - contentStart)));
 	req->bytes = fp - req->dp;
 
 	_beginthread(sendHTTP, 0, (void*)req);
@@ -2791,7 +2791,7 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 					else
 						cfig.dnsRepl = t + cfig.refresh + cfig.retry + cfig.retry;
 
-					sprintf(cfig.nsS, "%s.%s", localBuff, cfig.zone);
+					sprintf_s(cfig.nsS,sizeof(cfig.nsS), "%s.%s", localBuff, cfig.zone);
 
 					if (isLocal(ip))
 						add2Cache(localBuff, ip, INT_MAX, CTYPE_SERVER_A_AUTH, CTYPE_SERVER_PTR_AUTH);
@@ -3117,7 +3117,7 @@ MYWORD scanloc(data5 *req)
 				else if (strchr(cache->hostname, '.'))
 					strcpy_s(req->cname, sizeof(req->cname), cache->hostname);
 				else
-					sprintf(req->cname, "%s.%s", cache->hostname, cfig.zone);
+					sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->hostname, cfig.zone);
 
 				//sprintf_s(logBuff,sizeof(logBuff), "cType=%u, name=%s, hostname=%s", cache->cType, cache->name, cache->hostname);
 				//logMess(logBuff, 2);
@@ -3185,7 +3185,7 @@ MYWORD fdnmess(data5 *req)
 	int nRet = -1;
 
 	char mapname[8];
-	sprintf(mapname, "%u", req->dnsp->header.xid);
+	sprintf_s(mapname,sizeof(mapname), "%u", req->dnsp->header.xid);
 	data7 *queue = findQueue(mapname);
 
 	for (zoneDNS = 0; zoneDNS < MAX_COND_FORW && cfig.dnsRoutes[zoneDNS].zLen; zoneDNS++)
@@ -3495,7 +3495,7 @@ MYWORD frdnmess(data5 *req)
 	}
 
 	char mapname[8];
-	sprintf(mapname, "%u", req->dnsp->header.xid);
+	sprintf_s(mapname,sizeof(mapname), "%u", req->dnsp->header.xid);
 	data7 *queue = findQueue(mapname);
 
 	if (queue && queue->expiry)
@@ -5009,7 +5009,7 @@ void recvRepl(data9 *req)
 		{
 			if (req->dhcpp.header.bp_sname[0])
 			{
-				sprintf(cfig.nsS, "%s.%s", req->dhcpp.header.bp_sname, cfig.zone);
+				sprintf_s(cfig.nsS,sizeof(cfig.nsS), "%s.%s", req->dhcpp.header.bp_sname, cfig.zone);
 
 				if (isLocal(cfig.zoneServers[1]))
 					add2Cache(req->dhcpp.header.bp_sname, cfig.zoneServers[1], INT_MAX, CTYPE_SERVER_A_AUTH, CTYPE_SERVER_PTR_AUTH);
@@ -5038,7 +5038,7 @@ void recvRepl(data9 *req)
 		else if (cfig.replication == 2)
 		{
 			if (req->dhcpp.header.bp_sname[0])
-				sprintf(cfig.nsP, "%s.%s", req->dhcpp.header.bp_sname, cfig.zone);
+				sprintf_s(cfig.nsP,sizeof(cfig.nsP), "%s.%s", req->dhcpp.header.bp_sname, cfig.zone);
 		}
 
 		return;
@@ -6367,7 +6367,7 @@ bool getSection(const char *sectionName, char *buffer, MYBYTE serial, char *file
 {
 	//printf("%s=%s\n",fileName,sectionName);
 	char section[128];
-	sprintf(section, "[%s]", sectionName);
+	sprintf_s(section,sizeof(section), "[%s]", sectionName);
 	myUpper(section);
 	FILE *f = fopen(fileName, "rt");
 	char buff[512];
@@ -6395,7 +6395,7 @@ bool getSection(const char *sectionName, char *buffer, MYBYTE serial, char *file
 
 						if ((*buff) >= '0' && (*buff) <= '9' || (*buff) >= 'A' && (*buff) <= 'Z' || (*buff) >= 'a' && (*buff) <= 'z' || ((*buff) && strchr("/\\?*", (*buff))))
 						{
-							buffer += sprintf(buffer, "%s", buff);
+							buffer += sprintf_s(buffer,sizeof(buffer), "%s", buff);
 							buffer++;
 						}
 					}
@@ -6416,7 +6416,7 @@ FILE *openSection(const char *sectionName, MYBYTE serial)
 	char logBuff[512];
 	char tempbuff[512];
 	char section[128];
-	sprintf(section, "[%s]", sectionName);
+	sprintf_s(section,sizeof(section), "[%s]", sectionName);
 	myUpper(section);
 	FILE *f = NULL;
 	f = fopen(iniFile, "rt");
@@ -6455,7 +6455,7 @@ FILE *openSection(const char *sectionName, MYBYTE serial)
 							if (strchr(buff, '\\') || strchr(buff, '/'))
 								strcpy_s(tempbuff, sizeof(tempbuff), buff);
 							else
-								sprintf(tempbuff, "%s%s", filePATH, buff);
+								sprintf_s(tempbuff,sizeof(tempbuff), "%s%s", filePATH, buff);
 
 							f = fopen(tempbuff, "rt");
 
@@ -6705,11 +6705,11 @@ data15 data;
 data.ip = ip;
 
 if (data.octate[0] >= 192)
-sprintf(tempbuff, "%u.%u.%u", data.octate[2], data.octate[1], data.octate[0]);
+sprintf_s(tempbuff,sizeof(tempbuff), "%u.%u.%u", data.octate[2], data.octate[1], data.octate[0]);
 else if (data.octate[0] >= 128)
-sprintf(tempbuff, "%u.%u", data.octate[1], data.octate[0]);
+sprintf_s(tempbuff,sizeof(tempbuff), "%u.%u", data.octate[1], data.octate[0]);
 else
-sprintf(tempbuff, "%u", data.octate[0]);
+sprintf_s(tempbuff,sizeof(tempbuff), "%u", data.octate[0]);
 
 strcat(tempbuff, arpa);
 return tempbuff;
@@ -6723,9 +6723,9 @@ char *IP2String(char *target, MYDWORD ip, MYBYTE dnsType)
 	dp++;
 	data15 inaddr;
 	inaddr.ip = ip;
-	sprintf(dp, "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
+	sprintf_s(dp,sizeof(dp), "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
 	//MYBYTE *octate = (MYBYTE*)&ip;
-	//sprintf(target, "%u.%u.%u.%u", octate[0], octate[1], octate[2], octate[3]);
+	//sprintf_s(target,sizeof(target), "%u.%u.%u.%u", octate[0], octate[1], octate[2], octate[3]);
 	return target;
 }
 
@@ -6733,9 +6733,9 @@ char *IP2String(char *target, MYDWORD ip)
 {
 	data15 inaddr;
 	inaddr.ip = ip;
-	sprintf(target, "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
+	sprintf_s(target,sizeof(target), "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
 	//MYBYTE *octate = (MYBYTE*)&ip;
-	//sprintf(target, "%u.%u.%u.%u", octate[0], octate[1], octate[2], octate[3]);
+	//sprintf_s(target,sizeof(target), "%u.%u.%u.%u", octate[0], octate[1], octate[2], octate[3]);
 	return target;
 }
 
@@ -6978,12 +6978,12 @@ char *hex2String(char *target, MYBYTE *hex, MYBYTE bytes)
 	char *dp = target;
 
 	if (bytes)
-		dp += sprintf(target, "%02x", *hex);
+		dp += sprintf_s(target,sizeof(target), "%02x", *hex);
 	else
 		*target = 0;
 
 	for (MYBYTE i = 1; i < bytes; i++)
-			dp += sprintf(dp, ":%02x", *(hex + i));
+			dp += sprintf_s(dp,sizeof(dp), ":%02x", *(hex + i));
 
 	return target;
 }
@@ -6993,12 +6993,12 @@ char *genHostName(char *target, MYBYTE *hex, MYBYTE bytes)
 	char *dp = target;
 
 	if (bytes)
-		dp += sprintf(target, "Host%02x", *hex);
+		dp += sprintf_s(target,sizeof(target), "Host%02x", *hex);
 	else
 		*target = 0;
 
 	for (MYBYTE i = 1; i < bytes; i++)
-			dp += sprintf(dp, "%02x", *(hex + i));
+			dp += sprintf_s(dp,sizeof(dp), "%02x", *(hex + i));
 
 	return target;
 }
@@ -7013,12 +7013,12 @@ char *IP62String(char *target, MYBYTE *source)
 	for (markbyte = 4; markbyte > 0 && !dw[markbyte - 1]; markbyte--);
 
 	for (MYBYTE i = 0; i < markbyte; i++)
-		dp += sprintf(dp, "%x:", ntohs(dw[i]));
+		dp += sprintf_s(dp,sizeof(dp), "%x:", ntohs(dw[i]));
 
 	for (markbyte = 4; markbyte < 8 && !dw[markbyte]; markbyte++);
 
 	for (MYBYTE i = markbyte; i < 8; i++)
-		dp += sprintf(dp, ":%x", htons(dw[i]));
+		dp += sprintf_s(dp,sizeof(dp), ":%x", htons(dw[i]));
 
 	return target;
 }
@@ -7039,14 +7039,14 @@ char *IP62String(char *target, MYBYTE *source)
 
 			if (zerostarted && zeroended)
 			{
-				dp += sprintf(dp, "::");
+				dp += sprintf_s(dp,sizeof(dp), "::");
 				zerostarted = false;
 			}
 			else if (dp != target)
-				dp += sprintf(dp, ":");
+				dp += sprintf_s(dp,sizeof(dp), ":");
 
-			dp += sprintf(dp, "%x", source[0]);
-			dp += sprintf(dp, "%02x", source[1]);
+			dp += sprintf_s(dp,sizeof(dp), "%x", source[0]);
+			dp += sprintf_s(dp,sizeof(dp), "%02x", source[1]);
 		}
 		else if (source[1])
 		{
@@ -7055,13 +7055,13 @@ char *IP62String(char *target, MYBYTE *source)
 
 			if (zerostarted && zeroended)
 			{
-				dp += sprintf(dp, "::");
+				dp += sprintf_s(dp,sizeof(dp), "::");
 				zerostarted = false;
 			}
 			else if (dp != target)
-				dp += sprintf(dp, ":");
+				dp += sprintf_s(dp,sizeof(dp), ":");
 
-			dp += sprintf(dp, "%0x", source[1]);
+			dp += sprintf_s(dp,sizeof(dp), "%0x", source[1]);
 		}
 		else if (!zeroended)
 			zerostarted = true;
@@ -8517,16 +8517,16 @@ void __cdecl init(void *lpParam)
 	GetModuleFileName(NULL, filePATH, _MAX_PATH);
 	char *fileExt = strrchr(filePATH, '.');
 	*fileExt = 0;
-	sprintf(leaFile, "%s.state", filePATH);
-	sprintf(iniFile, "%s.ini", filePATH);
-	sprintf(lnkFile, "%s.url", filePATH);
-	sprintf(htmFile, "%s.htm", filePATH);
-	sprintf(tempFile, "%s.tmp", filePATH);
+	sprintf_s(leaFile,sizeof(leaFile), "%s.state", filePATH);
+	sprintf_s(iniFile,sizeof(iniFile), "%s.ini", filePATH);
+	sprintf_s(lnkFile,sizeof(lnkFile), "%s.url", filePATH);
+	sprintf_s(htmFile,sizeof(htmFile), "%s.htm", filePATH);
+	sprintf_s(tempFile,sizeof(tempFile), "%s.tmp", filePATH);
 	fileExt = strrchr(filePATH, '\\');
 	*fileExt = 0;
 	fileExt++;
-	sprintf(logFile, "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
-	sprintf(cliFile, "%s\\log\\%%s.log", filePATH);
+	sprintf_s(logFile,sizeof(logFile), "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
+	sprintf_s(cliFile,sizeof(cliFile), "%s\\log\\%%s.log", filePATH);
 	strcat(filePATH, "\\");
 
 	//printf("log=%s\n", logFile);
@@ -8573,7 +8573,7 @@ void __cdecl init(void *lpParam)
 					else if (!strcasecmp(value, "All"))
 						cfig.dnsLogLevel = 2;
 					else
-						sprintf(tempbuff, "Section [LOGGING], Invalid DNSLogLevel: %s", value);
+						sprintf_s(tempbuff,sizeof(tempbuff), "Section [LOGGING], Invalid DNSLogLevel: %s", value);
 				}
 				else if (!strcasecmp(name, "DHCPLogLevel"))
 				{
@@ -8586,13 +8586,13 @@ void __cdecl init(void *lpParam)
 //					else if (!strcasecmp(value, "Debug"))
 //						cfig.dhcpLogLevel = 3;
 					else
-						sprintf(tempbuff, "Section [LOGGING], Invalid DHCPLogLevel: %s", value);
+						sprintf_s(tempbuff,sizeof(tempbuff), "Section [LOGGING], Invalid DHCPLogLevel: %s", value);
 				}
 				else
-					sprintf(tempbuff, "Section [LOGGING], Invalid Entry %s ignored", raw);
+					sprintf_s(tempbuff,sizeof(tempbuff), "Section [LOGGING], Invalid Entry %s ignored", raw);
 			}
 			else
-				sprintf(tempbuff, "Section [LOGGING], Invalid Entry %s ignored", raw);
+				sprintf_s(tempbuff,sizeof(tempbuff), "Section [LOGGING], Invalid Entry %s ignored", raw);
 		}
 
 		if (tempbuff[0])
@@ -8874,7 +8874,7 @@ void __cdecl init(void *lpParam)
 	}
 
 	getInterfaces(&network);
-	sprintf(cfig.servername_fqn, "%s.%s", cfig.servername, cfig.zone);
+	sprintf_s(cfig.servername_fqn,sizeof(cfig.servername_fqn), "%s.%s", cfig.servername, cfig.zone);
 
 	if (f = openSection("ZONE_REPLICATION", 1))
 	{
@@ -9000,10 +9000,10 @@ void __cdecl init(void *lpParam)
 		for (int i = 0; i < cfig.rangeCount; i++)
 		{
 			char *logPtr = logBuff;
-			logPtr += sprintf(logPtr, "DHCP Range: ");
-			logPtr += sprintf(logPtr, "%s", IP2String(ipbuff, htonl(cfig.dhcpRanges[i].rangeStart)));
-			logPtr += sprintf(logPtr, "-%s", IP2String(ipbuff, htonl(cfig.dhcpRanges[i].rangeEnd)));
-			logPtr += sprintf(logPtr, "/%s", IP2String(ipbuff, cfig.dhcpRanges[i].mask));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "DHCP Range: ");
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", IP2String(ipbuff, htonl(cfig.dhcpRanges[i].rangeStart)));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "-%s", IP2String(ipbuff, htonl(cfig.dhcpRanges[i].rangeEnd)));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "/%s", IP2String(ipbuff, cfig.dhcpRanges[i].mask));
 			logDHCPMess(logBuff, 1);
 		}
 
@@ -9648,9 +9648,9 @@ void __cdecl init(void *lpParam)
 		for (int i = 0; i < MAX_DNS_RANGES && cfig.dnsRanges[i].rangeStart; i++)
 		{
 			char *logPtr = logBuff;
-			logPtr += sprintf(logPtr, "%s", "DNS Service Permitted Hosts: ");
-			logPtr += sprintf(logPtr, "%s-", IP2String(ipbuff, htonl(cfig.dnsRanges[i].rangeStart)));
-			logPtr += sprintf(logPtr, "%s", IP2String(ipbuff, htonl(cfig.dnsRanges[i].rangeEnd)));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", "DNS Service Permitted Hosts: ");
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s-", IP2String(ipbuff, htonl(cfig.dnsRanges[i].rangeStart)));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", IP2String(ipbuff, htonl(cfig.dnsRanges[i].rangeEnd)));
 			logDNSMess(logBuff, 1);
 		}
 	}
@@ -9785,7 +9785,7 @@ void __cdecl init(void *lpParam)
 					}
 					else if (!strcasecmp(name, "HTTPTitle"))
 					{
-						strncpy(htmlTitle, value, 255);
+						strncpy_s(htmlTitle,sizeof(htmlTitle), value, 255);
 						htmlTitle[255] = 0;
 					}
 					else
@@ -9797,7 +9797,7 @@ void __cdecl init(void *lpParam)
 			}
 
 			if (!htmlTitle[0])
-				sprintf(htmlTitle, "Dual Server on %s", cfig.servername);
+				sprintf_s(htmlTitle,sizeof(htmlTitle), "Dual Server on %s", cfig.servername);
 
 			network.httpConn.sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -10511,7 +10511,7 @@ MYWORD gdmess(data9 *req, MYBYTE sockInd)
 void debug(int i)
 {
 	char t[254];
-	sprintf(t, "%i", i);
+	sprintf_s(t,sizeof(t), "%i", i);
 	logMess(t, 1);
 }
 
@@ -10638,7 +10638,7 @@ void __cdecl logDebug(void *lpParam)
 	char localreq->extbuff[256];
 	data9 *req = (data9*)lpParam;
 	genHostName(localBuff, req->dhcpp.header.bp_chaddr, req->dhcpp.header.bp_hlen);
-	sprintf(localreq->extbuff, cliFile, localBuff);
+	sprintf_s(localreq->extbuff,sizeof(localreq->extbuff), cliFile, localBuff);
 	FILE *f = fopen(localreq->extbuff, "at");
 
 	if (f)
@@ -10647,11 +10647,11 @@ void __cdecl logDebug(void *lpParam)
 		strftime(localreq->extbuff, sizeof(localreq->extbuff), "%d-%m-%y %X", ttm);
 
 		char *s = localBuff;
-		s += sprintf(s, localreq->extbuff);
-		s += sprintf(s, " SourceMac=%s", req->chaddr);
-		s += sprintf(s, " ClientIP=%s", IP2String(localreq->extbuff, req->dhcpp.header.bp_ciaddr));
-		s += sprintf(s, " SourceIP=%s", IP2String(localreq->extbuff, req->remote.sin_addr.s_addr));
-		s += sprintf(s, " RelayAgent=%s", IP2String(localreq->extbuff, req->dhcpp.header.bp_giaddr));
+		s += sprintf_s(s,sizeof(s), localreq->extbuff);
+		s += sprintf_s(s,sizeof(s), " SourceMac=%s", req->chaddr);
+		s += sprintf_s(s,sizeof(s), " ClientIP=%s", IP2String(localreq->extbuff, req->dhcpp.header.bp_ciaddr));
+		s += sprintf_s(s,sizeof(s), " SourceIP=%s", IP2String(localreq->extbuff, req->remote.sin_addr.s_addr));
+		s += sprintf_s(s,sizeof(s), " RelayAgent=%s", IP2String(localreq->extbuff, req->dhcpp.header.bp_giaddr));
 		fprintf(f, "%s\n", localBuff);
 
 		data3 *op;
@@ -10675,7 +10675,7 @@ void __cdecl logDebug(void *lpParam)
 				}
 
 			s = localBuff;
-			s += sprintf(s, "\t%d\t%s\t", op->opt_code, opName);
+			s += sprintf_s(s,sizeof(s), "\t%d\t%s\t", op->opt_code, opName);
 			//printf("OpCode=%u,OpLen=%u,OpType=%u\n", op->opt_code, op->size, opType);
 
 			switch (opType)
@@ -10683,28 +10683,28 @@ void __cdecl logDebug(void *lpParam)
 				case 1:
 					memcpy(localreq->extbuff, op->value, op->size);
 					localreq->extbuff[op->size] = 0;
-					sprintf(s, "%s", localreq->extbuff);
+					sprintf_s(s,sizeof(s), "%s", localreq->extbuff);
 					break;
 				case 3:
 					for (BYTE x = 4; x <= op->size; x += 4)
 					{
 						IP2String(localreq->extbuff, fIP(op->value));
-						s += sprintf(s, "%s,", localreq->extbuff);
+						s += sprintf_s(s,sizeof(s), "%s,", localreq->extbuff);
 					}
 					break;
 				case 4:
-					sprintf(s, "%u", fULong(op->value));
+					sprintf_s(s,sizeof(s), "%u", fULong(op->value));
 					break;
 				case 5:
-					sprintf(s, "%u", fUShort(op->value));
+					sprintf_s(s,sizeof(s), "%u", fUShort(op->value));
 					break;
 				case 6:
 				case 7:
-					sprintf(s, "%u", op->value[0]);
+					sprintf_s(s,sizeof(s), "%u", op->value[0]);
 					break;
 				default:
 					if (op->size == 1)
-						sprintf(s, "%u", op->value[0]);
+						sprintf_s(s,sizeof(s), "%u", op->value[0]);
 					else
 						hex2String(s, op->value, op->size);
 					break;
@@ -10764,7 +10764,7 @@ void logDNSMess(data5 *req, char *logBuff, MYBYTE logLevel)
 	if (logLevel <= cfig.dnsLogLevel)
 	{
 		char *mess = (char*)calloc(1, 512);
-		sprintf(mess, "Client %s, %s", inet_ntoa(req->remote.sin_addr), logBuff);
+		sprintf_s(mess,sizeof(mess), "Client %s, %s", inet_ntoa(req->remote.sin_addr), logBuff);
 		_beginthread(logThread, 0, mess);
 	}
 }
@@ -10777,7 +10777,7 @@ void logTCPMess(data5 *req, char *logBuff, MYBYTE logLevel)
 	if (logLevel <= cfig.dnsLogLevel)
 	{
 		char *mess = (char*)calloc(1, 512);
-		sprintf(mess, "TCP Client %s, %s", inet_ntoa(req->remote.sin_addr), logBuff);
+		sprintf_s(mess,sizeof(mess), "TCP Client %s, %s", inet_ntoa(req->remote.sin_addr), logBuff);
 		_beginthread(logThread, 0, mess);
 	}
 }
