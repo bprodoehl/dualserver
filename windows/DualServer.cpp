@@ -785,13 +785,13 @@ int main(int argc, TCHAR* argv[])
 						{
 							if (argv[i][0] == '-') break;
 							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
-							strcpy(tmpIniPath + lastPos, argv[i]);
+							strcpy_s(tmpIniPath + lastPos,sizeof(tmpIniPath)-lastPos, argv[i]);
 							lastPos += strlen(argv[i]);
 						}
 						lastArg = i;
 						tmpIniPath[lastPos] = '\0';
 						printf("Using ini file at %s\n", tmpIniPath);
-						strcpy(iniFile, tmpIniPath);
+						strcpy_s(iniFile, sizeof(iniFile), tmpIniPath);
 					}
 					else if (argc > lastArg + 1 && lstrcmpi(argv[lastArg], TEXT("-s")) == 0)
 					{
@@ -802,13 +802,13 @@ int main(int argc, TCHAR* argv[])
 						{
 							if (argv[i][0] == '-') break;
 							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
-							strcpy(tmpIniPath + lastPos, argv[i]);
+							strcpy_s(tmpIniPath + lastPos, sizeof(tmpIniPath) - lastPos, argv[i]);
 							lastPos += strlen(argv[i]);
 						}
 						lastArg = i;
 						tmpIniPath[lastPos] = '\0';
 						printf("Using state file at %s\n", tmpIniPath);
-						strcpy(leaFile, tmpIniPath);
+						strcpy_s(leaFile, sizeof(leaFile), tmpIniPath);
 					}
 					else if (argc > lastArg + 1 && lstrcmpi(argv[lastArg], TEXT("-l")) == 0)
 					{
@@ -819,13 +819,13 @@ int main(int argc, TCHAR* argv[])
 						{
 							if (argv[i][0] == '-') break;
 							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
-							strcpy(tmpIniPath + lastPos, argv[i]);
+							strcpy_s(tmpIniPath + lastPos, sizeof(tmpIniPath) - lastPos, argv[i]);
 							lastPos += strlen(argv[i]);
 						}
 						lastArg = i;
 						tmpIniPath[lastPos] = '\0';
 						printf("Using log path at %s\n", tmpIniPath);
-						strcpy(logPath, tmpIniPath);
+						strcpy_s(logPath, sizeof(logPath), tmpIniPath);
 					}
 				}
 			}
