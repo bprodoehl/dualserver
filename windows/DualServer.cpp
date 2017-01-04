@@ -1964,7 +1964,11 @@ void procHTTP(data19 *req)
 	char tempbuff[512];
 	req->ling.l_onoff = 1; //0 = off (l_linger ignored), nonzero = on
 	req->ling.l_linger = 30; //0 = discard data, nonzero = wait for data sent
-	setsockopt(req->sock, SOL_SOCKET, SO_LINGER, (const char*)&req->ling, sizeof(req->ling));
+	if (SOCKET_ERROR == setsockopt(req->sock, SOL_SOCKET, SO_LINGER, (const char*)&req->ling, sizeof(req->ling)))
+	{
+		sprintf(logBuff, "Failed to set SO_LINGER on http socket");
+		logDHCPMess(logBuff, 1);
+	}
 
 	timeval tv1;
 	fd_set readfds1;
@@ -2349,7 +2353,11 @@ void procTCP(data5 *req)
 	char logBuff[512];
 	req->ling.l_onoff = 1; //0 = off (l_linger ignored), nonzero = on
 	req->ling.l_linger = 10; //0 = discard data, nonzero = wait for data sent
-	setsockopt(req->sock, SOL_SOCKET, SO_LINGER, (const char*)&req->ling, sizeof(req->ling));
+	if (SOCKET_ERROR == setsockopt(req->sock, SOL_SOCKET, SO_LINGER, (const char*)&req->ling, sizeof(req->ling)))
+	{
+		sprintf(logBuff, "Failed to set SO_LINGER on tcp socket");
+		logDHCPMess(logBuff, 1);
+	}
 
 	errno = 0;
 	req->bytes = recvTcpDnsMess(req->raw, req->sock, sizeof(req->raw));
@@ -3984,40 +3992,43 @@ MYDWORD resad(data9 *req)
 
 			//printf("%u\n", cache->mapname);
 
-			if (strcasecmp(cache->mapname, hostname))
-				break;
-
-			if (cache && cache->ip)
+			if (cache)
 			{
-				char k = getRangeInd(cache->ip);
+				if (strcasecmp(cache->mapname, hostname))
+					break;
 
-				if (k >= 0)
+				if (cache->ip)
 				{
-					if (checkRange(&rangeData, k))
+					char k = getRangeInd(cache->ip);
+
+					if (k >= 0)
 					{
-						data13 *range = &cfig.dhcpRanges[k];
-						int ind = getIndex(k, cache->ip);
-
-						if (ind >= 0 && range->expiry[ind] <= t)
+						if (checkRange(&rangeData, k))
 						{
-							MYDWORD iip = htonl(cache->ip);
+							data13 *range = &cfig.dhcpRanges[k];
+							int ind = getIndex(k, cache->ip);
 
-							if (!cfig.rangeSet[range->rangeSetInd].subnetIP[0])
+							if (ind >= 0 && range->expiry[ind] <= t)
 							{
-								calcRangeLimits(req->subnetIP, range->mask, &minRange, &maxRange);
+								MYDWORD iip = htonl(cache->ip);
 
-								if (iip >= minRange && iip <= maxRange)
+								if (!cfig.rangeSet[range->rangeSetInd].subnetIP[0])
+								{
+									calcRangeLimits(req->subnetIP, range->mask, &minRange, &maxRange);
+
+									if (iip >= minRange && iip <= maxRange)
+									{
+										iipNew = iip;
+										rangeInd = k;
+										break;
+									}
+								}
+								else
 								{
 									iipNew = iip;
 									rangeInd = k;
 									break;
 								}
-							}
-							else
-							{
-								iipNew = iip;
-								rangeInd = k;
-								break;
 							}
 						}
 					}
@@ -4834,26 +4845,29 @@ void holdIP(MYDWORD ip)
 void __cdecl sendToken(void *lpParam)
 {
 	//debug("Send Token");
+	char logBuff[512];
 	Sleep(1000 * 10);
 
 	while (kRunning)
 	{
 		errno = 0;
 
-		sendto(cfig.dhcpReplConn.sock,
-				token.raw,
-				token.bytes,
-				0,
-				(sockaddr*)&token.remote,
-				sizeof(token.remote));
+		if (SOCKET_ERROR == sendto(cfig.dhcpReplConn.sock,
+			token.raw,
+			token.bytes,
+			0,
+			(sockaddr*)&token.remote,
+			sizeof(token.remote)))
+		{
+//			errno = WSAGetLastError();
+//	
+//			if (!errno && verbatim || cfig.dhcpLogLevel >= 2)
+//			{
+//				sprintf(logBuff, "Token Sent");
+//				logDHCPMess(logBuff, 2);
+//			}
+		}
 
-//		errno = WSAGetLastError();
-//
-//		if (!errno && verbatim || cfig.dhcpLogLevel >= 2)
-//		{
-//			sprintf(logBuff, "Token Sent");
-//			logDHCPMess(logBuff, 2);
-//		}
 
 		Sleep(1000 * 300);
 	}
@@ -5005,20 +5019,21 @@ void recvRepl(data9 *req)
 
 			errno = 0;
 
-			sendto(cfig.dhcpReplConn.sock,
-					token.raw,
-					token.bytes,
-					0,
-					(sockaddr*)&token.remote,
-					sizeof(token.remote));
-
-//			errno = WSAGetLastError();
-//
-//			if (!errno && (verbatim || cfig.dhcpLogLevel >= 2))
-//			{
-//				sprintf(logBuff, "Token Responded");
-//				logDHCPMess(logBuff, 2);
-//			}
+			if (SOCKET_ERROR == sendto(cfig.dhcpReplConn.sock,
+				token.raw,
+				token.bytes,
+				0,
+				(sockaddr*)&token.remote,
+				sizeof(token.remote)))
+			{
+//				errno = WSAGetLastError();
+//	
+//				if (!errno && (verbatim || cfig.dhcpLogLevel >= 2))
+//				{
+//					sprintf(logBuff, "Token Responded");
+//					logDHCPMess(logBuff, 2);
+//				}
+			}
 		}
 		else if (cfig.replication == 2)
 		{
@@ -6203,7 +6218,7 @@ void loadDHCP()
 				}
 				else
 				{
-					sprintf(logBuff, "Invalid Static DHCP Host MAC Addr size, ignored", sectionName);
+					sprintf(logBuff, "Invalid Static DHCP Host MAC Addr size [%s], ignored", sectionName);
 					logDHCPMess(logBuff, 1);
 				}
 			}
@@ -7584,6 +7599,13 @@ MYDWORD getSerial(char *zone)
 		req.remote.sin_addr.s_addr = cfig.zoneServers[1];
 
 	req.sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (req.sock == INVALID_SOCKET)
+	{
+		closesocket(req.sock);
+		sprintf(logBuff, "Failed to send create socket to Primary Server %s", IP2String(ipbuff, req.remote.sin_addr.s_addr));
+		logDNSMess(logBuff, 1);
+		return 0;
+	}
 	req.dnsp = (dnsPacket*)req.raw;
 	req.dnsp->header.qdcount = htons(1);
 	req.dnsp->header.rd = false;
@@ -7673,6 +7695,13 @@ void sendServerName()
 	fd_set readfds1;
 
 	req.sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (req.sock == INVALID_SOCKET)
+	{
+		char logBuff[512];
+		sprintf(logBuff, "Failed to Create Socket in sendServerName");
+		logDNSMess(logBuff, 1);
+		return;
+	}
 	req.dnsp = (dnsPacket*)req.raw;
 	req.dnsp->header.opcode = OPCODE_DYNAMIC_UPDATE;
 	req.dnsp->header.qr = true;
@@ -9665,7 +9694,11 @@ void __cdecl init(void *lpParam)
 
 				network.dhcpConn[i].broadCastVal = TRUE;
 				network.dhcpConn[i].broadCastSize = sizeof(network.dhcpConn[i].broadCastVal);
-				setsockopt(network.dhcpConn[i].sock, SOL_SOCKET, SO_BROADCAST, (char*)(&network.dhcpConn[i].broadCastVal), network.dhcpConn[i].broadCastSize);
+				if (SOCKET_ERROR == setsockopt(network.dhcpConn[i].sock, SOL_SOCKET, SO_BROADCAST, (char*)(&network.dhcpConn[i].broadCastVal), network.dhcpConn[i].broadCastSize))
+				{
+					sprintf(logBuff, "Failed to set SO_BROADCAST on socket");
+					logDHCPMess(logBuff, 1);
+				}
 
 				int nRet = bind(network.dhcpConn[i].sock,
 								(sockaddr*)&network.dhcpConn[i].addr,
