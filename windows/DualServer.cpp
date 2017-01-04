@@ -10166,7 +10166,7 @@ void getInterfaces(data1 *network)
 
 	memset(network, 0, sizeof(data1));
 
-	SOCKET sd = WSASocket(PF_INET, SOCK_DGRAM, 0, 0, 0, 0);
+	SOCKET sd = WSASocketW(PF_INET, SOCK_DGRAM, 0, 0, 0, 0);
 
 	if (sd == INVALID_SOCKET)
 		return;
