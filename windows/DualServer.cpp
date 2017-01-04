@@ -329,7 +329,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 					FD_SET(network.forwConn.sock, &readfds);
 			}
 
-			if (select(network.maxFD, &readfds, NULL, NULL, &tv))
+			if (select((int)(network.maxFD), &readfds, NULL, NULL, &tv))
 			{
 				t = time(NULL);
 
@@ -786,7 +786,7 @@ int main(int argc, TCHAR* argv[])
 							if (argv[i][0] == '-') break;
 							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
 							strcpy_s(tmpIniPath + lastPos,sizeof(tmpIniPath)-lastPos, argv[i]);
-							lastPos += strlen(argv[i]);
+							lastPos += (int)strlen(argv[i]);
 						}
 						lastArg = i;
 						tmpIniPath[lastPos] = '\0';
@@ -803,7 +803,7 @@ int main(int argc, TCHAR* argv[])
 							if (argv[i][0] == '-') break;
 							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
 							strcpy_s(tmpIniPath + lastPos, sizeof(tmpIniPath) - lastPos, argv[i]);
-							lastPos += strlen(argv[i]);
+							lastPos += (int)strlen(argv[i]);
 						}
 						lastArg = i;
 						tmpIniPath[lastPos] = '\0';
@@ -820,7 +820,7 @@ int main(int argc, TCHAR* argv[])
 							if (argv[i][0] == '-') break;
 							if (lastPos>0) tmpIniPath[lastPos++] = ' ';
 							strcpy_s(tmpIniPath + lastPos, sizeof(tmpIniPath) - lastPos, argv[i]);
-							lastPos += strlen(argv[i]);
+							lastPos += (int)strlen(argv[i]);
 						}
 						lastArg = i;
 						tmpIniPath[lastPos] = '\0';
@@ -917,7 +917,7 @@ void runProg()
 				FD_SET(network.forwConn.sock, &readfds);
 		}
 
-		if (select(network.maxFD, &readfds, NULL, NULL, &tv))
+		if (select((int)(network.maxFD), &readfds, NULL, NULL, &tv))
 		{
 			t = time(NULL);
 
@@ -1133,7 +1133,7 @@ bool chkQu(char *query)
 		char *dp = strchr(query, '.');
 		if (dp)
 		{
-			MYWORD size = dp - query;
+			MYWORD size = (MYWORD)(dp - query);
 			if (size >= 64)
 				return 0;
 			query += (size + 1);
@@ -1205,13 +1205,13 @@ MYWORD qLen(char *query)
 
 		if (dp != NULL)
 		{
-			int size = dp - query;
+			int size = (int)(dp - query);
 			query += (size + 1);
 			fullsize += (size + 1);
 		}
 		else
 		{
-			int size = strlen(query);
+			int size = (int)strlen(query);
 
 			if (size)
 				fullsize += (size + 1);
@@ -1232,7 +1232,7 @@ MYWORD pQu(char *raw, char *query)
 
 		if (i != NULL)
 		{
-			int size = i - query;
+			int size = (int)(i - query);
 			*raw = size;
 			raw++;
 			memcpy(raw, query, size);
@@ -1242,7 +1242,7 @@ MYWORD pQu(char *raw, char *query)
 		}
 		else
 		{
-			int size = strlen(query);
+			int size = (int)strlen(query);
 			if (size)
 			{
 				*raw = size;
@@ -1806,7 +1806,7 @@ void addRRSOA(data5 *req)
 		req->dp += pULong(req->dp, cfig.retry);
 		req->dp += pULong(req->dp, cfig.expire);
 		req->dp += pULong(req->dp, cfig.minimum);
-		pUShort(data, (req->dp - data) - 2);
+		pUShort(data, (unsigned short)((req->dp - data) - 2));
 	}
 	//req->bytes = req->dp - req->raw;
 }
@@ -2035,7 +2035,7 @@ void procHTTP(data19 *req)
 	tv1.tv_usec = 0;
 	FD_SET(req->sock, &readfds1);
 
-	if (!select((req->sock + 1), &readfds1, NULL, NULL, &tv1))
+	if (!select((int)(req->sock + 1), &readfds1, NULL, NULL, &tv1))
 	{
 		sprintf_s(logBuff,sizeof(logBuff), "Client %s, HTTP Message Receive failed", IP2String(tempbuff, req->remote.sin_addr.s_addr));
 		logDHCPMess(logBuff, 1);
@@ -2128,7 +2128,7 @@ void sendStatus(data19 *req)
 	data7 *dhcpEntry = NULL;
 	//data7 *cache = NULL;
 	//printf("%d=%d\n", dhcpCache.size(), cfig.dhcpSize);
-	req->memSize = 2048 + (135 * dhcpCache.size()) + (cfig.dhcpSize * 26);
+	req->memSize = (int)(2048 + (135 * dhcpCache.size()) + (cfig.dhcpSize * 26));
 	req->dp = (char*)calloc(1, req->memSize);
 
 	if (!req->dp)
@@ -2294,9 +2294,9 @@ void sendStatus(data19 *req)
 		fp += sprintf_s(fp,sizeof(fp), "</tr>\n");
 
 	fp += sprintf_s(fp,sizeof(fp), "</table>\n</body>\n</html>");
-	MYBYTE x = sprintf_s(tempbuff,sizeof(tempbuff), "%u", (fp - contentStart));
+	MYBYTE x = sprintf_s(tempbuff,sizeof(tempbuff), "%u", (unsigned int)(fp - contentStart));
 	memcpy((contentStart - 12), tempbuff, x);
-	req->bytes = fp - req->dp;
+	req->bytes = (int)(fp - req->dp);
 
 	_beginthread(sendHTTP, 0, (void*)req);
 	return;
@@ -2380,7 +2380,7 @@ void __cdecl sendHTTP(void *lpParam)
 		FD_ZERO(&writefds1);
 		FD_SET(req->sock, &writefds1);
 
-		if (select((req->sock + 1), NULL, &writefds1, NULL, &tv1))
+		if (select((int)(req->sock + 1), NULL, &writefds1, NULL, &tv1))
 		{
 			if (req->bytes > 1024)
 				sent  = send(req->sock, dp, 1024, 0);
@@ -2781,11 +2781,11 @@ MYWORD sendTCPmess(data5 *req)
 	tv1.tv_sec = 5;
 	tv1.tv_usec = 0;
 
-	if (select((req->sock + 1), NULL, &writefds, NULL, &tv1) > 0)
+	if (select((int)(req->sock + 1), NULL, &writefds, NULL, &tv1) > 0)
 	{
 		errno = 0;
 		req->dnsp->header.ra = 0;
-		req->bytes = req->dp - req->raw;
+		req->bytes = (int)(req->dp - req->raw);
 		pUShort(req->raw, req->bytes - 2);
 
 		if (req->bytes == send(req->sock, req->raw, req->bytes, 0) && !WSAGetLastError())
@@ -3218,7 +3218,7 @@ MYWORD scanloc(data5 *req)
 		req->dp += pQu(req->dp, req->cname);
 		req->dp += pUShort(req->dp, DNS_TYPE_A);
 		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->bytes = req->dp - req->raw;
+		req->bytes = (int)(req->dp - req->raw);
 		return 0;
 	}
 	else if (req->qType == QTYPE_A_BARE || req->qType == QTYPE_A_ZONE || req->qType == QTYPE_P_ZONE)
@@ -3525,7 +3525,7 @@ MYWORD frdnmess(data5 *req)
 
 		if (resultFound)
 		{
-			MYWORD cacheSize = req->dp - req->raw;
+			MYWORD cacheSize = (MYWORD)(req->dp - req->raw);
 
 			if (cfig.minCache && expiry < cfig.minCache)
 				expiry = cfig.minCache;
@@ -3604,7 +3604,7 @@ MYWORD sdnmess(data5 *req)
 	//debug("sdnmess");
 
 	errno = 0;
-	req->bytes = req->dp - req->raw;
+	req->bytes = (int)(req->dp - req->raw);
 	req->bytes = sendto(network.dnsUdpConn[req->sockInd].sock,
 	                    req->raw,
 	                    req->bytes,
@@ -4419,7 +4419,7 @@ MYDWORD sdmess(data9 *req)
 		return 0;
 
 	addOptions(req);
-	int packSize = req->vp - (MYBYTE*)&req->dhcpp;
+	int packSize = (int)(req->vp - (MYBYTE*)&req->dhcpp);
 	packSize++;
 
 	if (req->req_type == DHCP_MESS_NONE)
@@ -4977,7 +4977,7 @@ MYDWORD sendRepl(data9 *req)
 
 	*(req->vp) = DHCP_OPTION_END;
 	req->vp++;
-	req->bytes = req->vp - (MYBYTE*)req->raw;
+	req->bytes = (int)(req->vp - (MYBYTE*)req->raw);
 
 	req->dhcpp.header.bp_op = BOOTP_REQUEST;
 	errno = 0;
@@ -5824,7 +5824,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 
 	*dp = DHCP_OPTION_END;
 	dp++;
-	optionData->optionSize = (dp - optionData->options);
+	optionData->optionSize = (unsigned short)(dp - optionData->options);
 	//printf("section=%s buffersize = %u option size=%u\n", sectionName, buffsize, optionData->optionSize);
 }
 
@@ -7669,7 +7669,7 @@ MYDWORD getSerial(char *zone)
 	req.dp += pQu(req.dp, zone);
 	req.dp += pUShort(req.dp, DNS_TYPE_SOA);
 	req.dp += pUShort(req.dp, DNS_CLASS_IN);
-	req.bytes = req.dp - req.raw;
+	req.bytes = (int)(req.dp - req.raw);
 	//pUShort(req.raw, req.bytes - 2);
 
 	if ((req.bytes = sendto(req.sock, req.raw, req.bytes, 0, (sockaddr*)&req.remote, sizeof(req.remote))) <= 0)
@@ -7773,7 +7773,7 @@ void sendServerName()
 	req.dp += pULong(req.dp, 0);
 	req.dp += pUShort(req.dp, 4);
 	req.dp += pIP(req.dp, cfig.zoneServers[1]);
-	req.bytes = req.dp - req.raw;
+	req.bytes = (int)(req.dp - req.raw);
 	//pUShort(req.raw, req.bytes - 2);
 
 	if ((req.bytes = sendto(req.sock, req.raw, req.bytes, 0, (sockaddr*)&req.remote, sizeof(req.remote))) <= 0)
@@ -7806,7 +7806,7 @@ MYWORD recvTcpDnsMess(char *target, SOCKET sock, MYWORD targetSize)
 	tv1.tv_sec = 5;
 	tv1.tv_usec = 0;
 
-	if (select(sock + 1, &readfds1, NULL, NULL, &tv1))
+	if (select((int)(sock + 1), &readfds1, NULL, NULL, &tv1))
 	{
 		errno = 0;
 		short chunk = recv(sock, target, 2, 0);
@@ -7828,7 +7828,7 @@ MYWORD recvTcpDnsMess(char *target, SOCKET sock, MYWORD targetSize)
 				tv1.tv_sec = 5;
 				tv1.tv_usec = 0;
 
-				if (select(sock + 1, &readfds1, NULL, NULL, &tv1))
+				if (select((int)(sock + 1), &readfds1, NULL, NULL, &tv1))
 				{
 					errno = 0;
 					ptr = target + rcd;
@@ -7996,7 +7996,7 @@ FILE *pullZone(SOCKET sock)
         tv1.tv_sec = 10;
         tv1.tv_usec = 0;
 
-        if (select((sock + 1), &readfds1, NULL, NULL, &tv1) > 0)
+        if (select((int)(sock + 1), &readfds1, NULL, NULL, &tv1) > 0)
         {
             errno = 0;
             short bytes = recv(sock, target, sizeof(target), 0);
@@ -8127,7 +8127,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 		req.dp += pQu(req.dp, zone);
 		req.dp += pUShort(req.dp, DNS_TYPE_AXFR);
 		req.dp += pUShort(req.dp, DNS_CLASS_IN);
-		req.bytes = req.dp - req.raw;
+		req.bytes = (int)(req.dp - req.raw);
 		pUShort(req.raw, req.bytes - 2);
 
 		if (send(req.sock, req.raw, req.bytes, 0) < req.bytes)
@@ -8145,14 +8145,14 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 
 		while (kRunning && !serial2)
 		{
-			req.bytes = fread(req.raw, 1, 2, f);
+			req.bytes = (int)fread(req.raw, 1, 2, f);
 
 			if (req.bytes != 2)
 				break;
 
 			MYWORD pktSize = fUShort(req.raw);
 
-			req.bytes = fread(req.raw, 1, pktSize, f);
+			req.bytes = (int)fread(req.raw, 1, pktSize, f);
 
 			if ((MYWORD)req.bytes != pktSize)
 			{
@@ -8431,7 +8431,7 @@ bool getSecondary()
 		req.dp += pQu(req.dp, cfig.authority);
 		req.dp += pUShort(req.dp, DNS_TYPE_AXFR);
 		req.dp += pUShort(req.dp, DNS_CLASS_IN);
-		req.bytes = req.dp - req.raw;
+		req.bytes = (int)(req.dp - req.raw);
 		pUShort(req.raw, (req.bytes - 2));
 
 		if (send(req.sock, req.raw, req.bytes, 0) < req.bytes)
@@ -8447,13 +8447,13 @@ bool getSecondary()
 
 		while (kRunning)
 		{
-			req.bytes = fread(req.raw, 1, 2, f);
+			req.bytes = (int)fread(req.raw, 1, 2, f);
 
 			if (req.bytes < 2)
 				break;
 
 			MYWORD pktSize = fUShort(req.raw);
-			req.bytes = fread(req.raw, 1, pktSize, f);
+			req.bytes = (int)fread(req.raw, 1, pktSize, f);
 
 			if ((MYWORD)req.bytes != pktSize)
 			{
@@ -9638,7 +9638,7 @@ void __cdecl init(void *lpParam)
 
 					token.vp[0] = DHCP_OPTION_END;
 					token.vp++;
-					token.bytes = token.vp - (MYBYTE*)token.raw;
+					token.bytes = (int)(token.vp - (MYBYTE*)token.raw);
 
  					if (cfig.replication == 2)
 						_beginthread(sendToken, 0, 0);
