@@ -9027,17 +9027,17 @@ void __cdecl init(void *lpParam)
 		{
 			while (readSection(raw, f))
 				dhcpServerPort = atoi(raw);
-			sprintf_s(logBuff, sizeof(logBuff), "Using DHCP Server Port of %u", dhcpServerPort);
-			logDNSMess(logBuff, 1);
 		}
+		sprintf_s(logBuff, sizeof(logBuff), "Using DHCP Server Port of %u", dhcpServerPort);
+		logDNSMess(logBuff, 1);
 
 		if (f = openSection("DHCP_CLIENT_PORT", 1))
 		{
 			while (readSection(raw, f))
 				dhcpClientPort = atoi(raw);
-			sprintf_s(logBuff, sizeof(logBuff), "Using DHCP Client Port of %u", dhcpClientPort);
-			logDNSMess(logBuff, 1);
 		}
+		sprintf_s(logBuff, sizeof(logBuff), "Using DHCP Client Port of %u", dhcpClientPort);
+		logDNSMess(logBuff, 1);
 
 		fEvent = CreateEvent(
 			NULL,                  // default security descriptor
@@ -9101,9 +9101,10 @@ void __cdecl init(void *lpParam)
 		{
 			while (readSection(raw, f))
 				dnsPort = atoi(raw);
-			sprintf_s(logBuff, sizeof(logBuff), "Using DNS Port of %u", dnsPort);
-			logDNSMess(logBuff, 1);
 		}
+		sprintf_s(logBuff, sizeof(logBuff), "Using DNS Port of %u", dnsPort);
+		logDNSMess(logBuff, 1);
+
 		if (f = openSection("DNS_ALLOWED_HOSTS", 1))
 		{
 			int i = 0;
