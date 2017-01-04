@@ -1189,7 +1189,7 @@ MYWORD pQu(char *raw, char *query)
 			{
 				*raw = size;
 				raw++;
-				strcpy(raw, query);
+				strcpy_s(raw, sizeof(raw), query);
 				fullsize += (size + 1);
 			}
 			break;
@@ -1392,7 +1392,7 @@ void addRRCache(data5 *req, data7 *cache)
 			MYWORD type = fUShort(indp);
 
 			if (!strcasecmp(tempbuff, req->query))
-				strcpy(tempbuff, req->query);
+				strcpy_s(tempbuff, sizeof(tempbuff), req->query);
 
 			req->dp += pQu(req->dp, tempbuff);
 			memcpy(req->dp, indp, 8);
@@ -1848,11 +1848,11 @@ void addRRAOne(data5 *req)
 		req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
 
 		if (!cache->name[0])
-			strcpy(req->cname, cfig.zone);
+			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
 		else if (!strchr(cache->name, '.'))
 			sprintf(req->cname, "%s.%s", cache->name, cfig.zone);
 		else
-			strcpy(req->cname, cache->name);
+			strcpy_s(req->cname, sizeof(req->cname), cache->name);
 
 		req->dp += pQu(req->dp, req->cname);
 		req->dp += pUShort(req->dp, DNS_TYPE_A);
@@ -2461,8 +2461,8 @@ void procTCP(data5 *req)
 		return;
 	}
 
-	strcpy(req->cname, req->query);
-	strcpy(req->mapname, req->query);
+	strcpy_s(req->cname, sizeof(req->cname), req->query);
+	strcpy_s(req->mapname, sizeof(req->mapname), req->query);
 	myLower(req->mapname);
 	req->qLen = strlen(req->cname);
 	req->qType = makeLocal(req->mapname);
@@ -2929,8 +2929,8 @@ MYWORD scanloc(data5 *req)
 	if (!req->query[0])
 		return 0;
 
-	strcpy(req->cname, req->query);
-	strcpy(req->mapname, req->query);
+	strcpy_s(req->cname, sizeof(req->cname),req->query);
+	strcpy_s(req->mapname, sizeof(req->mapname), req->query);
 	myLower(req->mapname);
 	req->qType = makeLocal(req->mapname);
 	//MYDWORD ip = req->remote.sin_addr.s_addr;
@@ -3421,7 +3421,7 @@ MYWORD frdnmess(data5 *req)
 	for (int i = 1; i <= ntohs(req->dnsp->header.qdcount); i++)
 	{
 		req->dp += fQu(req->cname, req->dnsp, req->dp);
-		strcpy(req->mapname, req->cname);
+		strcpy_s(req->mapname, sizeof(req->mapname), req->cname);
 		dnsType = fUShort(req->dp);
 		req->dp += 4; //type and class
 
@@ -3435,7 +3435,7 @@ MYWORD frdnmess(data5 *req)
 		}
 		else
 		{
-			strcpy(req->mapname, req->cname);
+			strcpy_s(req->mapname, sizeof(req->mapname), req->cname);
 			myLower(req->mapname);
 		}
 	}
@@ -4607,7 +4607,7 @@ void addOptions(data9 *req)
 			if (!req->hostname[0])
 				genHostName(req->hostname, req->dhcpp.header.bp_chaddr, req->dhcpp.header.bp_hlen);
 
-			strcpy(req->dhcpEntry->hostname, req->hostname);
+			strcpy_s(req->dhcpEntry->hostname, sizeof(req->dhcpEntry->hostname), req->hostname);
 /*
 			if (!req->opAdded[DHCP_OPTION_ROUTER])
 			{
@@ -4980,7 +4980,7 @@ MYDWORD sendRepl(data7 *dhcpEntry)
 	req.dhcpp.header.bp_magic_num[1] = 130;
 	req.dhcpp.header.bp_magic_num[2] = 83;
 	req.dhcpp.header.bp_magic_num[3] = 99;
-	strcpy(req.hostname, dhcpEntry->hostname);
+	strcpy_s(req.hostname, sizeof(req.hostname), dhcpEntry->hostname);
 
 	return sendRepl(&req);
 }
@@ -5123,7 +5123,7 @@ void recvRepl(data9 *req)
 			hangTime = req->rebind;
 
 		setLeaseExpiry(req->dhcpEntry, hangTime);
-		strcpy(req->dhcpEntry->hostname, req->hostname);
+		strcpy_s(req->dhcpEntry->hostname, sizeof(req->dhcpEntry->hostname), req->hostname);
 
 		_beginthread(updateStateFile, 0, (void*)req->dhcpEntry);
 
@@ -6453,7 +6453,7 @@ FILE *openSection(const char *sectionName, MYBYTE serial)
 							myTrim(buff, buff);
 
 							if (strchr(buff, '\\') || strchr(buff, '/'))
-								strcpy(tempbuff, buff);
+								strcpy_s(tempbuff, sizeof(tempbuff), buff);
 							else
 								sprintf(tempbuff, "%s%s", filePATH, buff);
 
@@ -6609,7 +6609,7 @@ void mySplit(char *name, char *value, char *source, char splitChar)
 
 char *strquery(data5 *req)
 {
-	strcpy(req->extbuff, req->query);
+	strcpy_s(req->extbuff, sizeof(req->extbuff), req->query);
 
 	switch (req->dnsType)
 	{
@@ -7223,7 +7223,7 @@ char *setMapName(char *tempbuff, char *mapname, MYBYTE dnsType)
 	char *dp = tempbuff;
 	(*dp) = dnsType;
 	dp++;
-	strcpy(dp, mapname);
+	strcpy_s(dp, sizeof(dp), mapname);
 	myLower(dp);
 	return tempbuff;
 }
@@ -7504,7 +7504,7 @@ char *findHost(char *tempbuff, MYDWORD ip)
 	data7 *cache = findEntry(tempbuff, DNS_TYPE_PTR);
 
 	if (cache)
-		strcpy(tempbuff, cache->hostname);
+		strcpy_s(tempbuff, sizeof(tempbuff), cache->hostname);
 	else
 		tempbuff[0] = 0;
 
@@ -7576,7 +7576,7 @@ char *cloneString(char *string)
 	char *s = (char*)calloc(1, strlen(string) + 1);
 
 	if (s)
-		strcpy(s, string);
+		strcpy_s(s, sizeof(s), string);
 
 	return s;
 }
@@ -8159,7 +8159,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 						data += fQu(tempbuff, req.dnsp, data);
 
 						if (!cfig.nsP[0])
-							strcpy(cfig.nsP, req.cname);
+							strcpy_s(cfig.nsP, sizeof(cfig.nsP), req.cname);
 
 						if (!serial1)
 						{
@@ -8233,7 +8233,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 							cfig.mxServers[ind][cfig.mxCount[ind]].pref = fUShort(data);
 							data += sizeof(MYWORD);
 							fQu(req.cname, req.dnsp, data);
-							strcpy(cfig.mxServers[ind][cfig.mxCount[ind]].hostname, req.cname);
+							strcpy_s(cfig.mxServers[ind][cfig.mxCount[ind]].hostname, sizeof(cfig.mxServers[ind][cfig.mxCount[ind]].hostname), req.cname);
 							cfig.mxCount[ind]++;
 							added++;
 						}
@@ -8244,7 +8244,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 						fQu(req.cname, req.dnsp, data);
 
 						if (!cfig.nsS[0] && strcasecmp(cfig.nsP, req.cname))
-							strcpy(cfig.nsS, req.cname);
+							strcpy_s(cfig.nsS, sizeof(cfig.nsS), req.cname);
 
 						break;
 
@@ -8860,7 +8860,7 @@ void __cdecl init(void *lpParam)
 
 			if (chkQu(name))
 			{
-				strcpy(cfig.zone, name);
+				strcpy_s(cfig.zone, sizeof(cfig.zone), name);
 				cfig.zLen = strlen(cfig.zone);
 			}
 			else
@@ -9216,8 +9216,8 @@ void __cdecl init(void *lpParam)
 								strcat(name, cfig.zone);
 							}
 
-							strcpy(cfig.mxServers[0][cfig.mxCount[0]].hostname, name);
-							strcpy(cfig.mxServers[1][cfig.mxCount[0]].hostname, name);
+							strcpy_s(cfig.mxServers[0][cfig.mxCount[0]].hostname,sizeof(cfig.mxServers[0][cfig.mxCount[0]].hostname), name);
+							strcpy_s(cfig.mxServers[1][cfig.mxCount[0]].hostname,sizeof(cfig.mxServers[1][cfig.mxCount[0]].hostname), name);
 							cfig.mxCount[0]++;
 						}
 						else
@@ -9276,7 +9276,7 @@ void __cdecl init(void *lpParam)
 
 									if (isIP(value) && isIP(value1))
 									{
-										strcpy(cfig.dnsRoutes[i].zone, name);
+										strcpy_s(cfig.dnsRoutes[i].zone, sizeof(cfig.dnsRoutes[i].zone), name);
 										cfig.dnsRoutes[i].zLen = strlen(cfig.dnsRoutes[i].zone);
 										cfig.dnsRoutes[i].dns[0] = ip;
 										cfig.dnsRoutes[i].dns[1] = ip1;
@@ -9294,7 +9294,7 @@ void __cdecl init(void *lpParam)
 
 									if (isIP(value))
 									{
-										strcpy(cfig.dnsRoutes[i].zone, name);
+										strcpy_s(cfig.dnsRoutes[i].zone, sizeof(cfig.dnsRoutes[i].zone), name);
 										cfig.dnsRoutes[i].zLen = strlen(cfig.dnsRoutes[i].zone);
 										cfig.dnsRoutes[i].dns[0] = ip;
 										i++;
@@ -9337,7 +9337,7 @@ void __cdecl init(void *lpParam)
 						if (chkQu(name) && (isIP(value) || !strcasecmp(value, "0.0.0.0")))
 						{
 							MYDWORD ip = inet_addr(value);
-							strcpy(cfig.wildHosts[i].wildcard, name);
+							strcpy_s(cfig.wildHosts[i].wildcard,sizeof(cfig.wildHosts[i].wildcard), name);
 							myLower(cfig.wildHosts[i].wildcard);
 							cfig.wildHosts[i].ip = ip;
 							i++;
@@ -9360,7 +9360,7 @@ void __cdecl init(void *lpParam)
 		if (cfig.replication == 2)
 		{
 //			if (dhcpService)
-//				strcpy(cfig.nsS, cfig.servername_fqn);
+//				strcpy_s(cfig.nsS, sizeof(cfig.nsS), cfig.servername_fqn);
 
 			while (kRunning)
 			{
@@ -9437,7 +9437,7 @@ void __cdecl init(void *lpParam)
 		}
 		else if (cfig.replication == 1)
 		{
-			strcpy(cfig.nsP, cfig.servername_fqn);
+			strcpy_s(cfig.nsP, sizeof(cfig.nsP), cfig.servername_fqn);
 
 			if (!dhcpService)
 			{
@@ -9466,7 +9466,7 @@ void __cdecl init(void *lpParam)
 		}
 		else
 		{
-			strcpy(cfig.nsP, cfig.servername_fqn);
+			strcpy_s(cfig.nsP, sizeof(cfig.nsP), cfig.servername_fqn);
 			cfig.serial1 = t;
 			cfig.serial2 = t;
 			cfig.expireTime = INT_MAX;
@@ -10248,13 +10248,13 @@ void getInterfaces(data1 *network)
 
 		if (!cfig.zone[0])
 		{
-			strcpy(cfig.zone, FixedInfo->DomainName);
+			strcpy_s(cfig.zone, sizeof(cfig.zone), FixedInfo->DomainName);
 			cfig.zLen = strlen(cfig.zone);
 		}
 
 		if (!cfig.zone[0] || cfig.zone[0] == NBSP)
 		{
-			strcpy(cfig.zone, "workgroup");
+			strcpy_s(cfig.zone, sizeof(cfig.zone), "workgroup");
 			cfig.zLen = strlen(cfig.zone);
 		}
 
@@ -10460,7 +10460,7 @@ MYWORD gdmess(data9 *req, MYBYTE sockInd)
 //		data7* cache = findEntry(IP2String(ipbuff, htonl(req->dhcpp.header.bp_ciaddr)), DNS_TYPE_PTR);
 //
 //		if (cache)
-//			strcpy(req->hostname, cache->hostname);
+//			strcpy_s(req->hostname, sizeof(req->hostname), cache->hostname);
 //	}
 //
 //	if ((req->req_type == 1 || req->req_type == 3) && cfig.dhcpLogLevel == 3)
@@ -10540,7 +10540,7 @@ void logDirect(char *mess)
 				fclose(f);
 			}
 
-			strcpy(cfig.logFileName, buffer);
+			strcpy_s(cfig.logFileName, sizeof(cfig.logFileName), buffer);
 			f = fopen(cfig.logFileName, "at");
 
 			if (f)
@@ -10550,7 +10550,7 @@ void logDirect(char *mess)
 			}
 		}
 
-		strcpy(cfig.logFileName, buffer);
+		strcpy_s(cfig.logFileName, sizeof(cfig.logFileName), buffer);
 		WritePrivateProfileString("InternetShortcut","URL", buffer, lnkFile);
 		WritePrivateProfileString("InternetShortcut","IconIndex", "0", lnkFile);
 		WritePrivateProfileString("InternetShortcut","IconFile", buffer, lnkFile);
@@ -10594,7 +10594,7 @@ void __cdecl logThread(void *lpParam)
 				fclose(f);
 			}
 
-			strcpy(cfig.logFileName, buffer);
+			strcpy_s(cfig.logFileName, sizeof(cfig.logFileName), buffer);
 			f = fopen(cfig.logFileName, "at");
 
 			if (f)
@@ -10604,7 +10604,7 @@ void __cdecl logThread(void *lpParam)
 			}
 		}
 
-		strcpy(cfig.logFileName, buffer);
+		strcpy_s(cfig.logFileName, sizeof(cfig.logFileName), buffer);
 		WritePrivateProfileString("InternetShortcut","URL", buffer, lnkFile);
 		WritePrivateProfileString("InternetShortcut","IconIndex", "0", lnkFile);
 		WritePrivateProfileString("InternetShortcut","IconFile", buffer, lnkFile);
@@ -10669,7 +10669,7 @@ void __cdecl logDebug(void *lpParam)
 			for (MYBYTE i = 0; i < maxInd; i++)
 				if (op->opt_code == opData[i].opTag)
 				{
-					strcpy(opName, opData[i].opName);
+					strcpy_s(opName, sizeof(opName), opData[i].opName);
 					opType = opData[i].opType;
 					break;
 				}
@@ -10800,14 +10800,14 @@ data7 *createCache(data71 *lump)
 
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			strcpy(cache->mapname, lump->mapname);
+			strcpy_s(cache->mapname, sizeof(cache->mapname), lump->mapname);
 			myLower(cache->mapname);
 			dp += strlen(cache->mapname);
 			dp++;
 			cache->hostname = (char*)dp;
 
 			if (lump->hostname)
-				strcpy(cache->hostname, lump->hostname);
+				strcpy_s(cache->hostname, sizeof(cache->hostname), lump->hostname);
 
 			dp += 65;
 
@@ -10834,12 +10834,12 @@ data7 *createCache(data71 *lump)
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
 			cache->name = (char*)dp;
-			strcpy(cache->mapname, lump->mapname);
+			strcpy_s(cache->mapname, sizeof(cache->mapname), lump->mapname);
 			//myLower(cache->mapname);
 			dp += strlen(cache->mapname);
 			dp++;
 			cache->query = (char*)dp;
-			strcpy(cache->query, lump->query);
+			strcpy_s(cache->query, sizeof(cache->query), lump->query);
 			//debug(cache->query);
 			//debug(strlen(cache->query));
 			dp += strlen(cache->query);
@@ -10900,7 +10900,7 @@ data7 *createCache(data71 *lump)
 			dp += strlen(lump->mapname);
 			dp++;
 			cache->hostname = (char*)dp;
-			strcpy(cache->hostname, lump->hostname);
+			strcpy_s(cache->hostname, sizeof(cache->hostname), lump->hostname);
 			break;
 		}
 
