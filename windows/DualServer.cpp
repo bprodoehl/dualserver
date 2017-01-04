@@ -76,6 +76,11 @@ HANDLE lEvent;
 HANDLE fEvent;
 HANDLE rEvent;
 
+// Ports
+unsigned short dnsPort = IPPORT_DNS;
+unsigned short dhcpServerPort = IPPORT_DHCPS;
+unsigned short dhcpClientPort = IPPORT_DHCPC;
+
 //constants
 const char NBSP = 32;
 const char RANGESET[] = "RANGE_SET";
@@ -3269,7 +3274,7 @@ MYWORD fdnmess(data5 *req)
 			{
 				req->addr.sin_family = AF_INET;
 				req->addr.sin_addr.s_addr = cfig.dnsRoutes[zoneDNS].dns[cfig.dnsRoutes[zoneDNS].currentDNS];
-				req->addr.sin_port = htons(IPPORT_DNS);
+				req->addr.sin_port = htons(dnsPort);
 				errno = 0;
 
 				nRet = sendto(network.forwConn.sock,
@@ -3374,7 +3379,7 @@ MYWORD fdnmess(data5 *req)
 		{
 			req->addr.sin_family = AF_INET;
 			req->addr.sin_addr.s_addr = network.dns[network.currentDNS];
-			req->addr.sin_port = htons(IPPORT_DNS);
+			req->addr.sin_port = htons(dnsPort);
 			errno = 0;
 
 			nRet = sendto(network.forwConn.sock,
@@ -4433,23 +4438,23 @@ MYDWORD sdmess(data9 *req)
 
 	if (req->targetIP)
 	{
-		req->remote.sin_port = htons(IPPORT_DHCPS);
+		req->remote.sin_port = htons(dhcpServerPort);
 		req->remote.sin_addr.s_addr = req->targetIP;
 	}
 	else if (req->dhcpp.header.bp_giaddr)
 	{
-		req->remote.sin_port = htons(IPPORT_DHCPS);
+		req->remote.sin_port = htons(dhcpServerPort);
 		req->remote.sin_addr.s_addr = req->dhcpp.header.bp_giaddr;
 	}
 	//else if (req->dhcpp.header.bp_broadcast || !req->remote.sin_addr.s_addr || req->reqIP)
 	else if (req->dhcpp.header.bp_broadcast || !req->remote.sin_addr.s_addr)
 	{
-		req->remote.sin_port = htons(IPPORT_DHCPC);
+		req->remote.sin_port = htons(dhcpClientPort);
 		req->remote.sin_addr.s_addr = INADDR_BROADCAST;
 	}
 	else
 	{
-		req->remote.sin_port = htons(IPPORT_DHCPC);
+		req->remote.sin_port = htons(dhcpClientPort);
 	}
 
 	req->dhcpp.header.bp_op = BOOTP_REPLY;
@@ -7644,7 +7649,7 @@ MYDWORD getSerial(char *zone)
 	data5 req;
 	memset(&req, 0, sizeof(data5));
 	req.remote.sin_family = AF_INET;
-	req.remote.sin_port = htons(IPPORT_DNS);
+	req.remote.sin_port = htons(dnsPort);
 	timeval tv1;
 	fd_set readfds1;
 
@@ -7743,7 +7748,7 @@ void sendServerName()
 	data5 req;
 	memset(&req, 0, sizeof(data5));
 	req.remote.sin_family = AF_INET;
-	req.remote.sin_port = htons(IPPORT_DNS);
+	req.remote.sin_port = htons(dnsPort);
 	req.remote.sin_addr.s_addr = cfig.zoneServers[0];
 
 	timeval tv1;
@@ -8111,7 +8116,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 	}
 
 	req.remote.sin_family = AF_INET;
-	req.remote.sin_port = htons(IPPORT_DNS);
+	req.remote.sin_port = htons(dnsPort);
 	req.remote.sin_addr.s_addr = cfig.zoneServers[0];
 
 	req.sockLen = sizeof(req.remote);
@@ -8410,7 +8415,7 @@ bool getSecondary()
 	}
 
 	req.remote.sin_family = AF_INET;
-	req.remote.sin_port = htons(IPPORT_DNS);
+	req.remote.sin_port = htons(dnsPort);
 
 	if (dhcpService && cfig.replication == 1)
 		req.remote.sin_addr.s_addr = cfig.zoneServers[1];
@@ -9018,6 +9023,22 @@ void __cdecl init(void *lpParam)
 	{
 		loadDHCP();
 
+		if (f = openSection("DHCP_SERVER_PORT", 1))
+		{
+			while (readSection(raw, f))
+				dhcpServerPort = atoi(raw);
+			sprintf_s(logBuff, sizeof(logBuff), "Using DHCP Server Port of %u", dhcpServerPort);
+			logDNSMess(logBuff, 1);
+		}
+
+		if (f = openSection("DHCP_CLIENT_PORT", 1))
+		{
+			while (readSection(raw, f))
+				dhcpClientPort = atoi(raw);
+			sprintf_s(logBuff, sizeof(logBuff), "Using DHCP Client Port of %u", dhcpClientPort);
+			logDNSMess(logBuff, 1);
+		}
+
 		fEvent = CreateEvent(
 			NULL,                  // default security descriptor
 			FALSE,                 // ManualReset
@@ -9076,6 +9097,13 @@ void __cdecl init(void *lpParam)
 
 	if (dnsService)
 	{
+		if (f = openSection("DNS_PORT", 1))
+		{
+			while (readSection(raw, f))
+				dnsPort = atoi(raw);
+			sprintf_s(logBuff, sizeof(logBuff), "Using DNS Port of %u", dnsPort);
+			logDNSMess(logBuff, 1);
+		}
 		if (f = openSection("DNS_ALLOWED_HOSTS", 1))
 		{
 			int i = 0;
@@ -9588,7 +9616,7 @@ void __cdecl init(void *lpParam)
 				}
 				else
 				{
-					cfig.dhcpReplConn.port = IPPORT_DHCPS;
+					cfig.dhcpReplConn.port = dhcpServerPort;
 					cfig.dhcpReplConn.loaded = true;
 					cfig.dhcpReplConn.ready = true;
 
@@ -9597,7 +9625,7 @@ void __cdecl init(void *lpParam)
 					token.vp = token.dhcpp.vend_data;
 					token.messsize = sizeof(dhcp_packet);
 
-					token.remote.sin_port = htons(IPPORT_DHCPS);
+					token.remote.sin_port = htons(dhcpServerPort);
 					token.remote.sin_family = AF_INET;
 
 					if (cfig.replication == 1)
@@ -9763,7 +9791,7 @@ void __cdecl init(void *lpParam)
 
 				network.dhcpConn[i].addr.sin_family = AF_INET;
 				network.dhcpConn[i].addr.sin_addr.s_addr = network.listenServers[j];
-				network.dhcpConn[i].addr.sin_port = htons(IPPORT_DHCPS);
+				network.dhcpConn[i].addr.sin_port = htons(dhcpServerPort);
 
 				network.dhcpConn[i].broadCastVal = TRUE;
 				network.dhcpConn[i].broadCastSize = sizeof(network.dhcpConn[i].broadCastVal);
@@ -9795,7 +9823,7 @@ void __cdecl init(void *lpParam)
 
 				network.dhcpConn[i].server = network.listenServers[j];
 				network.dhcpConn[i].mask = network.listenMasks[j];
-				network.dhcpConn[i].port = IPPORT_DHCPS;
+				network.dhcpConn[i].port = dhcpServerPort;
 
 				i++;
 			}
@@ -9944,7 +9972,7 @@ void __cdecl init(void *lpParam)
 
 				network.dnsUdpConn[i].addr.sin_family = AF_INET;
 				network.dnsUdpConn[i].addr.sin_addr.s_addr = network.listenServers[j];
-				network.dnsUdpConn[i].addr.sin_port = htons(IPPORT_DNS);
+				network.dnsUdpConn[i].addr.sin_port = htons(dnsPort);
 
 				int nRet = bind(network.dnsUdpConn[i].sock,
 								(sockaddr*)&network.dnsUdpConn[i].addr,
@@ -9967,7 +9995,7 @@ void __cdecl init(void *lpParam)
 					network.maxFD = network.dnsUdpConn[i].sock;
 
 				network.dnsUdpConn[i].server = network.listenServers[j];
-				network.dnsUdpConn[i].port = IPPORT_DNS;
+				network.dnsUdpConn[i].port = dnsPort;
 
 				i++;
 			}
@@ -9984,7 +10012,7 @@ void __cdecl init(void *lpParam)
 			{
 				network.forwConn.addr.sin_family = AF_INET;
 				network.forwConn.server = network.dns[0];
-				network.forwConn.port = IPPORT_DNS;
+				network.forwConn.port = dnsPort;
 				//bind(network.forwConn.sock, (sockaddr*)&network.forwConn.addr, sizeof(struct sockaddr_in));
 
 				network.forwConn.loaded = true;
@@ -10011,7 +10039,7 @@ void __cdecl init(void *lpParam)
 					//printf("Socket %u\n", network.dnsTcpConn[i].sock);
 					network.dnsTcpConn[i].addr.sin_family = AF_INET;
 					network.dnsTcpConn[i].addr.sin_addr.s_addr = network.listenServers[j];
-					network.dnsTcpConn[i].addr.sin_port = htons(IPPORT_DNS);
+					network.dnsTcpConn[i].addr.sin_port = htons(dnsPort);
 
 					int nRet = bind(network.dnsTcpConn[i].sock,
 									(sockaddr*)&network.dnsTcpConn[i].addr,
@@ -10037,7 +10065,7 @@ void __cdecl init(void *lpParam)
 						else
 						{
 							network.dnsTcpConn[i].server = network.listenServers[j];
-							network.dnsTcpConn[i].port = IPPORT_DNS;
+							network.dnsTcpConn[i].port = dnsPort;
 
 							network.dnsTcpConn[i].loaded = true;
 							network.dnsTcpConn[i].ready = true;
