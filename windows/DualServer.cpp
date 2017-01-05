@@ -1626,9 +1626,9 @@ void addRRServerA(data5 *req)
 void addRRAny(data5 *req)
 {
 	if (req->qType == QTYPE_A_BARE || req->qType == QTYPE_A_LOCAL || req->qType == QTYPE_A_ZONE)
-		req->iterBegin = dnsCache[currentInd].find(setMapName(req->tempname, req->mapname, DNS_TYPE_A));
+		req->iterBegin = dnsCache[currentInd].find(setMapName(req->tempname, sizeof(req->tempname), req->mapname, DNS_TYPE_A));
 	else if (req->qType == QTYPE_P_LOCAL || req->qType == QTYPE_P_ZONE)
-		req->iterBegin = dnsCache[currentInd].find(setMapName(req->tempname, req->mapname, DNS_TYPE_PTR));
+		req->iterBegin = dnsCache[currentInd].find(setMapName(req->tempname, sizeof(req->tempname), req->mapname, DNS_TYPE_PTR));
 	else
 		return;
 
@@ -2371,6 +2371,310 @@ void sendScopeStatus(data19 *req)
 	return;
 }
 */
+
+void sendJSONStatus(data19 *req)
+{
+	debug("sendJSONStatus");
+	char ipbuff[16];
+	char logBuff[512];
+	char tempbuff[512];
+
+	dhcpMap::iterator p;
+	MYDWORD iip = 0;
+	data7 *dhcpEntry = NULL;
+	req->memSize = 2048 + (135 * dhcpCache.size()) + (cfig.dhcpSize * 26);
+	req->dp = (char*)calloc(1, req->memSize);
+
+	if (!req->dp)
+	{
+		sprintf_s(logBuff, sizeof(logBuff), "Memory Error");
+		logDHCPMess(logBuff, 1);
+		closesocket(req->sock);
+		free(req);
+		return;
+	}
+
+	char *fp = req->dp;
+	char *maxData = req->dp + (req->memSize - 512);
+	tm ttm;
+	gmtime_s(&ttm, &t);
+	strftime(tempbuff, sizeof(tempbuff), "%a, %d %b %Y %H:%M:%S GMT", &ttm);
+	fp += sprintf_s(fp, sizeof(fp), send200, tempbuff, tempbuff);
+	char *contentStart = fp;
+	fp += sprintf_s(fp, sizeof(fp), htmlStart, htmlTitle);
+	fp += sprintf_s(fp, sizeof(fp), bodyStart, sVersion);
+	fp += sprintf_s(fp, sizeof(fp), "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
+
+	if (cfig.dhcpRepl > t)
+	{
+		fp += sprintf_s(fp, sizeof(fp), "<tr><th colspan=\"5\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
+		fp += sprintf_s(fp, sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th><th>Server</th></tr>\n");
+	}
+	else
+	{
+		fp += sprintf_s(fp, sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
+		fp += sprintf_s(fp, sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th></tr>\n");
+	}
+
+	for (p = dhcpCache.begin(); kRunning && p != dhcpCache.end() && fp < maxData; p++)
+	{
+		if ((dhcpEntry = p->second) && dhcpEntry->display && dhcpEntry->expiry >= t)
+		{
+			fp += sprintf_s(fp, sizeof(fp), "<tr>");
+			fp += sprintf_s(fp, sizeof(fp), td200, dhcpEntry->mapname);
+			fp += sprintf_s(fp, sizeof(fp), td200, IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
+
+			if (dhcpEntry->expiry >= INT_MAX)
+				fp += sprintf_s(fp, sizeof(fp), td200, "Infinity");
+			else
+			{
+				tm ttm;
+				localtime_s(&ttm, &dhcpEntry->expiry);
+				strftime(tempbuff, sizeof(tempbuff), "%d-%b-%y %X", &ttm);
+				fp += sprintf_s(fp, sizeof(fp), td200, tempbuff);
+			}
+
+			if (dhcpEntry->hostname[0])
+			{
+				strcpy_s(tempbuff, sizeof(tempbuff), dhcpEntry->hostname);
+				tempbuff[20] = 0;
+				fp += sprintf_s(fp, sizeof(fp), td200, tempbuff);
+			}
+			else
+				fp += sprintf_s(fp, sizeof(fp), td200, "&nbsp;");
+
+			if (cfig.dhcpRepl > t)
+			{
+				if (dhcpEntry->local && cfig.replication == 1)
+					fp += sprintf_s(fp, sizeof(fp), td200, "Primary");
+				else if (dhcpEntry->local && cfig.replication == 2)
+					fp += sprintf_s(fp, sizeof(fp), td200, "Secondary");
+				else if (cfig.replication == 1)
+					fp += sprintf_s(fp, sizeof(fp), td200, "Secondary");
+				else
+					fp += sprintf_s(fp, sizeof(fp), td200, "Primary");
+			}
+
+			fp += sprintf_s(fp, sizeof(fp), "</tr>\n");
+		}
+	}
+
+	fp += sprintf_s(fp, sizeof(fp), "</table>\n<br>\n<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp, sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Dynamic Leases</i></font></th></tr>\n");
+	fp += sprintf_s(fp, sizeof(fp), "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>Available Leases</b></td><td align=\"right\"><b>Free Leases</b></td></tr>\n");
+
+	for (char rangeInd = 0; kRunning && rangeInd < cfig.rangeCount && fp < maxData; rangeInd++)
+	{
+		float ipused = 0;
+		float ipfree = 0;
+		int ind = 0;
+
+		for (MYDWORD iip = cfig.dhcpRanges[rangeInd].rangeStart; iip <= cfig.dhcpRanges[rangeInd].rangeEnd; iip++, ind++)
+		{
+			if (cfig.dhcpRanges[rangeInd].expiry[ind] < t)
+				ipfree++;
+			else if (cfig.dhcpRanges[rangeInd].dhcpEntry[ind] && !(cfig.dhcpRanges[rangeInd].dhcpEntry[ind]->fixed))
+				ipused++;
+		}
+
+		IP2String(tempbuff, sizeof(tempbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
+		IP2String(ipbuff, sizeof(ipbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
+		fp += sprintf_s(fp, sizeof(fp), "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td></tr>\n", tempbuff, ipbuff, (ipused + ipfree), ipfree);
+	}
+
+	fp += sprintf_s(fp, sizeof(fp), "</table>\n<br>\n<table border=\"1\" width=\"640\" cellpadding=\"1\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp, sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Static Leases</i></font></th></tr>\n");
+	fp += sprintf_s(fp, sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Mac Address</th><th>IP</th></tr>\n");
+
+	MYBYTE colNum = 0;
+
+	for (p = dhcpCache.begin(); kRunning && p != dhcpCache.end() && fp < maxData; p++)
+	{
+		if ((dhcpEntry = p->second) && dhcpEntry->fixed && dhcpEntry->expiry < t)
+		{
+			if (!colNum)
+			{
+				fp += sprintf_s(fp, sizeof(fp), "<tr>");
+				colNum = 1;
+			}
+			else if (colNum == 1)
+			{
+				colNum = 2;
+			}
+			else if (colNum == 2)
+			{
+				fp += sprintf_s(fp, sizeof(fp), "</tr>\n<tr>");
+				colNum = 1;
+			}
+
+			fp += sprintf_s(fp, sizeof(fp), td200, dhcpEntry->mapname);
+			fp += sprintf_s(fp, sizeof(fp), td200, IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
+		}
+	}
+
+	if (colNum)
+		fp += sprintf_s(fp, sizeof(fp), "</tr>\n");
+
+	fp += sprintf_s(fp, sizeof(fp), "</table>\n</body>\n</html>");
+	MYBYTE x = sprintf_s(tempbuff, sizeof(tempbuff), "%u", (fp - contentStart));
+	memcpy((contentStart - 12), tempbuff, x);
+	req->bytes = fp - req->dp;
+
+	_beginthread(sendHTTP, 0, (void*)req);
+	return;
+}
+
+void sendXMLStatus(data19 *req)
+{
+	debug("sendXMLStatus");
+	char ipbuff[16];
+	char logBuff[512];
+	char tempbuff[512];
+
+	dhcpMap::iterator p;
+	MYDWORD iip = 0;
+	data7 *dhcpEntry = NULL;
+	req->memSize = 2048 + (135 * dhcpCache.size()) + (cfig.dhcpSize * 26);
+	req->dp = (char*)calloc(1, req->memSize);
+
+	if (!req->dp)
+	{
+		sprintf_s(logBuff, sizeof(logBuff), "Memory Error");
+		logDHCPMess(logBuff, 1);
+		closesocket(req->sock);
+		free(req);
+		return;
+	}
+
+	char *fp = req->dp;
+	char *maxData = req->dp + (req->memSize - 512);
+	tm ttm;
+	gmtime_s(&ttm, &t);
+	strftime(tempbuff, sizeof(tempbuff), "%a, %d %b %Y %H:%M:%S GMT", &ttm);
+	fp += sprintf_s(fp, sizeof(fp), send200, tempbuff, tempbuff);
+	char *contentStart = fp;
+	fp += sprintf_s(fp, sizeof(fp), htmlStart, htmlTitle);
+	fp += sprintf_s(fp, sizeof(fp), bodyStart, sVersion);
+	fp += sprintf_s(fp, sizeof(fp), "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
+
+	if (cfig.dhcpRepl > t)
+	{
+		fp += sprintf_s(fp, sizeof(fp), "<tr><th colspan=\"5\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
+		fp += sprintf_s(fp, sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th><th>Server</th></tr>\n");
+	}
+	else
+	{
+		fp += sprintf_s(fp, sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
+		fp += sprintf_s(fp, sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th></tr>\n");
+	}
+
+	for (p = dhcpCache.begin(); kRunning && p != dhcpCache.end() && fp < maxData; p++)
+	{
+		if ((dhcpEntry = p->second) && dhcpEntry->display && dhcpEntry->expiry >= t)
+		{
+			fp += sprintf_s(fp, sizeof(fp), "<tr>");
+			fp += sprintf_s(fp, sizeof(fp), td200, dhcpEntry->mapname);
+			fp += sprintf_s(fp, sizeof(fp), td200, IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
+
+			if (dhcpEntry->expiry >= INT_MAX)
+				fp += sprintf_s(fp, sizeof(fp), td200, "Infinity");
+			else
+			{
+				tm ttm;
+				localtime_s(&ttm, &dhcpEntry->expiry);
+				strftime(tempbuff, sizeof(tempbuff), "%d-%b-%y %X", &ttm);
+				fp += sprintf_s(fp, sizeof(fp), td200, tempbuff);
+			}
+
+			if (dhcpEntry->hostname[0])
+			{
+				strcpy_s(tempbuff, sizeof(tempbuff), dhcpEntry->hostname);
+				tempbuff[20] = 0;
+				fp += sprintf_s(fp, sizeof(fp), td200, tempbuff);
+			}
+			else
+				fp += sprintf_s(fp, sizeof(fp), td200, "&nbsp;");
+
+			if (cfig.dhcpRepl > t)
+			{
+				if (dhcpEntry->local && cfig.replication == 1)
+					fp += sprintf_s(fp, sizeof(fp), td200, "Primary");
+				else if (dhcpEntry->local && cfig.replication == 2)
+					fp += sprintf_s(fp, sizeof(fp), td200, "Secondary");
+				else if (cfig.replication == 1)
+					fp += sprintf_s(fp, sizeof(fp), td200, "Secondary");
+				else
+					fp += sprintf_s(fp, sizeof(fp), td200, "Primary");
+			}
+
+			fp += sprintf_s(fp, sizeof(fp), "</tr>\n");
+		}
+	}
+
+	fp += sprintf_s(fp, sizeof(fp), "</table>\n<br>\n<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp, sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Dynamic Leases</i></font></th></tr>\n");
+	fp += sprintf_s(fp, sizeof(fp), "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>Available Leases</b></td><td align=\"right\"><b>Free Leases</b></td></tr>\n");
+
+	for (char rangeInd = 0; kRunning && rangeInd < cfig.rangeCount && fp < maxData; rangeInd++)
+	{
+		float ipused = 0;
+		float ipfree = 0;
+		int ind = 0;
+
+		for (MYDWORD iip = cfig.dhcpRanges[rangeInd].rangeStart; iip <= cfig.dhcpRanges[rangeInd].rangeEnd; iip++, ind++)
+		{
+			if (cfig.dhcpRanges[rangeInd].expiry[ind] < t)
+				ipfree++;
+			else if (cfig.dhcpRanges[rangeInd].dhcpEntry[ind] && !(cfig.dhcpRanges[rangeInd].dhcpEntry[ind]->fixed))
+				ipused++;
+		}
+
+		IP2String(tempbuff, sizeof(tempbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
+		IP2String(ipbuff, sizeof(ipbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
+		fp += sprintf_s(fp, sizeof(fp), "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td></tr>\n", tempbuff, ipbuff, (ipused + ipfree), ipfree);
+	}
+
+	fp += sprintf_s(fp, sizeof(fp), "</table>\n<br>\n<table border=\"1\" width=\"640\" cellpadding=\"1\" bgcolor=\"#b8b8b8\">\n");
+	fp += sprintf_s(fp, sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Static Leases</i></font></th></tr>\n");
+	fp += sprintf_s(fp, sizeof(fp), "<tr><th>Mac Address</th><th>IP</th><th>Mac Address</th><th>IP</th></tr>\n");
+
+	MYBYTE colNum = 0;
+
+	for (p = dhcpCache.begin(); kRunning && p != dhcpCache.end() && fp < maxData; p++)
+	{
+		if ((dhcpEntry = p->second) && dhcpEntry->fixed && dhcpEntry->expiry < t)
+		{
+			if (!colNum)
+			{
+				fp += sprintf_s(fp, sizeof(fp), "<tr>");
+				colNum = 1;
+			}
+			else if (colNum == 1)
+			{
+				colNum = 2;
+			}
+			else if (colNum == 2)
+			{
+				fp += sprintf_s(fp, sizeof(fp), "</tr>\n<tr>");
+				colNum = 1;
+			}
+
+			fp += sprintf_s(fp, sizeof(fp), td200, dhcpEntry->mapname);
+			fp += sprintf_s(fp, sizeof(fp), td200, IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
+		}
+	}
+
+	if (colNum)
+		fp += sprintf_s(fp, sizeof(fp), "</tr>\n");
+
+	fp += sprintf_s(fp, sizeof(fp), "</table>\n</body>\n</html>");
+	MYBYTE x = sprintf_s(tempbuff, sizeof(tempbuff), "%u", (fp - contentStart));
+	memcpy((contentStart - 12), tempbuff, x);
+	req->bytes = fp - req->dp;
+
+	_beginthread(sendHTTP, 0, (void*)req);
+	return;
+}
 
 void __cdecl sendHTTP(void *lpParam)
 {
@@ -3115,7 +3419,7 @@ MYWORD scanloc(data5 *req)
 
 	for (int m = 0; m < 3; m++)
 	{
-		req->iterBegin = dnsCache[currentInd].find(setMapName(req->tempname, req->mapname, req->dnsType));
+		req->iterBegin = dnsCache[currentInd].find(setMapName(req->tempname, sizeof(req->tempname), req->mapname, req->dnsType));
 
 		if (req->iterBegin == dnsCache[currentInd].end())
 			break;
@@ -3718,7 +4022,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 	if (aType)
 	{
 		cache = NULL;
-		setMapName(tempbuff, hostname, DNS_TYPE_A);
+		setMapName(tempbuff, sizeof(tempbuff), hostname, DNS_TYPE_A);
 
 		p = dnsCache[currentInd].find(tempbuff);
 
@@ -6819,7 +7123,7 @@ char *IP2String(char *target, unsigned int targetsz, MYDWORD ip, MYBYTE dnsType)
 	dp++;
 	data15 inaddr;
 	inaddr.ip = ip;
-	sprintf_s(dp, targetsz, "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
+	sprintf_s(dp, (targetsz-(dp-target)), "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
 	//MYBYTE *octate = (MYBYTE*)&ip;
 	//sprintf_s(target,sizeof(target), "%u.%u.%u.%u", octate[0], octate[1], octate[2], octate[3]);
 	return target;
@@ -7315,12 +7619,12 @@ bool isLocal(MYDWORD ip)
 		return false;
 }
 
-char *setMapName(char *tempbuff, char *mapname, MYBYTE dnsType)
+char *setMapName(char *tempbuff, unsigned int targetsz, char *mapname, MYBYTE dnsType)
 {
 	char *dp = tempbuff;
 	(*dp) = dnsType;
 	dp++;
-	strcpy_s(dp, sizeof(dp), mapname);
+	strcpy_s(dp, targetsz-(dp-tempbuff), mapname);
 	myLower(dp);
 	return tempbuff;
 }
@@ -7611,7 +7915,7 @@ char *findHost(char *tempbuff, unsigned int destsz, MYDWORD ip)
 data7 *findEntry(char *key, MYBYTE dnsType, MYBYTE cType)
 {
 	char tempbuff[512];
-	hostMap::iterator it = dnsCache[currentInd].find(setMapName(tempbuff, key, dnsType));
+	hostMap::iterator it = dnsCache[currentInd].find(setMapName(tempbuff, sizeof(tempbuff), key, dnsType));
 
 	while (it != dnsCache[currentInd].end() && it->second && !strcasecmp(it->second->mapname, tempbuff))
 	{
@@ -7628,7 +7932,7 @@ data7 *findEntry(char *key, MYBYTE dnsType)
 {
 	char tempbuff[512];
 	//printf("finding %u=%s\n",ind,key);
-	hostMap::iterator it = dnsCache[currentInd].find(setMapName(tempbuff, key, dnsType));
+	hostMap::iterator it = dnsCache[currentInd].find(setMapName(tempbuff, sizeof(tempbuff), key, dnsType));
 
 	if (it != dnsCache[currentInd].end() && it->second)
 		return it->second;
@@ -11076,7 +11380,7 @@ data7 *createCache(data71 *lump)
 			cache->dnsType = lump->dnsType;
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			setMapName(cache->mapname, lump->mapname, lump->dnsType);
+			setMapName(cache->mapname, dataSize - sizeof(data7), lump->mapname, lump->dnsType);
 			dp++;
 			cache->name = (char*)dp;
 			dp += strlen(lump->mapname);
@@ -11107,13 +11411,13 @@ data7 *createCache(data71 *lump)
 			cache->dnsType = lump->dnsType;
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			setMapName(cache->mapname, lump->mapname, lump->dnsType);
+			setMapName(cache->mapname, dataSize - sizeof(data7), lump->mapname, lump->dnsType);
 			dp++;
 			cache->name = (char*)dp;
 			dp += strlen(lump->mapname);
 			dp++;
 			cache->hostname = (char*)dp;
-			strcpy_s(cache->hostname, sizeof(cache->hostname), lump->hostname);
+			strcpy_s(cache->hostname, dataSize - ((int)dp - (int)cache), lump->hostname);
 			break;
 		}
 
@@ -11128,7 +11432,7 @@ data7 *createCache(data71 *lump)
 			cache->dnsType = lump->dnsType;
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			setMapName(cache->mapname, lump->mapname, lump->dnsType);
+			setMapName(cache->mapname, dataSize - sizeof(data7), lump->mapname, lump->dnsType);
 			dp++;
 			cache->name = (char*)dp;
 			break;
