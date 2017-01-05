@@ -5651,7 +5651,10 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				logDHCPMess(logBuff, 1);
 			}
 			else
+			{
 				inet_pton(AF_INET, value, &(optionData->ip));
+				//optionData->ip = ntohl(optionData->ip);
+			}
 
 			continue;
 		}
@@ -6464,7 +6467,10 @@ void loadDHCP()
 	}
 
 	if (!cfig.mask)
+	{
 		inet_pton(AF_INET, "255.255.255.0", &(cfig.mask));
+		//cfig.mask = ntohl(cfig.mask);
+	}
 
 	for (MYBYTE i = 1; i <= MAX_RANGE_SETS ; i++)
 	{
@@ -7196,7 +7202,8 @@ bool isIP(char *str)
 		return false;
 
 	MYDWORD ip;
-	inet_pton(AF_INET,str,&ip);
+	inet_pton(AF_INET, str, &ip);
+	ip = ntohl(ip);
 
 	if (ip == INADDR_NONE || ip == INADDR_ANY)
 		return false;
@@ -8426,6 +8433,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 	if (cache)
 	{
 		inet_pton(AF_INET, localhost_ip, &(cache->ip));
+		//cache->ip = ntohl(cache->ip);
 		cache->expiry = INT_MAX;
 		dnsCache[ind].insert(pair<string, data7*>(cache->mapname, cache));
 	}
@@ -8871,6 +8879,7 @@ bool getSecondary()
 					{
 						*dp = 0;
 						inet_pton(AF_INET, req.mapname, &ip);
+						//ip = ntohl(ip);
 						fQu(req.cname, req.dnsp, data);
 						makeLocal(req.cname);
 
@@ -9067,6 +9076,7 @@ void __cdecl init(void *lpParam)
 				{
 					MYDWORD addr;
 					inet_pton(AF_INET, raw, &addr);
+					//addr = ntohl(addr);
 					addServer(cfig.specifiedDnsServers, MAX_SERVERS, addr);
 				}
 				else
@@ -9120,6 +9130,7 @@ void __cdecl init(void *lpParam)
 			{
 				MYDWORD addr;
 				inet_pton(AF_INET, raw, &addr);
+				//addr = ntohl(addr);
 				addServer(cfig.specifiedServers, MAX_SERVERS, addr);
 			}
 			else
@@ -9314,12 +9325,19 @@ void __cdecl init(void *lpParam)
 					if (chkQu(name) && !isIP(name) && isIP(value))
 					{
 						if (!strcasecmp(name, "Primary"))
+						{
 							inet_pton(AF_INET, value, &(cfig.zoneServers[0]));
+							//cfig.zoneServers[0] = ntohl(cfig.zoneServers[0]);
+						}
 						else if (!strcasecmp(name, "Secondary"))
+						{
 							inet_pton(AF_INET, value, &(cfig.zoneServers[1]));
+							//cfig.zoneServers[1] = ntohl(cfig.zoneServers[1]);
+						}
 						else if (dnsService && !strcasecmp(name, "AXFRClient"))
 						{
 							inet_pton(AF_INET, value, &(cfig.zoneServers[i]));
+							//cfig.zoneServers[i] = ntohl(cfig.zoneServers[i]);
 							i++;
 						}
 						else
@@ -9472,11 +9490,14 @@ void __cdecl init(void *lpParam)
 					if (isIP(name) && isIP(value))
 					{
 						inet_pton(AF_INET, name, &rs);
+						//rs = ntohl(rs);
 						inet_pton(AF_INET, value, &re);
+						//re = ntohl(re);
 					}
 					else if (isIP(name) && !value[0])
 					{
 						inet_pton(AF_INET, name, &rs);
+						//rs = ntohl(rs);
 						re = rs;
 					}
 
@@ -9509,6 +9530,7 @@ void __cdecl init(void *lpParam)
 					{
 						MYDWORD ip;
 						inet_pton(AF_INET, value, &ip);
+						//ip = ntohl(ip);
 						MYBYTE nameType = makeLocal(name);
 						bool ipLocal = isLocal(ip);
 
@@ -9715,8 +9737,10 @@ void __cdecl init(void *lpParam)
 
 									MYDWORD ip;
 									inet_pton(AF_INET, myTrim(value, value), &ip);
+									//ip = ntohl(ip);
 									MYDWORD ip1;
 									inet_pton(AF_INET, myTrim(value1, value1), &ip1);
+									//ip1 = ntohl(ip1);
 
 									if (isIP(value) && isIP(value1))
 									{
@@ -9736,6 +9760,7 @@ void __cdecl init(void *lpParam)
 								{
 									MYDWORD ip;
 									inet_pton(AF_INET, value, &ip);
+									//ip = ntohl(ip);
 
 									if (isIP(value))
 									{
@@ -9783,6 +9808,7 @@ void __cdecl init(void *lpParam)
 						{
 							MYDWORD ip;
 							inet_pton(AF_INET, value, &ip);
+							//ip = ntohl(ip);
 							strcpy_s(cfig.wildHosts[i].wildcard,sizeof(cfig.wildHosts[i].wildcard), name);
 							myLower(cfig.wildHosts[i].wildcard);
 							cfig.wildHosts[i].ip = ip;
@@ -9866,6 +9892,7 @@ void __cdecl init(void *lpParam)
 						case CTYPE_STATIC_PTR_AUTH:
 							unsigned __int32 ipTmp;
 							inet_pton(AF_INET, cache->mapname, &ipTmp);
+							//ipTmp = ntohl(ipTmp);
 							holdIP(ipTmp);
 							break;
 					}
@@ -9904,6 +9931,7 @@ void __cdecl init(void *lpParam)
 			char localhost[] = "localhost";
 			unsigned __int32 ipTmp;
 			inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+			//ipTmp = ntohl(ipTmp);
 			add2Cache(localhost, ipTmp, INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
 
 			if (isLocal(cfig.zoneServers[0]))
@@ -9923,6 +9951,7 @@ void __cdecl init(void *lpParam)
 			char localhost[] = "localhost";
 			unsigned __int32 ipTmp;
 			inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+			//ipTmp = ntohl(ipTmp);
 			add2Cache(localhost, ipTmp, INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
 
 			for (int i = 0; i < MAX_SERVERS && network.listenServers[i]; i++)
@@ -10183,7 +10212,8 @@ void __cdecl init(void *lpParam)
 			}
 
 			network.httpConn.port = 6789;
-			inet_pton(AF_INET,"127.0.0.1",&(network.httpConn.server));
+			inet_pton(AF_INET, "127.0.0.1", &(network.httpConn.server));
+			//network.httpConn.server = ntohl(network.httpConn.server);
 
 			if (f = openSection("HTTP_INTERFACE", 1))
 			{
@@ -10198,6 +10228,7 @@ void __cdecl init(void *lpParam)
 						if (isIP(name))
 						{
 							inet_pton(AF_INET, name, &(network.httpConn.server));
+							//network.httpConn.server = ntohl(network.httpConn.server);
 						}
 						else
 						{
@@ -10220,6 +10251,7 @@ void __cdecl init(void *lpParam)
 
 						unsigned __int32 ipTmp;
 						inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+						//ipTmp = ntohl(ipTmp);
 						if (network.httpConn.server != ipTmp && !findServer(network.allServers, MAX_SERVERS, network.httpConn.server))
 						{
 							bindfailed = true;
@@ -10234,6 +10266,7 @@ void __cdecl init(void *lpParam)
 						{
 							unsigned __int32 ipTmp;
 							inet_pton(AF_INET, value, &ipTmp);
+							//ipTmp = ntohl(ipTmp);
 							addServer(cfig.httpClients, 8, ipTmp);
 						}
 						else
@@ -10657,7 +10690,8 @@ void getInterfaces(data1 *network)
 				while (sList)
 				{
 					MYDWORD iaddr;
-					inet_pton(AF_INET,sList->IpAddress.String,&iaddr);
+					inet_pton(AF_INET, sList->IpAddress.String, &iaddr);
+					//iaddr = ntohl(iaddr);
 
 					if (iaddr)
 					{
@@ -10669,6 +10703,7 @@ void getInterfaces(data1 *network)
 							{
 								network->staticServers[k] = iaddr;
 								inet_pton(AF_INET, sList->IpMask.String, &network->staticMasks[k]);
+								//network->staticMasks[k] = ntohl(network->staticMasks[k]);
 								break;
 							}
 						}
@@ -10786,6 +10821,7 @@ void getInterfaces(data1 *network)
 			{
 				MYDWORD addr;
 				inet_pton(AF_INET, pIPAddr->IpAddress.String, &addr);
+				//addr = ntohl(addr);
 
 				if (!dnsService || !findServer(network->allServers, MAX_SERVERS, addr))
 					addServer(network->dns, MAX_SERVERS, addr);
