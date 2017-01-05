@@ -275,7 +275,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 		{
 			if (verbatim || cfig.dnsLogLevel || cfig.dhcpLogLevel)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Thread Creation Failed");
+				sprintf_s(logBuff, sizeof(logBuff), "Thread Creation Failed");
 				logMess(logBuff, 1);
 			}
 			exit(-1);
@@ -353,7 +353,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 
 							if (errno || req->sock == INVALID_SOCKET)
 							{
-								sprintf_s(logBuff,sizeof(logBuff), "Accept Failed, WSAError %u", errno);
+								sprintf_s(logBuff, sizeof(logBuff), "Accept Failed, WSAError %u", errno);
 								logDHCPMess(logBuff, 1);
 								free(req);
 							}
@@ -362,7 +362,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 						}
 						else
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Memory Error");
+							sprintf_s(logBuff, sizeof(logBuff), "Memory Error");
 							logDHCPMess(logBuff, 1);
 						}
 					}
@@ -407,13 +407,13 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 										if (verbatim || cfig.dnsLogLevel >= 2)
 										{
 											if (dnsr.dnsType == DNS_TYPE_SOA)
-												sprintf_s(logBuff,sizeof(logBuff), "SOA Sent for zone %s", dnsr.query);
+												sprintf_s(logBuff, sizeof(logBuff), "SOA Sent for zone %s", dnsr.query);
 											else if (dnsr.dnsType == DNS_TYPE_NS)
-												sprintf_s(logBuff,sizeof(logBuff), "NS Sent for zone %s", dnsr.query);
+												sprintf_s(logBuff, sizeof(logBuff), "NS Sent for zone %s", dnsr.query);
 											else if (dnsr.cType == CTYPE_CACHED)
-												sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Cache to %s", strquery(&dnsr), getResult(&dnsr));
+												sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Cache to %s", strquery(&dnsr), getResult(&dnsr));
 											else
-												sprintf_s(logBuff,sizeof(logBuff), "%s resolved Locally to %s", strquery(&dnsr), getResult(&dnsr));
+												sprintf_s(logBuff, sizeof(logBuff), "%s resolved Locally to %s", strquery(&dnsr), getResult(&dnsr));
 
 											logDNSMess(&dnsr, logBuff, 2);
 										}
@@ -424,7 +424,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 
 										if (verbatim || cfig.dnsLogLevel >= 2)
 										{
-											sprintf_s(logBuff,sizeof(logBuff), "%s not found", strquery(&dnsr));
+											sprintf_s(logBuff, sizeof(logBuff), "%s not found", strquery(&dnsr));
 											logDNSMess(&dnsr, logBuff, 2);
 										}
 									}
@@ -438,7 +438,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 
 										if (verbatim || cfig.dnsLogLevel >= 2)
 										{
-											sprintf_s(logBuff,sizeof(logBuff), "%s not found", strquery(&dnsr));
+											sprintf_s(logBuff, sizeof(logBuff), "%s not found", strquery(&dnsr));
 											logDNSMess(&dnsr, logBuff, 2);
 										}
 									}
@@ -464,7 +464,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 							{
 								if (verbatim || cfig.dnsLogLevel)
 								{
-									sprintf_s(logBuff,sizeof(logBuff), "Accept Failed, WSAError=%u", errno);
+									sprintf_s(logBuff, sizeof(logBuff), "Accept Failed, WSAError=%u", errno);
 									logDNSMess(logBuff, 1);
 								}
 							}
@@ -486,24 +486,24 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 									if (dnsr.dnsp->header.ancount)
 									{
 										if (getResult(&dnsr))
-											sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Forwarding Server as %s", strquery(&dnsr), dnsr.tempname);
+											sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Forwarding Server as %s", strquery(&dnsr), dnsr.tempname);
 										else
-											sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Forwarding Server", strquery(&dnsr));
+											sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Forwarding Server", strquery(&dnsr));
 									}
 									else
-										sprintf_s(logBuff,sizeof(logBuff), "%s not found by Forwarding Server", strquery(&dnsr));
+										sprintf_s(logBuff, sizeof(logBuff), "%s not found by Forwarding Server", strquery(&dnsr));
 								}
 								else
 								{
 									if (dnsr.dnsp->header.ancount)
 									{
 										if (getResult(&dnsr))
-											sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Conditional Forwarder as %s", strquery(&dnsr), dnsr.tempname);
+											sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Conditional Forwarder as %s", strquery(&dnsr), dnsr.tempname);
 										else
-											sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Conditional Forwarder", strquery(&dnsr));
+											sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Conditional Forwarder", strquery(&dnsr));
 									}
 									else
-										sprintf_s(logBuff,sizeof(logBuff), "%s not found by Conditional Forwarder", strquery(&dnsr));
+										sprintf_s(logBuff, sizeof(logBuff), "%s not found by Conditional Forwarder", strquery(&dnsr));
 								}
 
 								logDNSMess(&dnsr, logBuff, 2);
@@ -519,7 +519,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 			{
 				currentInd = magin.currentInd;
 				magin.done = false;
-				//sprintf_s(logBuff,sizeof(logBuff), "New Index=%u", currentInd);
+				//sprintf_s(logBuff, sizeof(logBuff), "New Index=%u", currentInd);
 				//logMess(logBuff, 2);
 			}
 			else
@@ -531,14 +531,14 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 		//serviceStatus.dwCheckPoint = 2;
 		//serviceStatus.dwWaitHint = 1000;
 		SetServiceStatus(serviceStatusHandle, &serviceStatus);
-		sprintf_s(logBuff,sizeof(logBuff), "Closing Network Connections...");
+		sprintf_s(logBuff, sizeof(logBuff), "Closing Network Connections...");
 		logMess(logBuff, 1);
 		closeConn();
 
         if (cfig.dhcpReplConn.ready)
             closesocket(cfig.dhcpReplConn.sock);
 
-		sprintf_s(logBuff,sizeof(logBuff), "Dual Server Stopped !\n");
+		sprintf_s(logBuff, sizeof(logBuff), "Dual Server Stopped !\n");
 		logMess(logBuff, 1);
 
 		Sleep(2000);
@@ -589,7 +589,7 @@ void closeConn()
 		if (network.httpConn.ready)
 		{
 			closesocket(network.httpConn.sock);
-			sprintf_s(logBuff,sizeof(logBuff), "httpConn %s:%u closed", IP2String(ipbuff, network.httpConn.server), network.httpConn.port);
+			sprintf_s(logBuff, sizeof(logBuff), "httpConn %s:%u closed", IP2String(ipbuff, network.httpConn.server), network.httpConn.port);
 			logMess(logBuff, 1);
 		}
 
@@ -597,7 +597,7 @@ void closeConn()
         	if (network.dhcpConn[i].ready)
         	{
             	closesocket(network.dhcpConn[i].sock);
-				sprintf_s(logBuff,sizeof(logBuff), "dhcpConn[%u] %s:%u closed", i, IP2String(ipbuff, network.dhcpConn[i].server), network.dhcpConn[i].port);
+				sprintf_s(logBuff, sizeof(logBuff), "dhcpConn[%u] %s:%u closed", i, IP2String(ipbuff, network.dhcpConn[i].server), network.dhcpConn[i].port);
 				logMess(logBuff, 1);
 			}
     }
@@ -608,7 +608,7 @@ void closeConn()
         	if (network.dnsUdpConn[i].ready)
         	{
            		closesocket(network.dnsUdpConn[i].sock);
-				sprintf_s(logBuff,sizeof(logBuff), "dnsUdpConn %s:%u closed", IP2String(ipbuff, network.dnsUdpConn[i].server), network.dnsUdpConn[i].port);
+				sprintf_s(logBuff, sizeof(logBuff), "dnsUdpConn %s:%u closed", IP2String(ipbuff, network.dnsUdpConn[i].server), network.dnsUdpConn[i].port);
 				logMess(logBuff, 1);
 			}
 
@@ -616,14 +616,14 @@ void closeConn()
         	if (network.dnsTcpConn[i].ready)
         	{
             	closesocket(network.dnsTcpConn[i].sock);
-				sprintf_s(logBuff,sizeof(logBuff), "dnsTcpConn %s:%u closed", IP2String(ipbuff, network.dnsTcpConn[i].server), network.dnsTcpConn[i].port);
+				sprintf_s(logBuff, sizeof(logBuff), "dnsTcpConn %s:%u closed", IP2String(ipbuff, network.dnsTcpConn[i].server), network.dnsTcpConn[i].port);
 				logMess(logBuff, 1);
 			}
 
         if (network.forwConn.ready)
         {
         	closesocket(network.forwConn.sock);
-			sprintf_s(logBuff,sizeof(logBuff), "forwConn %s:%u closed", IP2String(ipbuff, network.forwConn.server), network.forwConn.port);
+			sprintf_s(logBuff, sizeof(logBuff), "forwConn %s:%u closed", IP2String(ipbuff, network.forwConn.server), network.forwConn.port);
 			logMess(logBuff, 1);
 		}
     }
@@ -870,7 +870,7 @@ void runProg()
 	{
 		if (verbatim || cfig.dnsLogLevel || cfig.dhcpLogLevel)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Thread Creation Failed");
+			sprintf_s(logBuff, sizeof(logBuff), "Thread Creation Failed");
 			logMess(logBuff, 1);
 		}
 		exit(-1);
@@ -941,7 +941,7 @@ void runProg()
 
 						if (errno || req->sock == INVALID_SOCKET)
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Accept Failed, WSAError %u", errno);
+							sprintf_s(logBuff, sizeof(logBuff), "Accept Failed, WSAError %u", errno);
 							logDHCPMess(logBuff, 1);
 							free(req);
 						}
@@ -950,7 +950,7 @@ void runProg()
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Memory Error");
+						sprintf_s(logBuff, sizeof(logBuff), "Memory Error");
 						logDHCPMess(logBuff, 1);
 					}
 				}
@@ -995,13 +995,13 @@ void runProg()
 									if (verbatim || cfig.dnsLogLevel >= 2)
 									{
 										if (dnsr.dnsType == DNS_TYPE_SOA)
-											sprintf_s(logBuff,sizeof(logBuff), "SOA Sent for zone %s", dnsr.query);
+											sprintf_s(logBuff, sizeof(logBuff), "SOA Sent for zone %s", dnsr.query);
 										else if (dnsr.dnsType == DNS_TYPE_NS)
-											sprintf_s(logBuff,sizeof(logBuff), "NS Sent for zone %s", dnsr.query);
+											sprintf_s(logBuff, sizeof(logBuff), "NS Sent for zone %s", dnsr.query);
 										else if (dnsr.cType == CTYPE_CACHED)
-											sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Cache to %s", strquery(&dnsr), getResult(&dnsr));
+											sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Cache to %s", strquery(&dnsr), getResult(&dnsr));
 										else
-											sprintf_s(logBuff,sizeof(logBuff), "%s resolved Locally to %s", strquery(&dnsr), getResult(&dnsr));
+											sprintf_s(logBuff, sizeof(logBuff), "%s resolved Locally to %s", strquery(&dnsr), getResult(&dnsr));
 
 										logDNSMess(&dnsr, logBuff, 2);
 									}
@@ -1012,7 +1012,7 @@ void runProg()
 
 									if (verbatim || cfig.dnsLogLevel >= 2)
 									{
-										sprintf_s(logBuff,sizeof(logBuff), "%s not found", strquery(&dnsr));
+										sprintf_s(logBuff, sizeof(logBuff), "%s not found", strquery(&dnsr));
 										logDNSMess(&dnsr, logBuff, 2);
 									}
 								}
@@ -1026,7 +1026,7 @@ void runProg()
 
 									if (verbatim || cfig.dnsLogLevel >= 2)
 									{
-										sprintf_s(logBuff,sizeof(logBuff), "%s not found", strquery(&dnsr));
+										sprintf_s(logBuff, sizeof(logBuff), "%s not found", strquery(&dnsr));
 										logDNSMess(&dnsr, logBuff, 2);
 									}
 								}
@@ -1052,7 +1052,7 @@ void runProg()
 						{
 							if (verbatim || cfig.dnsLogLevel)
 							{
-								sprintf_s(logBuff,sizeof(logBuff), "Accept Failed, WSAError=%u", errno);
+								sprintf_s(logBuff, sizeof(logBuff), "Accept Failed, WSAError=%u", errno);
 								logDNSMess(logBuff, 1);
 							}
 						}
@@ -1074,24 +1074,24 @@ void runProg()
 								if (dnsr.dnsp->header.ancount)
 								{
 									if (getResult(&dnsr))
-										sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Forwarding Server as %s", strquery(&dnsr), dnsr.tempname);
+										sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Forwarding Server as %s", strquery(&dnsr), dnsr.tempname);
 									else
-										sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Forwarding Server", strquery(&dnsr));
+										sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Forwarding Server", strquery(&dnsr));
 								}
 								else
-									sprintf_s(logBuff,sizeof(logBuff), "%s not found by Forwarding Server", strquery(&dnsr));
+									sprintf_s(logBuff, sizeof(logBuff), "%s not found by Forwarding Server", strquery(&dnsr));
 							}
 							else
 							{
 								if (dnsr.dnsp->header.ancount)
 								{
 									if (getResult(&dnsr))
-										sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Conditional Forwarder as %s", strquery(&dnsr), dnsr.tempname);
+										sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Conditional Forwarder as %s", strquery(&dnsr), dnsr.tempname);
 									else
-										sprintf_s(logBuff,sizeof(logBuff), "%s resolved from Conditional Forwarder", strquery(&dnsr));
+										sprintf_s(logBuff, sizeof(logBuff), "%s resolved from Conditional Forwarder", strquery(&dnsr));
 								}
 								else
-									sprintf_s(logBuff,sizeof(logBuff), "%s not found by Conditional Forwarder", strquery(&dnsr));
+									sprintf_s(logBuff, sizeof(logBuff), "%s not found by Conditional Forwarder", strquery(&dnsr));
 							}
 
 							logDNSMess(&dnsr, logBuff, 2);
@@ -1107,7 +1107,7 @@ void runProg()
 		{
 			currentInd = magin.currentInd;
 			magin.done = false;
-			//sprintf_s(logBuff,sizeof(logBuff), "New Index=%u", currentInd);
+			//sprintf_s(logBuff, sizeof(logBuff), "New Index=%u", currentInd);
 			//logMess(logBuff, 2);
 		}
 		else
@@ -1116,14 +1116,14 @@ void runProg()
 	while (kRunning);
 
 	kRunning = false;
-    sprintf_s(logBuff,sizeof(logBuff), "Closing Network Connections...");
+    sprintf_s(logBuff, sizeof(logBuff), "Closing Network Connections...");
     logMess(logBuff, 1);
 	closeConn();
 
 	if (cfig.dhcpReplConn.ready)
 		closesocket(cfig.dhcpReplConn.sock);
 
-    sprintf_s(logBuff,sizeof(logBuff), "Dual Server Stopped !\n");
+    sprintf_s(logBuff, sizeof(logBuff), "Dual Server Stopped !\n");
     logMess(logBuff, 1);
 
 	WSACleanup();
@@ -1338,7 +1338,7 @@ void addRRExt(data5 *req)
 	char tempbuff[512];
 	char temp[2048];
 	//char logBuff[512];
-	//sprintf_s(logBuff,sizeof(logBuff), "%s=%s=%i\n", req->cname, req->query, req->bytes);
+	//sprintf_s(logBuff, sizeof(logBuff), "%s=%s=%i\n", req->cname, req->query, req->bytes);
 	//logMess(logBuff, 2);
 
 	if (strcasecmp(req->cname, req->query))
@@ -2031,7 +2031,7 @@ void procHTTP(data19 *req)
 	req->ling.l_linger = 30; //0 = discard data, nonzero = wait for data sent
 	if (SOCKET_ERROR == setsockopt(req->sock, SOL_SOCKET, SO_LINGER, (const char*)&req->ling, sizeof(req->ling)))
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Failed to set SO_LINGER on http socket");
+		sprintf_s(logBuff, sizeof(logBuff), "Failed to set SO_LINGER on http socket");
 		logDHCPMess(logBuff, 1);
 	}
 
@@ -2044,7 +2044,7 @@ void procHTTP(data19 *req)
 
 	if (!select((int)(req->sock + 1), &readfds1, NULL, NULL, &tv1))
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Client %s, HTTP Message Receive failed", IP2String(tempbuff, req->remote.sin_addr.s_addr));
+		sprintf_s(logBuff, sizeof(logBuff), "Client %s, HTTP Message Receive failed", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr));
 		logDHCPMess(logBuff, 1);
 		closesocket(req->sock);
 		free(req);
@@ -2058,7 +2058,7 @@ void procHTTP(data19 *req)
 
 	if (errno || req->bytes <= 0)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Client %s, HTTP Message Receive failed, WSAError %d", IP2String(tempbuff, req->remote.sin_addr.s_addr), errno);
+		sprintf_s(logBuff, sizeof(logBuff), "Client %s, HTTP Message Receive failed, WSAError %d", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr), errno);
 		logDHCPMess(logBuff, 1);
 		closesocket(req->sock);
 		free(req);
@@ -2066,7 +2066,7 @@ void procHTTP(data19 *req)
 	}
 	else if (verbatim || cfig.dhcpLogLevel >= 2)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Client %s, HTTP Request Received", IP2String(tempbuff, req->remote.sin_addr.s_addr));
+		sprintf_s(logBuff, sizeof(logBuff), "Client %s, HTTP Request Received", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr));
 		logDHCPMess(logBuff, 2);
 		//printf("%s\n", buffer);
 	}
@@ -2075,7 +2075,7 @@ void procHTTP(data19 *req)
 	{
 		if (verbatim || cfig.dhcpLogLevel >= 2)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Client %s, HTTP Access Denied", IP2String(tempbuff, req->remote.sin_addr.s_addr));
+			sprintf_s(logBuff, sizeof(logBuff), "Client %s, HTTP Access Denied", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr));
 			logDHCPMess(logBuff, 2);
 		}
 
@@ -2100,18 +2100,22 @@ void procHTTP(data19 *req)
 
 	if (fp && !strcasecmp(fp, "/"))
 		sendStatus(req);
-//	else if (fp && !strcasecmp(fp, "/scopestatus"))
-//		sendScopeStatus(req);
+	//	else if (fp && !strcasecmp(fp, "/scopestatus"))
+	//		sendScopeStatus(req);
+	else if (fp && !strcasecmp(fp, "/json"))
+		sendJSONStatus(req);
+	else if (fp && !strcasecmp(fp, "/xml"))
+		sendXMLStatus(req);
 	else
 	{
 		if (fp && (verbatim || cfig.dhcpLogLevel >= 2))
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Client %s, %s not found", IP2String(tempbuff, req->remote.sin_addr.s_addr), fp);
+			sprintf_s(logBuff, sizeof(logBuff), "Client %s, %s not found", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr), fp);
 			logDHCPMess(logBuff, 2);
 		}
 		else if (verbatim || cfig.dhcpLogLevel >= 2)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Client %s, Invalid http request", IP2String(tempbuff, req->remote.sin_addr.s_addr));
+			sprintf_s(logBuff, sizeof(logBuff), "Client %s, Invalid http request", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr));
 			logDHCPMess(logBuff, 2);
 		}
 
@@ -2140,7 +2144,7 @@ void sendStatus(data19 *req)
 
 	if (!req->dp)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Memory Error");
+		sprintf_s(logBuff, sizeof(logBuff), "Memory Error");
 		logDHCPMess(logBuff, 1);
 		closesocket(req->sock);
 		free(req);
@@ -2175,7 +2179,7 @@ void sendStatus(data19 *req)
 		{
 			fp += sprintf_s(fp,sizeof(fp), "<tr>");
 			fp += sprintf_s(fp,sizeof(fp), td200, dhcpEntry->mapname);
-			fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, dhcpEntry->ip));
+			fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
 
 			if (dhcpEntry->expiry >= INT_MAX)
 				fp += sprintf_s(fp,sizeof(fp), td200, "Infinity");
@@ -2236,7 +2240,7 @@ void sendStatus(data19 *req)
 					colNum = 1;
 				}
 
-				fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, htonl(iip)));
+				fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, sizeof(tempbuff), htonl(iip)));
 			}
 		}
 	}
@@ -2262,8 +2266,8 @@ void sendStatus(data19 *req)
 				ipused++;
 		}
 
-		IP2String(tempbuff, ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
-		IP2String(ipbuff, ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
+		IP2String(tempbuff, sizeof(tempbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
+		IP2String(ipbuff, sizeof(ipbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
 		fp += sprintf_s(fp,sizeof(fp), "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td></tr>\n", tempbuff, ipbuff, (ipused + ipfree), ipfree);
 	}
 
@@ -2293,7 +2297,7 @@ void sendStatus(data19 *req)
 			}
 
 			fp += sprintf_s(fp,sizeof(fp), td200, dhcpEntry->mapname);
-			fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, dhcpEntry->ip));
+			fp += sprintf_s(fp,sizeof(fp), td200, IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
 		}
 	}
 
@@ -2320,7 +2324,7 @@ void sendScopeStatus(data19 *req)
 
 	if (!req->dp)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Memory Error");
+		sprintf_s(logBuff, sizeof(logBuff), "Memory Error");
 		logDHCPMess(logBuff, 1);
 		closesocket(req->sock);
 		free(req);
@@ -2354,8 +2358,8 @@ void sendScopeStatus(data19 *req)
 				ipfree++;
 		}
 
-		IP2String(tempbuff, ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
-		IP2String(req->extbuff, ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
+		IP2String(tempbuff, sizeof(tempbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
+		IP2String(req->extbuff, sizeof(req->extbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
 		fp += sprintf_s(fp,sizeof(fp), "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td><td align=\"right\">%2.2f</td></tr>\n", tempbuff, req->extbuff, ipused, ipfree, ((ipfree * 100)/(ipused + ipfree)));
 	}
 
@@ -2372,7 +2376,7 @@ void __cdecl sendHTTP(void *lpParam)
 {
 	data19 *req = (data19*)lpParam;
 
-	//sprintf_s(logBuff,sizeof(logBuff), "sendHTTP memsize=%d bytes=%d", req->memSize, req->bytes);
+	//sprintf_s(logBuff, sizeof(logBuff), "sendHTTP memsize=%d bytes=%d", req->memSize, req->bytes);
 	//(logBuff);
 
 	char *dp = req->dp;
@@ -2422,7 +2426,7 @@ void procTCP(data5 *req)
 	req->ling.l_linger = 10; //0 = discard data, nonzero = wait for data sent
 	if (SOCKET_ERROR == setsockopt(req->sock, SOL_SOCKET, SO_LINGER, (const char*)&req->ling, sizeof(req->ling)))
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Failed to set SO_LINGER on tcp socket");
+		sprintf_s(logBuff, sizeof(logBuff), "Failed to set SO_LINGER on tcp socket");
 		logDHCPMess(logBuff, 1);
 	}
 
@@ -2432,7 +2436,7 @@ void procTCP(data5 *req)
 
 	if (req->bytes < 2)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Error Getting TCP DNS Message");
+		sprintf_s(logBuff, sizeof(logBuff), "Error Getting TCP DNS Message");
 		logDNSMess(logBuff, 1);
 		closesocket(req->sock);
 		return;
@@ -2450,7 +2454,7 @@ void procTCP(data5 *req)
 
 	if (!findServer(network.allServers, MAX_SERVERS, clientIP) && !findServer(cfig.zoneServers, MAX_TCP_CLIENTS, clientIP) && !findServer(&cfig.zoneServers[2], MAX_TCP_CLIENTS - 2, clientIP))
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "DNS TCP Query, Access Denied");
+		sprintf_s(logBuff, sizeof(logBuff), "DNS TCP Query, Access Denied");
 		logTCPMess(req, logBuff, 1);
 		addRRError(req, RCODE_REFUSED);
 		sendTCPmess(req);
@@ -2460,7 +2464,7 @@ void procTCP(data5 *req)
 
 	if (ntohs(req->dnsp->header.qdcount) != 1 || ntohs(req->dnsp->header.ancount))
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "DNS Query Format Error");
+		sprintf_s(logBuff, sizeof(logBuff), "DNS Query Format Error");
 		logTCPMess(req, logBuff, 1);
 		addRRError(req, RCODE_FORMATERROR);
 		sendTCPmess(req);
@@ -2473,23 +2477,23 @@ void procTCP(data5 *req)
 		switch (req->dnsp->header.opcode)
 		{
 			case OPCODE_INVERSE_QUERY:
-				sprintf_s(logBuff,sizeof(logBuff), "Inverse query not supported");
+				sprintf_s(logBuff, sizeof(logBuff), "Inverse query not supported");
 				break;
 
 			case OPCODE_SRVR_STAT_REQ:
-				sprintf_s(logBuff,sizeof(logBuff), "Server Status Request not supported");
+				sprintf_s(logBuff, sizeof(logBuff), "Server Status Request not supported");
 				break;
 
 			case OPCODE_NOTIFY:
-				sprintf_s(logBuff,sizeof(logBuff), "Notify not supported");
+				sprintf_s(logBuff, sizeof(logBuff), "Notify not supported");
 				break;
 
 			case OPCODE_DYNAMIC_UPDATE:
-				sprintf_s(logBuff,sizeof(logBuff), "Dynamic Update not needed/supported by Dual Server");
+				sprintf_s(logBuff, sizeof(logBuff), "Dynamic Update not needed/supported by Dual Server");
 				break;
 
 			default:
-				sprintf_s(logBuff,sizeof(logBuff), "OpCode %u not supported", req->dnsp->header.opcode);
+				sprintf_s(logBuff, sizeof(logBuff), "OpCode %u not supported", req->dnsp->header.opcode);
 		}
 
 		logTCPMess(req, logBuff, 1);
@@ -2510,7 +2514,7 @@ void procTCP(data5 *req)
 
 	if (req->qclass != DNS_CLASS_IN)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "DNS Class %u not supported", req->qclass);
+		sprintf_s(logBuff, sizeof(logBuff), "DNS Class %u not supported", req->qclass);
 		logTCPMess(req, logBuff, 1);
 		addRRError(req, RCODE_NOTIMPL);
 		sendTCPmess(req);
@@ -2520,7 +2524,7 @@ void procTCP(data5 *req)
 
 	if (!req->dnsType)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "missing query type");
+		sprintf_s(logBuff, sizeof(logBuff), "missing query type");
 		logTCPMess(req, logBuff, 1);
 		addRRError(req, RCODE_FORMATERROR);
 		sendTCPmess(req);
@@ -2546,7 +2550,7 @@ void procTCP(data5 *req)
 	{
 		addRRError(req, RCODE_NOTIMPL);
 		sendTCPmess(req);
-		sprintf_s(logBuff,sizeof(logBuff), "%s,  Query Type not supported", strquery(req));
+		sprintf_s(logBuff, sizeof(logBuff), "%s,  Query Type not supported", strquery(req));
 		logTCPMess(req, logBuff, 1);
 		closesocket(req->sock);
 		return;
@@ -2555,14 +2559,14 @@ void procTCP(data5 *req)
 	{
 		addRRError(req, RCODE_NOTAUTH);
 		sendTCPmess(req);
-		sprintf_s(logBuff,sizeof(logBuff), "Server is not authority for zone %s", req->query);
+		sprintf_s(logBuff, sizeof(logBuff), "Server is not authority for zone %s", req->query);
 		logTCPMess(req, logBuff, 1);
 	}
 	else if (cfig.expireTime < t)
 	{
 		addRRError(req, RCODE_NOTZONE);
 		sendTCPmess(req);
-		sprintf_s(logBuff,sizeof(logBuff), "Zone %s expired", req->query);
+		sprintf_s(logBuff, sizeof(logBuff), "Zone %s expired", req->query);
 		logTCPMess(req, logBuff, 1);
 	}
 	else
@@ -2575,9 +2579,9 @@ void procTCP(data5 *req)
 				sendTCPmess(req);
 
 				if (req->dnsp->header.ancount)
-					sprintf_s(logBuff,sizeof(logBuff), "SOA Sent for zone %s", req->query);
+					sprintf_s(logBuff, sizeof(logBuff), "SOA Sent for zone %s", req->query);
 				else
-					sprintf_s(logBuff,sizeof(logBuff), "%s not found", strquery(req));
+					sprintf_s(logBuff, sizeof(logBuff), "%s not found", strquery(req));
 
 				logTCPMess(req, logBuff, 2);
 				break;
@@ -2589,9 +2593,9 @@ void procTCP(data5 *req)
 				sendTCPmess(req);
 
 				if (req->dnsp->header.ancount)
-					sprintf_s(logBuff,sizeof(logBuff), "NS Sent for zone %s", req->query);
+					sprintf_s(logBuff, sizeof(logBuff), "NS Sent for zone %s", req->query);
 				else
-					sprintf_s(logBuff,sizeof(logBuff), "%s not found", strquery(req));
+					sprintf_s(logBuff, sizeof(logBuff), "%s not found", strquery(req));
 
 				logTCPMess(req, logBuff, 2);
 				break;
@@ -2685,7 +2689,7 @@ void procTCP(data5 *req)
 					if (sendTCPmess(req))
 					{
 						records++;
-						sprintf_s(logBuff,sizeof(logBuff), "Zone %s with %d RRs Sent", req->query, records);
+						sprintf_s(logBuff, sizeof(logBuff), "Zone %s with %d RRs Sent", req->query, records);
 						logTCPMess(req, logBuff, 2);
 					}
 				}
@@ -2752,7 +2756,7 @@ void procTCP(data5 *req)
 					if (sendTCPmess(req))
 					{
 						records++;
-						sprintf_s(logBuff,sizeof(logBuff), "Zone %s with %d RRs Sent", req->query, records);
+						sprintf_s(logBuff, sizeof(logBuff), "Zone %s with %d RRs Sent", req->query, records);
 						logTCPMess(req, logBuff, 2);
 					}
 				}
@@ -2761,13 +2765,13 @@ void procTCP(data5 *req)
 					addRRNone(req);
 					req->dnsp->header.rcode = RCODE_NOTAUTH;
 					sendTCPmess(req);
-					sprintf_s(logBuff,sizeof(logBuff), "Server is not authority for zone %s", req->query);
+					sprintf_s(logBuff, sizeof(logBuff), "Server is not authority for zone %s", req->query);
 					logTCPMess(req, logBuff, 1);
 				}
 				break;
 
 				default:
-					sprintf_s(logBuff,sizeof(logBuff), "%s Query type not supported", strquery(req));
+					sprintf_s(logBuff, sizeof(logBuff), "%s Query type not supported", strquery(req));
 					logTCPMess(req, logBuff, 1);
 					addRRError(req, RCODE_NOTIMPL);
 					sendTCPmess(req);
@@ -2801,7 +2805,7 @@ MYWORD sendTCPmess(data5 *req)
 
 	if (verbatim || cfig.dnsLogLevel >= 1)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Failed to send %s", strquery(req));
+		sprintf_s(logBuff, sizeof(logBuff), "Failed to send %s", strquery(req));
 		logTCPMess(req, logBuff, 1);
 	}
 
@@ -2883,23 +2887,23 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 			switch (req->dnsp->header.opcode)
 			{
 				case OPCODE_INVERSE_QUERY:
-					sprintf_s(logBuff,sizeof(logBuff), "Inverse query not supported");
+					sprintf_s(logBuff, sizeof(logBuff), "Inverse query not supported");
 					break;
 
 				case OPCODE_SRVR_STAT_REQ:
-					sprintf_s(logBuff,sizeof(logBuff), "Server Status Request not supported");
+					sprintf_s(logBuff, sizeof(logBuff), "Server Status Request not supported");
 					break;
 
 				case OPCODE_NOTIFY:
-					sprintf_s(logBuff,sizeof(logBuff), "Notify not supported");
+					sprintf_s(logBuff, sizeof(logBuff), "Notify not supported");
 					break;
 
 				case OPCODE_DYNAMIC_UPDATE:
-					sprintf_s(logBuff,sizeof(logBuff), "Dynamic Update not needed/supported by Dual Server");
+					sprintf_s(logBuff, sizeof(logBuff), "Dynamic Update not needed/supported by Dual Server");
 					break;
 
 				default:
-					sprintf_s(logBuff,sizeof(logBuff), "OpCode %d not supported", req->dnsp->header.opcode);
+					sprintf_s(logBuff, sizeof(logBuff), "OpCode %d not supported", req->dnsp->header.opcode);
 			}
 
 			logDNSMess(req, logBuff, 1);
@@ -2913,7 +2917,7 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 	{
 		if (verbatim || cfig.dnsLogLevel >= 1)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "DNS Query Format Error");
+			sprintf_s(logBuff, sizeof(logBuff), "DNS Query Format Error");
 			logDNSMess(req, logBuff, 1);
 		}
 
@@ -2938,7 +2942,7 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 	{
 		if (verbatim || cfig.dnsLogLevel >= 1)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "DNS Class %d not supported", req->qclass);
+			sprintf_s(logBuff, sizeof(logBuff), "DNS Class %d not supported", req->qclass);
 			logDNSMess(req, logBuff, 1);
 		}
 		addRRError(req, RCODE_NOTIMPL);
@@ -2949,7 +2953,7 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 	{
 		if (verbatim || cfig.dnsLogLevel >= 1)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "missing query type");
+			sprintf_s(logBuff, sizeof(logBuff), "missing query type");
 			logDNSMess(req, logBuff, 1);
 		}
 
@@ -2972,7 +2976,7 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 	if (getRangeInd(ip) >= 0)
 		return req->bytes;
 
-	if (findEntry(IP2String(req->cname, iip), DNS_TYPE_PTR, CTYPE_LOCAL_PTR_NAUTH))
+	if (findEntry(IP2String(req->cname, sizeof(req->cname), iip), DNS_TYPE_PTR, CTYPE_LOCAL_PTR_NAUTH))
 		return req->bytes;
 
 	if (findServer(network.allServers, MAX_SERVERS, ip))
@@ -2980,7 +2984,7 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 
 	if (verbatim || cfig.dnsLogLevel >= 1)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "DNS UDP Query, Access Denied");
+		sprintf_s(logBuff, sizeof(logBuff), "DNS UDP Query, Access Denied");
 		logDNSMess(req, logBuff, 1);
 	}
 
@@ -3001,7 +3005,7 @@ MYWORD scanloc(data5 *req)
 	myLower(req->mapname);
 	req->qType = makeLocal(req->mapname);
 	//MYDWORD ip = req->remote.sin_addr.s_addr;
-	//sprintf_s(logBuff,sizeof(logBuff), "qType=%u dnsType=%u query=%s mapname=%s", req->qType, req->dnsType, req->query, req->mapname);
+	//sprintf_s(logBuff, sizeof(logBuff), "qType=%u dnsType=%u query=%s mapname=%s", req->qType, req->dnsType, req->query, req->mapname);
 	//logMess(logBuff, 2);
 
 	switch (req->qType)
@@ -3092,7 +3096,7 @@ MYWORD scanloc(data5 *req)
 					{
 						if (verbatim || cfig.dnsLogLevel)
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "%s, DNS Query Type not supported", strquery(req));
+							sprintf_s(logBuff, sizeof(logBuff), "%s, DNS Query Type not supported", strquery(req));
 							logDNSMess(req, logBuff, 1);
 						}
 						addRRNone(req);
@@ -3186,7 +3190,7 @@ MYWORD scanloc(data5 *req)
 				else
 					sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->hostname, cfig.zone);
 
-				//sprintf_s(logBuff,sizeof(logBuff), "cType=%u, name=%s, hostname=%s", cache->cType, cache->name, cache->hostname);
+				//sprintf_s(logBuff, sizeof(logBuff), "cType=%u, name=%s, hostname=%s", cache->cType, cache->name, cache->hostname);
 				//logMess(logBuff, 2);
 
 				strcpy_s(req->mapname, sizeof(req->mapname), cache->hostname);
@@ -3198,7 +3202,7 @@ MYWORD scanloc(data5 *req)
 		}
 	}
 
-	//sprintf_s(logBuff,sizeof(logBuff), "cType=%u,dnsType=%u,query=%s,cname=%s", req->cType, req->dnsType, req->query, req->cname);
+	//sprintf_s(logBuff, sizeof(logBuff), "cType=%u,dnsType=%u,query=%s,cname=%s", req->cType, req->dnsType, req->query, req->cname);
 	//logMess(logBuff, 2);
 
 	if (req->dnsType == DNS_TYPE_A && cfig.wildHosts[0].wildcard[0])
@@ -3292,7 +3296,7 @@ MYWORD fdnmess(data5 *req)
 				{
 					if (verbatim || cfig.dnsLogLevel)
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Error Forwarding UDP DNS Message to Conditional Forwarder %s", IP2String(ipbuff, req->addr.sin_addr.s_addr));
+						sprintf_s(logBuff, sizeof(logBuff), "Error Forwarding UDP DNS Message to Conditional Forwarder %s", IP2String(ipbuff, sizeof(ipbuff), req->addr.sin_addr.s_addr));
 						logDNSMess(req, logBuff, 1);
 						addRRNone(req);
 						req->dnsp->header.rcode = RCODE_SERVERFAIL;
@@ -3307,7 +3311,7 @@ MYWORD fdnmess(data5 *req)
 				{
 					if (verbatim || cfig.dnsLogLevel >= 2)
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "%s forwarded to Conditional Forwarder %s", strquery(req), IP2String(ipbuff, cfig.dnsRoutes[zoneDNS].dns[cfig.dnsRoutes[zoneDNS].currentDNS]));
+						sprintf_s(logBuff, sizeof(logBuff), "%s forwarded to Conditional Forwarder %s", strquery(req), IP2String(ipbuff, sizeof(ipbuff), cfig.dnsRoutes[zoneDNS].dns[cfig.dnsRoutes[zoneDNS].currentDNS]));
 						logDNSMess(req, logBuff, 2);
 					}
 				}
@@ -3319,7 +3323,7 @@ MYWORD fdnmess(data5 *req)
 
 	if (req->qType != QTYPE_CHILDZONE)
 	{
-		//sprintf_s(logBuff,sizeof(logBuff), "after qType=%d %d", req->qType, QTYPE_CHILDZONE);
+		//sprintf_s(logBuff, sizeof(logBuff), "after qType=%d %d", req->qType, QTYPE_CHILDZONE);
 		//logMess(logBuff, 2);
 
 		if (cfig.authorized && (req->qType == QTYPE_A_LOCAL || req->qType == QTYPE_P_LOCAL))
@@ -3351,7 +3355,7 @@ MYWORD fdnmess(data5 *req)
 			addRRNone(req);
 			if (verbatim || cfig.dnsLogLevel)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "%s is not found (recursion not desired)", strquery(req));
+				sprintf_s(logBuff, sizeof(logBuff), "%s is not found (recursion not desired)", strquery(req));
 				logDNSMess(req, logBuff, 2);
 			}
 			return 0;
@@ -3363,7 +3367,7 @@ MYWORD fdnmess(data5 *req)
 			req->dnsp->header.ra = 0;
 			if (verbatim || cfig.dnsLogLevel)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "%s not found (recursion not available)", strquery(req));
+				sprintf_s(logBuff, sizeof(logBuff), "%s not found (recursion not available)", strquery(req));
 				logDNSMess(req, logBuff, 2);
 			}
 			return 0;
@@ -3397,7 +3401,7 @@ MYWORD fdnmess(data5 *req)
 			{
 				if (verbatim || cfig.dnsLogLevel)
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Error forwarding UDP DNS Message to Forwarding Server %s", IP2String(ipbuff, network.dns[network.currentDNS]));
+					sprintf_s(logBuff, sizeof(logBuff), "Error forwarding UDP DNS Message to Forwarding Server %s", IP2String(ipbuff, sizeof(ipbuff), network.dns[network.currentDNS]));
 					logDNSMess(req, logBuff, 1);
 					addRRNone(req);
 					req->dnsp->header.rcode = RCODE_SERVERFAIL;
@@ -3417,7 +3421,7 @@ MYWORD fdnmess(data5 *req)
 			{
 				if (verbatim || cfig.dnsLogLevel >= 2)
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "%s forwarded to Forwarding Server %s", strquery(req), IP2String(ipbuff, network.dns[network.currentDNS]));
+					sprintf_s(logBuff, sizeof(logBuff), "%s forwarded to Forwarding Server %s", strquery(req), IP2String(ipbuff, sizeof(ipbuff), network.dns[network.currentDNS]));
 					logDNSMess(req, logBuff, 2);
 				}
 			}
@@ -3455,7 +3459,7 @@ MYWORD fdnmess(data5 *req)
 	else
 		queue->dnsIndex = network.currentDNS;
 
-	//sprintf_s(logBuff,sizeof(logBuff), "queue created for %s", req->query);
+	//sprintf_s(logBuff, sizeof(logBuff), "queue created for %s", req->query);
 	//debug(logBuff);
 
 	return (nRet);
@@ -3629,7 +3633,7 @@ MYWORD sdnmess(data5 *req)
 
 void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE pType)
 {
-	//sprintf_s(logBuff,sizeof(logBuff), "Adding %s=%s %u", hostname,IP2String(ipbuff, ip), expiry - t);
+	//sprintf_s(logBuff, sizeof(logBuff), "Adding %s=%s %u", hostname,IP2String(ipbuff, sizeof(ipbuff), ip), expiry - t);
 	//logMess(logBuff, 1);
 
 	//memset(&lump, 0, sizeof(data71));
@@ -3644,7 +3648,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 
 	if (pType)
 	{
-		IP2String(tempbuff, htonl(ip), DNS_TYPE_PTR);
+		IP2String(tempbuff, sizeof(tempbuff), htonl(ip), DNS_TYPE_PTR);
 		p = dnsCache[currentInd].find(tempbuff);
 
 		for (; p != dnsCache[currentInd].end(); p++)
@@ -3664,7 +3668,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 			memset(&lump, 0, sizeof(data71));
 			lump.cType = pType;
 			lump.dnsType = DNS_TYPE_PTR;
-			lump.mapname = IP2String(tempbuff, htonl(ip));
+			lump.mapname = IP2String(tempbuff, sizeof(tempbuff), htonl(ip));
 			lump.hostname = hostname;
 			cache = createCache(&lump);
 /*
@@ -3685,7 +3689,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 
 					free(cache);
 
-					sprintf_s(logBuff,sizeof(logBuff), "Memory Allocation Error");
+					sprintf_s(logBuff, sizeof(logBuff), "Memory Allocation Error");
 					logDNSMess(logBuff, 1);
 					return;
 				}
@@ -3708,7 +3712,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 			cache->cType = pType;
 			cache->expiry = expiry;
 		}
-		//printf("Added %s=%s\n", IP2String(ipbuff, ip), hostname);
+		//printf("Added %s=%s\n", IP2String(ipbuff, sizeof(ipbuff), ip), hostname);
 	}
 
 	if (aType)
@@ -3746,7 +3750,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 
 				if (!cache->mapname)
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Memory Allocation Error");
+					sprintf_s(logBuff, sizeof(logBuff), "Memory Allocation Error");
 					logDNSMess(logBuff, 1);
 					free(cache);
 					return;
@@ -3784,7 +3788,7 @@ void expireEntry(MYDWORD ip)
 	if (!ip)
 		return;
 
-	IP2String(ipbuff, htonl(ip));
+	IP2String(ipbuff, sizeof(ipbuff), htonl(ip));
 	data7 *cache = findEntry(ipbuff, DNS_TYPE_PTR, CTYPE_LOCAL_PTR_AUTH);
 
 	if (!cache)
@@ -3818,7 +3822,7 @@ void addHostNotFound(char *hostname)
 
 		if (!cache->mapname)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Memory Allocation Error");
+			sprintf_s(logBuff, sizeof(logBuff), "Memory Allocation Error");
 			free(cache);
 			logDNSMess(logBuff, 1);
 			return;
@@ -3864,9 +3868,9 @@ char* getResult(data5 *req)
 		raw += 2; //datalength
 
 		if (type == DNS_TYPE_A)
-			return IP2String(req->tempname, fIP(raw));
+			return IP2String(req->tempname, sizeof(req->tempname), fIP(raw));
 		else if (type == DNS_TYPE_AAAA)
-			return IP62String(req->tempname, (MYBYTE*)raw);
+			return IP62String(req->tempname, sizeof(req->tempname), (MYBYTE*)raw);
 		else if (type == DNS_TYPE_PTR)
 		{
 			fQu(req->tempname, req->dnsp, raw);
@@ -3938,7 +3942,7 @@ MYDWORD resad(data9 *req)
 		{
 			if (verbatim || cfig.dhcpLogLevel)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Static DHCP Host %s (%s) has No IP, DHCPDISCOVER ignored", req->chaddr, req->hostname);
+				sprintf_s(logBuff, sizeof(logBuff), "Static DHCP Host %s (%s) has No IP, DHCPDISCOVER ignored", req->chaddr, req->hostname);
 				logDHCPMess(logBuff, 1);
 			}
 			return 0;
@@ -4227,7 +4231,7 @@ MYDWORD resad(data9 *req)
 
 			if (!req->dhcpEntry)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Memory Allocation Error");
+				sprintf_s(logBuff, sizeof(logBuff), "Memory Allocation Error");
 				logDHCPMess(logBuff, 1);
 				return 0;
 			}
@@ -4236,7 +4240,7 @@ MYDWORD resad(data9 *req)
 
 			if (!req->dhcpEntry->mapname)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Memory Allocation Error");
+				sprintf_s(logBuff, sizeof(logBuff), "Memory Allocation Error");
 				logDHCPMess(logBuff, 1);
 				return 0;
 			}
@@ -4256,16 +4260,16 @@ MYDWORD resad(data9 *req)
 		if (rangeFound)
 		{
 			if (req->dhcpp.header.bp_giaddr)
-				sprintf_s(logBuff,sizeof(logBuff), "No free leases for DHCPDISCOVER for %s (%s) from RelayAgent %s", req->chaddr, req->hostname, IP2String(tempbuff, req->dhcpp.header.bp_giaddr));
+				sprintf_s(logBuff, sizeof(logBuff), "No free leases for DHCPDISCOVER for %s (%s) from RelayAgent %s", req->chaddr, req->hostname, IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_giaddr));
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "No free leases for DHCPDISCOVER for %s (%s) from interface %s", req->chaddr, req->hostname, IP2String(tempbuff, network.dhcpConn[req->sockInd].server));
+				sprintf_s(logBuff, sizeof(logBuff), "No free leases for DHCPDISCOVER for %s (%s) from interface %s", req->chaddr, req->hostname, IP2String(tempbuff, sizeof(tempbuff), network.dhcpConn[req->sockInd].server));
 		}
 		else
 		{
 			if (req->dhcpp.header.bp_giaddr)
-				sprintf_s(logBuff,sizeof(logBuff), "No Matching DHCP Range for DHCPDISCOVER for %s (%s) from RelayAgent %s", req->chaddr, req->hostname, IP2String(tempbuff, req->dhcpp.header.bp_giaddr));
+				sprintf_s(logBuff, sizeof(logBuff), "No Matching DHCP Range for DHCPDISCOVER for %s (%s) from RelayAgent %s", req->chaddr, req->hostname, IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_giaddr));
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "No Matching DHCP Range for DHCPDISCOVER for %s (%s) from interface %s", req->chaddr, req->hostname, IP2String(tempbuff, network.dhcpConn[req->sockInd].server));
+				sprintf_s(logBuff, sizeof(logBuff), "No Matching DHCP Range for DHCPDISCOVER for %s (%s) from interface %s", req->chaddr, req->hostname, IP2String(tempbuff, sizeof(tempbuff), network.dhcpConn[req->sockInd].server));
 		}
 		logDHCPMess(logBuff, 1);
 	}
@@ -4285,7 +4289,7 @@ MYDWORD chad(data9 *req)
 
 MYDWORD sdmess(data9 *req)
 {
-	//sprintf_s(logBuff,sizeof(logBuff), "sdmess, Request Type = %u",req->req_type);
+	//sprintf_s(logBuff, sizeof(logBuff), "sdmess, Request Type = %u",req->req_type);
 	//debug(logBuff);
 	char logBuff[512];
 	char tempbuff[512];
@@ -4298,7 +4302,7 @@ MYDWORD sdmess(data9 *req)
 		{
 			if (verbatim || cfig.dhcpLogLevel)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "No Static Entry found for BOOTPREQUEST from Host %s", req->chaddr);
+				sprintf_s(logBuff, sizeof(logBuff), "No Static Entry found for BOOTPREQUEST from Host %s", req->chaddr);
 				logDHCPMess(logBuff, 1);
 			}
 
@@ -4318,7 +4322,7 @@ MYDWORD sdmess(data9 *req)
 
 			if (verbatim || cfig.dhcpLogLevel)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "IP Address %s declined by Host %s (%s), locked", IP2String(tempbuff, req->dhcpp.header.bp_ciaddr), req->chaddr, req->hostname);
+				sprintf_s(logBuff, sizeof(logBuff), "IP Address %s declined by Host %s (%s), locked", IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_ciaddr), req->chaddr, req->hostname);
 				logDHCPMess(logBuff, 1);
 			}
 		}
@@ -4340,7 +4344,7 @@ MYDWORD sdmess(data9 *req)
 
 			if (verbatim || cfig.dhcpLogLevel)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "IP Address %s released by Host %s (%s)", IP2String(tempbuff, req->dhcpp.header.bp_ciaddr), req->chaddr, req->hostname);
+				sprintf_s(logBuff, sizeof(logBuff), "IP Address %s released by Host %s (%s)", IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_ciaddr), req->chaddr, req->hostname);
 				logDHCPMess(logBuff, 1);
 			}
 		}
@@ -4349,9 +4353,9 @@ MYDWORD sdmess(data9 *req)
 	}
 	else if (req->req_type == DHCP_MESS_INFORM)
 	{
-		//printf("repl0=%s\n", IP2String(tempbuff, cfig.zoneServers[0]));
-		//printf("repl1=%s\n", IP2String(tempbuff, cfig.zoneServers[1]));
-		//printf("IP=%s bytes=%u replication=%i\n", IP2String(tempbuff, req->remote.sin_addr.s_addr), req->bytes, cfig.replication);
+		//printf("repl0=%s\n", IP2String(tempbuff, sizeof(tempbuff), cfig.zoneServers[0]));
+		//printf("repl1=%s\n", IP2String(tempbuff, sizeof(tempbuff), cfig.zoneServers[1]));
+		//printf("IP=%s bytes=%u replication=%i\n", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr), req->bytes, cfig.replication);
 
 		if ((cfig.replication == 1 && req->remote.sin_addr.s_addr == cfig.zoneServers[1]) || (cfig.replication == 2 && req->remote.sin_addr.s_addr == cfig.zoneServers[0]))
 			recvRepl(req);
@@ -4386,7 +4390,7 @@ MYDWORD sdmess(data9 *req)
 	}
 	else if (req->req_type == DHCP_MESS_REQUEST)
 	{
-		//printf("%s\n", IP2String(tempbuff, req->dhcpp.header.bp_ciaddr));
+		//printf("%s\n", IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_ciaddr));
 
 		if (req->server)
 		{
@@ -4517,7 +4521,7 @@ MYDWORD sdmess(data9 *req)
 	if (errno || req->bytes <= 0)
 		return 0;
 
-	//printf("goes=%s %i\n",IP2String(tempbuff, req->dhcpp.header.bp_yiaddr),req->sockInd);
+	//printf("goes=%s %i\n",IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_yiaddr),req->sockInd);
 	return req->dhcpp.header.bp_yiaddr;
 }
 
@@ -4548,15 +4552,15 @@ MYDWORD alad(data9 *req)
 		{
 			if (req->lease && req->reqIP)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Host %s (%s) allotted %s for %u seconds", req->chaddr, req->hostname, IP2String(tempbuff, req->dhcpp.header.bp_yiaddr), req->lease);
+				sprintf_s(logBuff, sizeof(logBuff), "Host %s (%s) allotted %s for %u seconds", req->chaddr, req->hostname, IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_yiaddr), req->lease);
 			}
 			else if (req->req_type)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Host %s (%s) renewed %s for %u seconds", req->chaddr, req->hostname, IP2String(tempbuff, req->dhcpp.header.bp_yiaddr), req->lease);
+				sprintf_s(logBuff, sizeof(logBuff), "Host %s (%s) renewed %s for %u seconds", req->chaddr, req->hostname, IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_yiaddr), req->lease);
 			}
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "BOOTP Host %s (%s) allotted %s", req->chaddr, req->hostname, IP2String(tempbuff, req->dhcpp.header.bp_yiaddr));
+				sprintf_s(logBuff, sizeof(logBuff), "BOOTP Host %s (%s) allotted %s", req->chaddr, req->hostname, IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_yiaddr));
 			}
 			logDHCPMess(logBuff, 1);
 		}
@@ -4568,7 +4572,7 @@ MYDWORD alad(data9 *req)
 	}
 	else if ((verbatim || cfig.dhcpLogLevel >= 2) && req->resp_type == DHCP_MESS_OFFER)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Host %s (%s) offered %s", req->chaddr, req->hostname, IP2String(tempbuff, req->dhcpp.header.bp_yiaddr));
+		sprintf_s(logBuff, sizeof(logBuff), "Host %s (%s) offered %s", req->chaddr, req->hostname, IP2String(tempbuff, sizeof(tempbuff), req->dhcpp.header.bp_yiaddr));
 		logDHCPMess(logBuff, 2);
 	}
 	//printf("%u=out\n", req->resp_type);
@@ -4962,7 +4966,7 @@ void __cdecl sendToken(void *lpParam)
 //	
 //			if (!errno && verbatim || cfig.dhcpLogLevel >= 2)
 //			{
-//				sprintf_s(logBuff,sizeof(logBuff), "Token Sent");
+//				sprintf_s(logBuff, sizeof(logBuff), "Token Sent");
 //				logDHCPMess(logBuff, 2);
 //			}
 		}
@@ -5038,9 +5042,9 @@ MYDWORD sendRepl(data9 *req)
 		if (verbatim || cfig.dhcpLogLevel >= 1)
 		{
 			if (cfig.replication == 1)
-				sprintf_s(logBuff,sizeof(logBuff), "WSAError %u Sending DHCP Update to Secondary Server", errno);
+				sprintf_s(logBuff, sizeof(logBuff), "WSAError %u Sending DHCP Update to Secondary Server", errno);
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "WSAError %u Sending DHCP Update to Primary Server", errno);
+				sprintf_s(logBuff, sizeof(logBuff), "WSAError %u Sending DHCP Update to Primary Server", errno);
 
 			logDHCPMess(logBuff, 1);
 		}
@@ -5050,9 +5054,9 @@ MYDWORD sendRepl(data9 *req)
 	else if (verbatim || cfig.dhcpLogLevel >= 2)
 	{
 		if (cfig.replication == 1)
-			sprintf_s(logBuff,sizeof(logBuff), "DHCP Update for host %s (%s) sent to Secondary Server", req->dhcpEntry->mapname, IP2String(ipbuff, req->dhcpEntry->ip));
+			sprintf_s(logBuff, sizeof(logBuff), "DHCP Update for host %s (%s) sent to Secondary Server", req->dhcpEntry->mapname, IP2String(ipbuff, sizeof(ipbuff), req->dhcpEntry->ip));
 		else
-			sprintf_s(logBuff,sizeof(logBuff), "DHCP Update for host %s (%s) sent to Primary Server", req->dhcpEntry->mapname, IP2String(ipbuff, req->dhcpEntry->ip));
+			sprintf_s(logBuff, sizeof(logBuff), "DHCP Update for host %s (%s) sent to Primary Server", req->dhcpEntry->mapname, IP2String(ipbuff, sizeof(ipbuff), req->dhcpEntry->ip));
 
 		logDHCPMess(logBuff, 2);
 	}
@@ -5097,7 +5101,7 @@ void recvRepl(data9 *req)
 	{
 //		if (verbatim || cfig.dhcpLogLevel >= 2)
 //		{
-//			sprintf_s(logBuff,sizeof(logBuff), "Token Received");
+//			sprintf_s(logBuff, sizeof(logBuff), "Token Received");
 //			logDHCPMess(logBuff, 2);
 //		}
 
@@ -5129,7 +5133,7 @@ void recvRepl(data9 *req)
 //	
 //				if (!errno && (verbatim || cfig.dhcpLogLevel >= 2))
 //				{
-//					sprintf_s(logBuff,sizeof(logBuff), "Token Responded");
+//					sprintf_s(logBuff, sizeof(logBuff), "Token Responded");
 //					logDHCPMess(logBuff, 2);
 //				}
 			}
@@ -5161,9 +5165,9 @@ void recvRepl(data9 *req)
 		if (req->dhcpEntry->fixed)
 		{
 			if (cfig.replication == 1)
-				sprintf_s(logBuff,sizeof(logBuff), "DHCP Update ignored for %s (%s) from Secondary Server", req->chaddr, IP2String(ipbuff, ip));
+				sprintf_s(logBuff, sizeof(logBuff), "DHCP Update ignored for %s (%s) from Secondary Server", req->chaddr, IP2String(ipbuff, sizeof(ipbuff), ip));
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "DHCP Update ignored for %s (%s) from Primary Server", req->chaddr, IP2String(ipbuff, ip));
+				sprintf_s(logBuff, sizeof(logBuff), "DHCP Update ignored for %s (%s) from Primary Server", req->chaddr, IP2String(ipbuff, sizeof(ipbuff), ip));
 
 			logDHCPMess(logBuff, 1);
 			return;
@@ -5192,7 +5196,7 @@ void recvRepl(data9 *req)
 
 		if (!req->dhcpEntry)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Memory Allocation Error");
+			sprintf_s(logBuff, sizeof(logBuff), "Memory Allocation Error");
 			logDHCPMess(logBuff, 1);
 			return;
 		}
@@ -5201,7 +5205,7 @@ void recvRepl(data9 *req)
 
 		if (!req->dhcpEntry->mapname)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Memory Allocation Error");
+			sprintf_s(logBuff, sizeof(logBuff), "Memory Allocation Error");
 			free(req->dhcpEntry);
 			logDHCPMess(logBuff, 1);
 			return;
@@ -5237,9 +5241,9 @@ void recvRepl(data9 *req)
 		if (verbatim || cfig.dhcpLogLevel >= 2)
 		{
 			if (cfig.replication == 1)
-				sprintf_s(logBuff,sizeof(logBuff), "DHCP Update received for %s (%s) from Secondary Server", req->chaddr, IP2String(ipbuff, ip));
+				sprintf_s(logBuff, sizeof(logBuff), "DHCP Update received for %s (%s) from Secondary Server", req->chaddr, IP2String(ipbuff, sizeof(ipbuff), ip));
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "DHCP Update received for %s (%s) from Primary Server", req->chaddr, IP2String(ipbuff, ip));
+				sprintf_s(logBuff, sizeof(logBuff), "DHCP Update received for %s (%s) from Primary Server", req->chaddr, IP2String(ipbuff, sizeof(ipbuff), ip));
 
 			logDHCPMess(logBuff, 2);
 		}
@@ -5247,9 +5251,9 @@ void recvRepl(data9 *req)
 	else
 	{
 		if (cfig.replication == 1)
-			sprintf_s(logBuff,sizeof(logBuff), "DHCP Update ignored for %s (%s) from Secondary Server", req->chaddr, IP2String(ipbuff, ip));
+			sprintf_s(logBuff, sizeof(logBuff), "DHCP Update ignored for %s (%s) from Secondary Server", req->chaddr, IP2String(ipbuff, sizeof(ipbuff), ip));
 		else
-			sprintf_s(logBuff,sizeof(logBuff), "DHCP Update ignored for %s (%s) from Primary Server", req->chaddr, IP2String(ipbuff, ip));
+			sprintf_s(logBuff, sizeof(logBuff), "DHCP Update ignored for %s (%s) from Primary Server", req->chaddr, IP2String(ipbuff, sizeof(ipbuff), ip));
 
 		logDHCPMess(logBuff, 1);
 		return;
@@ -5314,7 +5318,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 
 		if (!name[0])
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] invalid option %s ignored", sectionName, raw);
+			sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] invalid option %s ignored", sectionName, raw);
 			logDHCPMess(logBuff, 1);
 			continue;
 		}
@@ -5325,7 +5329,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				addDHCPRange(value);
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			continue;
@@ -5353,7 +5357,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				addMacRange(optionData->rangeSetInd, value);
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			continue;
@@ -5372,7 +5376,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				valSize = (unsigned char)strlen(value);
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s value too big, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s value too big, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 				continue;
 			}
@@ -5406,7 +5410,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 
 			if (numbytes > 255)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, too many bytes, entry ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, too many bytes, entry ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 				continue;
 			}
@@ -5445,7 +5449,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 			}
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s value too long, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s value too long, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 				continue;
 			}
@@ -5457,7 +5461,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				addVendClass(optionData->rangeSetInd, value, valSize);
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			continue;
@@ -5468,7 +5472,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				addUserClass(optionData->rangeSetInd, value, valSize);
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			continue;
@@ -5477,7 +5481,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 		{
 			if (valSize != 4)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] invalid value %s, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] invalid value %s, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			else if (!strcasecmp(sectionName, RANGESET))
@@ -5487,7 +5491,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 			}
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			continue;
@@ -5496,17 +5500,17 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 		{
 			if (valSize != 4)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] invalid value %s, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] invalid value %s, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			else if (!strcasecmp(sectionName, RANGESET))
 			{
 				cfig.rangeSet[optionData->rangeSetInd].targetIP = fIP(value);
-				//printf("TARGET IP %s set RangeSetInd  %d\n", IP2String(ipbuff, cfig.rangeSet[optionData->rangeSetInd].targetIP), optionData->rangeSetInd);
+				//printf("TARGET IP %s set RangeSetInd  %d\n", IP2String(ipbuff, sizeof(ipbuff), cfig.rangeSet[optionData->rangeSetInd].targetIP), optionData->rangeSetInd);
 			}
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, option ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			continue;
@@ -5518,7 +5522,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 		{
 			if (atoi(name) < 1 || atoi(name) >= 254)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] invalid option %s, ignored", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] invalid option %s, ignored", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 				continue;
 			}
@@ -5538,7 +5542,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 
 		if (!opTag)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] invalid option %s, ignored", sectionName, raw);
+			sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] invalid option %s, ignored", sectionName, raw);
 			logDHCPMess(logBuff, 1);
 			continue;
 		}
@@ -5546,12 +5550,12 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 		if (!opType)
 			opType = valType;
 
-		//sprintf_s(logBuff,sizeof(logBuff), "Tag %i ValType %i opType %i value=%s size=%u", opTag, valType, opType, value, valSize);
+		//sprintf_s(logBuff, sizeof(logBuff), "Tag %i ValType %i opType %i value=%s size=%u", opTag, valType, opType, value, valSize);
 		//logDHCPMess(logBuff, 1);
 
 		if (op_specified[opTag])
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] duplicate option %s, ignored", sectionName, raw);
+			sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] duplicate option %s, ignored", sectionName, raw);
 			logDHCPMess(logBuff, 1);
 			continue;
 		}
@@ -5572,7 +5576,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 			}
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
 				logDHCPMess(logBuff, 1);
 			}
 			continue;
@@ -5587,12 +5591,12 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 
 				if (valType != 1 && valType != 2)
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, need string value, option ignored", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, need string value, option ignored", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 				}
 				else if (opTag == DHCP_OPTION_DOMAINNAME)
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %u should be under [DOMAIN_NAME], ignored", sectionName, opTag);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %u should be under [DOMAIN_NAME], ignored", sectionName, opTag);
 					logDHCPMess(logBuff, 1);
 					continue;
 				}
@@ -5608,7 +5612,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 				}
 			}
@@ -5621,13 +5625,13 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				{
 					if (opType == 3 && valSize % 4)
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, missing/extra bytes/octates in IP, option ignored", sectionName, raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, missing/extra bytes/octates in IP, option ignored", sectionName, raw);
 						logDHCPMess(logBuff, 1);
 						continue;
 					}
 					else if (opType == 8 && valSize % 8)
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, some values not in IP/Mask form, option ignored", sectionName, raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, some values not in IP/Mask form, option ignored", sectionName, raw);
 						logDHCPMess(logBuff, 1);
 						continue;
 					}
@@ -5636,7 +5640,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 					{
 						if (valSize != 4 || !checkMask(fIP(value)))
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] Invalid subnetmask %s, option ignored", sectionName, raw);
+							sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] Invalid subnetmask %s, option ignored", sectionName, raw);
 							logDHCPMess(logBuff, 1);
 							continue;
 						}
@@ -5656,13 +5660,13 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
 						logDHCPMess(logBuff, 1);
 					}
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, Invalid value, should be one or more IP/4 Bytes", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, Invalid value, should be one or more IP/4 Bytes", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 				}
 			}
@@ -5678,7 +5682,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 					j = atol(value);
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, value should be integer between 0 & %u or 4 bytes, option ignored", sectionName, name, UINT_MAX);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, value should be integer between 0 & %u or 4 bytes, option ignored", sectionName, name, UINT_MAX);
 					logDHCPMess(logBuff, 1);
 					continue;
 				}
@@ -5690,13 +5694,13 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 
 					if (!strcasecmp(sectionName, GLOBALOPTIONS))
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, please set it in [TIMINGS] section", sectionName, raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s not allowed in this section, please set it in [TIMINGS] section", sectionName, raw);
 						logDHCPMess(logBuff, 1);
 						continue;
 					}
 					else if (j < cfig.lease)
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s value should be more then %u (Default Lease), ignored", sectionName, name, cfig.lease);
+						sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s value should be more then %u (Default Lease), ignored", sectionName, name, cfig.lease);
 						logDHCPMess(logBuff, 1);
 						continue;
 					}
@@ -5714,7 +5718,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 				}
 			}
@@ -5730,7 +5734,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 					j = atoi(value);
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, value should be between 0 & %u or 2 bytes, option ignored", sectionName, name, USHRT_MAX);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, value should be between 0 & %u or 2 bytes, option ignored", sectionName, name, USHRT_MAX);
 					logDHCPMess(logBuff, 1);
 					continue;
 				}
@@ -5746,7 +5750,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 				}
 			}
@@ -5762,7 +5766,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 					j = atoi(value);
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, value should be between 0 & %u or single byte, option ignored", sectionName, name, UCHAR_MAX);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, value should be between 0 & %u or single byte, option ignored", sectionName, name, UCHAR_MAX);
 					logDHCPMess(logBuff, 1);
 					continue;
 				}
@@ -5779,7 +5783,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 				}
 			}
@@ -5799,7 +5803,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 					j = atoi(value);
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, value should be yes/on/true/1 or no/off/false/0, option ignored", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, value should be yes/on/true/1 or no/off/false/0, option ignored", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 					continue;
 				}
@@ -5816,7 +5820,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 				}
 			}
@@ -5833,7 +5837,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 
 				if (opType == 2 && valType != 2)
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, value should be comma separated bytes or hex string, option ignored", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, value should be comma separated bytes or hex string, option ignored", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 					continue;
 				}
@@ -5849,7 +5853,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: section [%s] option %s, no more space for options", sectionName, raw);
 					logDHCPMess(logBuff, 1);
 				}
 			}
@@ -5958,7 +5962,7 @@ void addDHCPRange(char *dp)
 						|| (range->rangeStart >= rs && range->rangeStart <= re)
 						|| (range->rangeEnd >= rs && range->rangeEnd <= re))
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: DHCP Range %s overlaps with another range, ignored", dp);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: DHCP Range %s overlaps with another range, ignored", dp);
 					logDHCPMess(logBuff, 1);
 					return;
 				}
@@ -5981,7 +5985,7 @@ void addDHCPRange(char *dp)
 					if (range->dhcpEntry)
 						free(range->dhcpEntry);
 
-					sprintf_s(logBuff,sizeof(logBuff), "DHCP Ranges Load, Memory Allocation Error");
+					sprintf_s(logBuff, sizeof(logBuff), "DHCP Ranges Load, Memory Allocation Error");
 					logDHCPMess(logBuff, 1);
 					return;
 				}
@@ -5989,13 +5993,13 @@ void addDHCPRange(char *dp)
 		}
 		else
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Section [%s] Invalid DHCP range %s in ini file, ignored", RANGESET, dp);
+			sprintf_s(logBuff, sizeof(logBuff), "Section [%s] Invalid DHCP range %s in ini file, ignored", RANGESET, dp);
 			logDHCPMess(logBuff, 1);
 		}
 	}
 	else
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Section [%s] Invalid DHCP range %s in ini file, ignored", RANGESET, dp);
+		sprintf_s(logBuff, sizeof(logBuff), "Section [%s] Invalid DHCP range %s in ini file, ignored", RANGESET, dp);
 		logDHCPMess(logBuff, 1);
 	}
 }
@@ -6016,7 +6020,7 @@ void addVendClass(MYBYTE rangeSetInd, char *vendClass, MYBYTE vendClassSize)
 
 	if(!rangeSet->vendClass[i])
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Vendor Class Load, Memory Allocation Error");
+		sprintf_s(logBuff, sizeof(logBuff), "Vendor Class Load, Memory Allocation Error");
 		logDHCPMess(logBuff, 1);
 	}
 	else
@@ -6045,7 +6049,7 @@ void addUserClass(MYBYTE rangeSetInd, char *userClass, MYBYTE userClassSize)
 
 	if(!rangeSet->userClass[i])
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Vendor Class Load, Memory Allocation Error");
+		sprintf_s(logBuff, sizeof(logBuff), "Vendor Class Load, Memory Allocation Error");
 		logDHCPMess(logBuff, 1);
 	}
 	else
@@ -6081,38 +6085,38 @@ void addMacRange(MYBYTE rangeSetInd, char *macRange)
 
 		if(!name[0] || !value[0])
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Section [%s], invalid Filter_Mac_Range %s, ignored", RANGESET, macRange);
+			sprintf_s(logBuff, sizeof(logBuff), "Section [%s], invalid Filter_Mac_Range %s, ignored", RANGESET, macRange);
 			logDHCPMess(logBuff, 1);
 		}
 		else
 		{
 			MYBYTE macSize1 = 16;
 			MYBYTE macSize2 = 16;
-			MYBYTE *macStart = (MYBYTE*)calloc(1, macSize1);
-			MYBYTE *macEnd = (MYBYTE*)calloc(1, macSize2);
+			MYBYTE *macStart = (MYBYTE*)calloc(sizeof(char), macSize1);
+			MYBYTE *macEnd = (MYBYTE*)calloc(sizeof(char), macSize2);
 
 			if(!macStart || !macEnd)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "DHCP Range Load, Memory Allocation Error");
+				sprintf_s(logBuff, sizeof(logBuff), "DHCP Range Load, Memory Allocation Error");
 				logDHCPMess(logBuff, 1);
 			}
 			else if (getHexValue(macStart, name, &macSize1) || getHexValue(macEnd, value, &macSize2))
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Section [%s], Invalid character in Filter_Mac_Range %s", RANGESET, macRange);
+				sprintf_s(logBuff, sizeof(logBuff), "Section [%s], Invalid character in Filter_Mac_Range %s", RANGESET, macRange);
 				logDHCPMess(logBuff, 1);
 				free(macStart);
 				free(macEnd);
 			}
 			else if (memcmp(macStart, macEnd, 16) > 0)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Section [%s], Invalid Filter_Mac_Range %s, (higher bound specified on left), ignored", RANGESET, macRange);
+				sprintf_s(logBuff, sizeof(logBuff), "Section [%s], Invalid Filter_Mac_Range %s, (higher bound specified on left), ignored", RANGESET, macRange);
 				logDHCPMess(logBuff, 1);
 				free(macStart);
 				free(macEnd);
 			}
 			else if (macSize1 != macSize2)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Section [%s], Invalid Filter_Mac_Range %s, (start/end size mismatched), ignored", RANGESET, macRange);
+				sprintf_s(logBuff, sizeof(logBuff), "Section [%s], Invalid Filter_Mac_Range %s, (start/end size mismatched), ignored", RANGESET, macRange);
 				logDHCPMess(logBuff, 1);
 				free(macStart);
 				free(macEnd);
@@ -6179,7 +6183,7 @@ void loadDHCP()
 			break;
 	}
 
-	//printf("%s\n", IP2String(ipbuff, cfig.mask));
+	//printf("%s\n", IP2String(ipbuff, sizeof(ipbuff), cfig.mask));
 
 	for (char rangeInd = 0; rangeInd < cfig.rangeCount; rangeInd++)
 	{
@@ -6278,7 +6282,7 @@ void loadDHCP()
 
 							if (!dhcpEntry)
 							{
-								sprintf_s(logBuff,sizeof(logBuff), "Host Options Load, Memory Allocation Error");
+								sprintf_s(logBuff, sizeof(logBuff), "Host Options Load, Memory Allocation Error");
 								logDHCPMess(logBuff, 1);
 								fclose(ff);
 								return;
@@ -6288,7 +6292,7 @@ void loadDHCP()
 
 							if (!dhcpEntry->mapname)
 							{
-								sprintf_s(logBuff,sizeof(logBuff), "Host Data Load, Memory Allocation Error");
+								sprintf_s(logBuff, sizeof(logBuff), "Host Data Load, Memory Allocation Error");
 								logDHCPMess(logBuff, 1);
 								fclose(ff);
 								return;
@@ -6299,35 +6303,35 @@ void loadDHCP()
 							dhcpEntry->fixed = 1;
 							lockIP(optionData.ip);
 							dhcpCache[dhcpEntry->mapname] = dhcpEntry;
-							//printf("%s=%s=%s size=%u %u\n", mapname, dhcpEntry->mapname, IP2String(ipbuff, optionData.ip), optionData.optionSize, dhcpEntry->options);
+							//printf("%s=%s=%s size=%u %u\n", mapname, dhcpEntry->mapname, IP2String(ipbuff, sizeof(ipbuff), optionData.ip), optionData.optionSize, dhcpEntry->options);
 						}
 						else
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Static DHCP Host [%s] Duplicate IP Address %s, Entry ignored", sectionName, IP2String(ipbuff, optionData.ip));
+							sprintf_s(logBuff, sizeof(logBuff), "Static DHCP Host [%s] Duplicate IP Address %s, Entry ignored", sectionName, IP2String(ipbuff, sizeof(ipbuff), optionData.ip));
 							logDHCPMess(logBuff, 1);
 						}
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Duplicate Static DHCP Host [%s] ignored", sectionName);
+						sprintf_s(logBuff, sizeof(logBuff), "Duplicate Static DHCP Host [%s] ignored", sectionName);
 						logDHCPMess(logBuff, 1);
 					}
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Invalid Static DHCP Host MAC Addr size [%s], ignored", sectionName);
+					sprintf_s(logBuff, sizeof(logBuff), "Invalid Static DHCP Host MAC Addr size [%s], ignored", sectionName);
 					logDHCPMess(logBuff, 1);
 				}
 			}
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Invalid Static DHCP Host MAC Addr [%s] ignored", sectionName);
+				sprintf_s(logBuff, sizeof(logBuff), "Invalid Static DHCP Host MAC Addr [%s] ignored", sectionName);
 				logDHCPMess(logBuff, 1);
 			}
 
 			if (!optionData.ip)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: No IP Address for DHCP Static Host %s specified", sectionName);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: No IP Address for DHCP Static Host %s specified", sectionName);
 				logDHCPMess(logBuff, 1);
 			}
 		}
@@ -6345,7 +6349,7 @@ void loadDHCP()
 			char rangeInd = -1;
 			int ind = -1;
 
-			//printf("Loading %s=%s\n", dhcpData.hostname, IP2String(ipbuff, dhcpData.ip));
+			//printf("Loading %s=%s\n", dhcpData.hostname, IP2String(ipbuff, sizeof(ipbuff), dhcpData.ip));
 
 			if (dhcpData.bp_hlen <= 16 && !findServer(network.allServers, MAX_SERVERS, dhcpData.ip))
 			{
@@ -6378,7 +6382,7 @@ void loadDHCP()
 
 					if (!dhcpEntry)
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Loading Existing Leases, Memory Allocation Error");
+						sprintf_s(logBuff, sizeof(logBuff), "Loading Existing Leases, Memory Allocation Error");
 						logDHCPMess(logBuff, 1);
 						fclose(ff);
 						return;
@@ -6388,7 +6392,7 @@ void loadDHCP()
 
 					if (!dhcpEntry->mapname)
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Loading Existing Leases, Memory Allocation Error");
+						sprintf_s(logBuff, sizeof(logBuff), "Loading Existing Leases, Memory Allocation Error");
 						free(dhcpEntry);
 						logDHCPMess(logBuff, 1);
 						fclose(ff);
@@ -6418,7 +6422,7 @@ void loadDHCP()
 						else
 							add2Cache(dhcpData.hostname, dhcpEntry->ip, dhcpData.expiry, CTYPE_LOCAL_A, CTYPE_LOCAL_PTR_NAUTH);
 					}
-					//printf("Loaded %s=%s\n", dhcpData.hostname, IP2String(ipbuff, dhcpData.ip));
+					//printf("Loaded %s=%s\n", dhcpData.hostname, IP2String(ipbuff, sizeof(ipbuff), dhcpData.ip));
 				}
 			}
 		}
@@ -6555,7 +6559,7 @@ FILE *openSection(const char *sectionName, MYBYTE serial)
 								return f;
 							else
 							{
-								sprintf_s(logBuff,sizeof(logBuff), "Error: Section [%s], file %s not found", sectionName, tempbuff);
+								sprintf_s(logBuff, sizeof(logBuff), "Error: Section [%s], file %s not found", sectionName, tempbuff);
 								logMess(logBuff, 1);
 								return NULL;
 							}
@@ -6808,24 +6812,24 @@ return tempbuff;
 }
 */
 
-char *IP2String(char *target, MYDWORD ip, MYBYTE dnsType)
+char *IP2String(char *target, unsigned int targetsz, MYDWORD ip, MYBYTE dnsType)
 {
 	char *dp = target;
 	(*dp) = dnsType;
 	dp++;
 	data15 inaddr;
 	inaddr.ip = ip;
-	sprintf_s(dp,sizeof(dp), "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
+	sprintf_s(dp, targetsz, "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
 	//MYBYTE *octate = (MYBYTE*)&ip;
 	//sprintf_s(target,sizeof(target), "%u.%u.%u.%u", octate[0], octate[1], octate[2], octate[3]);
 	return target;
 }
 
-char *IP2String(char *target, MYDWORD ip)
+char *IP2String(char *target, unsigned int targetsz, MYDWORD ip)
 {
 	data15 inaddr;
 	inaddr.ip = ip;
-	sprintf_s(target,sizeof(target), "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
+	sprintf_s(target, targetsz, "%u.%u.%u.%u", inaddr.octate[0], inaddr.octate[1], inaddr.octate[2], inaddr.octate[3]);
 	//MYBYTE *octate = (MYBYTE*)&ip;
 	//sprintf_s(target,sizeof(target), "%u.%u.%u.%u", octate[0], octate[1], octate[2], octate[3]);
 	return target;
@@ -7117,7 +7121,7 @@ char *IP62String(char *target, MYBYTE *source)
 }
 */
 
-char *IP62String(char *target, MYBYTE *source)
+char *IP62String(char *target, unsigned int targetsz, MYBYTE *source)
 {
 	char *dp = target;
 	bool zerostarted = false;
@@ -7138,8 +7142,8 @@ char *IP62String(char *target, MYBYTE *source)
 			else if (dp != target)
 				dp += sprintf_s(dp,sizeof(dp), ":");
 
-			dp += sprintf_s(dp,sizeof(dp), "%x", source[0]);
-			dp += sprintf_s(dp,sizeof(dp), "%02x", source[1]);
+			dp += sprintf_s(dp, (targetsz - (dp - target)), "%x", source[0]);
+			dp += sprintf_s(dp, (targetsz - (dp - target)), "%02x", source[1]);
 		}
 		else if (source[1])
 		{
@@ -7148,13 +7152,13 @@ char *IP62String(char *target, MYBYTE *source)
 
 			if (zerostarted && zeroended)
 			{
-				dp += sprintf_s(dp,sizeof(dp), "::");
+				dp += sprintf_s(dp, (targetsz - (dp - target)), "::");
 				zerostarted = false;
 			}
 			else if (dp != target)
-				dp += sprintf_s(dp,sizeof(dp), ":");
+				dp += sprintf_s(dp, (targetsz - (dp - target)), ":");
 
-			dp += sprintf_s(dp,sizeof(dp), "%0x", source[1]);
+			dp += sprintf_s(dp, (targetsz - (dp - target)), "%0x", source[1]);
 		}
 		else if (!zeroended)
 			zerostarted = true;
@@ -7375,9 +7379,9 @@ void listCache()
 		cache = p->second;
 
 		if (cache->hostname)
-			sprintf_s(logBuff,sizeof(logBuff), "%s=%s", cache->mapname, cache->hostname);
+			sprintf_s(logBuff, sizeof(logBuff), "%s=%s", cache->mapname, cache->hostname);
 		else
-			sprintf_s(logBuff,sizeof(logBuff), "%s=%s", cache->mapname, IP2String(ipbuff, cache->ip));
+			sprintf_s(logBuff, sizeof(logBuff), "%s=%s", cache->mapname, IP2String(ipbuff, sizeof(ipbuff), cache->ip));
 
 		logDNSMess(logBuff, 1);
 		p++;
@@ -7393,7 +7397,7 @@ void listDhcpCache()
 	while (p != dhcpCache.end())
 	{
 		cache = p->second;
-		sprintf_s(logBuff,sizeof(logBuff), cache->mapname);
+		sprintf_s(logBuff, sizeof(logBuff), cache->mapname);
 		logDHCPMess(logBuff, 1);
 		p++;
 	}
@@ -7404,7 +7408,7 @@ void checkSize()
 	//listCache();
 	//listDhcpCache();
 	//printf("Start %u=%u\n",dnsCache[currentInd].size(),dnsAge[currentInd].size());
-	//sprintf_s(logBuff,sizeof(logBuff), "Start Cache size %u=%u",dnsCache[currentInd].size(),dnsAge[currentInd].size());
+	//sprintf_s(logBuff, sizeof(logBuff), "Start Cache size %u=%u",dnsCache[currentInd].size(),dnsAge[currentInd].size());
 	//debug(logBuff);
 
 	data7 *cache = NULL;
@@ -7430,7 +7434,7 @@ void checkSize()
 		if (cache && cache->expiry > t)
 		{
 			dnsAge[currentInd].insert(pair<time_t, data7*>(cache->expiry, cache));
-			//sprintf_s(logBuff,sizeof(logBuff), "Entry %s being advanced", cache->name);
+			//sprintf_s(logBuff, sizeof(logBuff), "Entry %s being advanced", cache->name);
 			//logMess(logBuff, 1);
 		}
 		else if (cache)
@@ -7468,14 +7472,14 @@ void checkSize()
 					cfig.serial2 = (unsigned int)t;
 			}
 
-			//sprintf_s(logBuff,sizeof(logBuff), "Data Type=%u Cache Size=%u, Age Size=%u, Entry %s being deleted", cache->cType, dnsCache[currentInd].size(), dnsAge[currentInd].size(), cache->name);
+			//sprintf_s(logBuff, sizeof(logBuff), "Data Type=%u Cache Size=%u, Age Size=%u, Entry %s being deleted", cache->cType, dnsCache[currentInd].size(), dnsAge[currentInd].size(), cache->name);
 			//logMess(logBuff, 1);
 			delDnsEntry(cache);
 			//maxDelete--;
 		}
 	}
 
-	//sprintf_s(logBuff,sizeof(logBuff), "End Cache size %u=%u",dnsCache[currentInd].size(),dnsAge[currentInd].size());
+	//sprintf_s(logBuff, sizeof(logBuff), "End Cache size %u=%u",dnsCache[currentInd].size(),dnsAge[currentInd].size());
 	//debug(logBuff);
 
 /*
@@ -7526,7 +7530,7 @@ void delDnsEntry(data7* cache)
 			break;
 		else if (r->second == cache)
 		{
-			//sprintf_s(logBuff,sizeof(logBuff), "cType=%u dnsType=%u Size=%u, Entry %s being deleted", cache->cType, cache->dnsType, dnsCache[currentInd].size(), cache->name);
+			//sprintf_s(logBuff, sizeof(logBuff), "cType=%u dnsType=%u Size=%u, Entry %s being deleted", cache->cType, cache->dnsType, dnsCache[currentInd].size(), cache->name);
 			//debug(logBuff);
 			dnsCache[currentInd].erase(r);
 			free(cache);
@@ -7591,9 +7595,9 @@ MYDWORD calcMask(MYDWORD rangeStart, MYDWORD rangeEnd)
 	return mask.ip;
 }
 
-char *findHost(char *tempbuff, MYDWORD ip)
+char *findHost(char *tempbuff, unsigned int destsz, MYDWORD ip)
 {
-	IP2String(tempbuff, htonl(ip));
+	IP2String(tempbuff, destsz, htonl(ip));
 	data7 *cache = findEntry(tempbuff, DNS_TYPE_PTR);
 
 	if (cache)
@@ -7666,10 +7670,11 @@ void addEntry(data7 *entry)
 
 char *cloneString(char *string)
 {
-	char *s = (char*)calloc(1, strlen(string) + 1);
+	unsigned int destsz = sizeof(char) * (strlen(string) + 1);
+	char *s = (char*)calloc(1, destsz);
 
 	if (s)
-		strcpy_s(s, sizeof(s), string);
+		strcpy_s(s, destsz, string);
 
 	return s;
 }
@@ -7697,7 +7702,7 @@ MYDWORD getSerial(char *zone)
 	if (req.sock == INVALID_SOCKET)
 	{
 		closesocket(req.sock);
-		sprintf_s(logBuff,sizeof(logBuff), "Failed to send create socket to Primary Server %s", IP2String(ipbuff, req.remote.sin_addr.s_addr));
+		sprintf_s(logBuff, sizeof(logBuff), "Failed to send create socket to Primary Server %s", IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr));
 		logDNSMess(logBuff, 1);
 		return 0;
 	}
@@ -7715,7 +7720,7 @@ MYDWORD getSerial(char *zone)
 	if ((req.bytes = sendto(req.sock, req.raw, req.bytes, 0, (sockaddr*)&req.remote, sizeof(req.remote))) <= 0)
 	{
 		closesocket(req.sock);
-		sprintf_s(logBuff,sizeof(logBuff), "Failed to send request to Primary Server %s", IP2String(ipbuff, req.remote.sin_addr.s_addr));
+		sprintf_s(logBuff, sizeof(logBuff), "Failed to send request to Primary Server %s", IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr));
 		logDNSMess(logBuff, 1);
 		return 0;
 	}
@@ -7765,14 +7770,14 @@ MYDWORD getSerial(char *zone)
 		else
 		{
 			closesocket(req.sock);
-			//sprintf_s(logBuff,sizeof(logBuff), "Zone %s not found on Primary Server %s", zone, IP2String(ipbuff, req.remote.sin_addr.s_addr));
+			//sprintf_s(logBuff, sizeof(logBuff), "Zone %s not found on Primary Server %s", zone, IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr));
 			//logDNSMess(logBuff, 1);
 			return 0;
 		}
 	}
 
 	closesocket(req.sock);
-	sprintf_s(logBuff,sizeof(logBuff), "Failed to contact the Primary Server %s", IP2String(ipbuff, req.remote.sin_addr.s_addr));
+	sprintf_s(logBuff, sizeof(logBuff), "Failed to contact the Primary Server %s", IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr));
 	logDNSMess(logBuff, 1);
 	return 0;
 }
@@ -7793,7 +7798,7 @@ void sendServerName()
 	if (req.sock == INVALID_SOCKET)
 	{
 		char logBuff[512];
-		sprintf_s(logBuff,sizeof(logBuff), "Failed to Create Socket in sendServerName");
+		sprintf_s(logBuff, sizeof(logBuff), "Failed to Create Socket in sendServerName");
 		logDNSMess(logBuff, 1);
 		return;
 	}
@@ -7897,7 +7902,7 @@ void emptyCache(MYBYTE ind)
 	//char logBuff[512];
 	data7 *cache = NULL;
 
-	//sprintf_s(logBuff,sizeof(logBuff), "Emptying cache[%d] Start %d=%d",ind, dnsCache[ind].size(), dnsAge[ind].size());
+	//sprintf_s(logBuff, sizeof(logBuff), "Emptying cache[%d] Start %d=%d",ind, dnsCache[ind].size(), dnsAge[ind].size());
 	//logMess(logBuff, 2);
 
 	cfig.mxCount[ind] = 0;
@@ -7925,13 +7930,13 @@ void __cdecl checkZone(void *lpParam)
 
 	while (kRunning)
 	{
-//		//if (!dhcpService && !findEntry(IP2String(ipbuff, htonl(cfig.zoneServers[1])), DNS_TYPE_PTR))
+//		//if (!dhcpService && !findEntry(IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.zoneServers[1])), DNS_TYPE_PTR))
 //		if (!dhcpService)
 //			sendServerName();
 
 		MYBYTE updateInd = !magin->currentInd;
 		emptyCache(updateInd);
-		sprintf_s(logBuff,sizeof(logBuff), "Checking Serial from Primary Server %s", IP2String(ipbuff, cfig.zoneServers[0]));
+		sprintf_s(logBuff, sizeof(logBuff), "Checking Serial from Primary Server %s", IP2String(ipbuff, sizeof(ipbuff), cfig.zoneServers[0]));
 		logDNSMess(logBuff, 2);
 
 		MYDWORD serial1 = getSerial(cfig.zone);
@@ -7944,7 +7949,7 @@ void __cdecl checkZone(void *lpParam)
 		{
 			//cfig.dnsRepl = 0;
 			//cfig.dhcpRepl = 0;
-			sprintf_s(logBuff,sizeof(logBuff), "Failed to get SOA from Primary Server, waiting %i seconds to retry", cfig.retry);
+			sprintf_s(logBuff, sizeof(logBuff), "Failed to get SOA from Primary Server, waiting %i seconds to retry", cfig.retry);
 			logDNSMess(logBuff, 1);
 			Sleep(1000*(cfig.retry));
 			continue;
@@ -7961,7 +7966,7 @@ void __cdecl checkZone(void *lpParam)
 			else
 				cfig.expireTime = t + cfig.expire;
 
-			sprintf_s(logBuff,sizeof(logBuff), "Zone Refresh not required");
+			sprintf_s(logBuff, sizeof(logBuff), "Zone Refresh not required");
 			logDNSMess(logBuff, 2);
 			Sleep(1000*(cfig.refresh));
 		}
@@ -7977,7 +7982,7 @@ void __cdecl checkZone(void *lpParam)
 
 			if (!serial1 || !serial2)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Waiting %u seconds to retry", cfig.retry);
+				sprintf_s(logBuff, sizeof(logBuff), "Waiting %u seconds to retry", cfig.retry);
 				logDNSMess(logBuff, 1);
 				Sleep(1000*(cfig.retry));
 			}
@@ -8131,7 +8136,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 
 	if (req.sock == INVALID_SOCKET)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Failed to Create Socket, Zone Transfer Failed");
+		sprintf_s(logBuff, sizeof(logBuff), "Failed to Create Socket, Zone Transfer Failed");
 		logDNSMess(logBuff, 1);
 		return 0;
 	}
@@ -8145,7 +8150,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 	if (nRet == SOCKET_ERROR)
 	{
 		closesocket(req.sock);
-		sprintf_s(logBuff,sizeof(logBuff), "Error: Interface %s not ready, Zone Transfer Failed", IP2String(ipbuff, req.addr.sin_addr.s_addr));
+		sprintf_s(logBuff, sizeof(logBuff), "Error: Interface %s not ready, Zone Transfer Failed", IP2String(ipbuff, sizeof(ipbuff), req.addr.sin_addr.s_addr));
 		logDNSMess(logBuff, 1);
 		return 0;
 	}
@@ -8173,7 +8178,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 		if (send(req.sock, req.raw, req.bytes, 0) < req.bytes)
 		{
 			closesocket(req.sock);
-			sprintf_s(logBuff,sizeof(logBuff), "Failed to contact Primary Server %s, Zone Transfer Failed", IP2String(ipbuff, req.remote.sin_addr.s_addr));
+			sprintf_s(logBuff, sizeof(logBuff), "Failed to contact Primary Server %s, Zone Transfer Failed", IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr));
 			logDNSMess(logBuff, 1);
 			return 0;
 		}
@@ -8206,7 +8211,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 
 			if (req.dnsp->header.rcode)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Primary Server %s, zone %s refused", IP2String(ipbuff, req.remote.sin_addr.s_addr), zone);
+				sprintf_s(logBuff, sizeof(logBuff), "Primary Server %s, zone %s refused", IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr), zone);
 				logDNSMess(logBuff, 1);
 				fclose(f);
 				return 0;
@@ -8235,7 +8240,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 					return 0;
 				}
 
-				//sprintf_s(logBuff,sizeof(logBuff), "%u=%s\n", pktSize, req.mapname);
+				//sprintf_s(logBuff, sizeof(logBuff), "%u=%s\n", pktSize, req.mapname);
 				//logMess(logBuff, 2);
 
 				req.dnsType = (unsigned char)fUShort(req.dp);
@@ -8365,7 +8370,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 						lump.hostname = req.cname;
 						cache = createCache(&lump);
 
-						//sprintf_s(logBuff,sizeof(logBuff), "%s=%s=%u=%s=%s", req.mapname, req.cname, cache->mapname[0], &cache->mapname[1], cache->hostname);
+						//sprintf_s(logBuff, sizeof(logBuff), "%s=%s=%u=%s=%s", req.mapname, req.cname, cache->mapname[0], &cache->mapname[1], cache->hostname);
 						//logDNSMess(logBuff, 2);
 
 						if (cache)
@@ -8399,19 +8404,19 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 			}
 
 			//printf("Refresh ind %i serial %u size %i\n", ind, serial1, dnsCache[ind].size());
-			sprintf_s(logBuff,sizeof(logBuff), "Zone %s Transferred from Primary Server, %u RRs imported", zone, added);
+			sprintf_s(logBuff, sizeof(logBuff), "Zone %s Transferred from Primary Server, %u RRs imported", zone, added);
 			logDNSMess(logBuff, 1);
 			return serial1;
 		}
 		else
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Primary Server %s, zone %s Invalid AXFR data", IP2String(ipbuff, req.remote.sin_addr.s_addr), zone);
+			sprintf_s(logBuff, sizeof(logBuff), "Primary Server %s, zone %s Invalid AXFR data", IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr), zone);
 			logDNSMess(logBuff, 1);
 		}
 	}
 	else
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Failed to contact Primary Server %s, Zone Transfer Failed", IP2String(ipbuff, req.remote.sin_addr.s_addr));
+		sprintf_s(logBuff, sizeof(logBuff), "Failed to contact Primary Server %s, Zone Transfer Failed", IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr));
 		logDNSMess(logBuff, 1);
 		closesocket(req.sock);
 		return 0;
@@ -8588,7 +8593,7 @@ bool getSecondary()
 			}
 		}
 
-		sprintf_s(logBuff,sizeof(logBuff), "%u RRs rebuild from Secondary Server", rr);
+		sprintf_s(logBuff, sizeof(logBuff), "%u RRs rebuild from Secondary Server", rr);
 		logDNSMess(logBuff, 2);
 		fclose(f);
 		return true;
@@ -8645,7 +8650,7 @@ void __cdecl init(void *lpParam)
 	}
 	else if ( GetLastError() == ERROR_ALREADY_EXISTS )
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "CreateEvent opened an existing Event\nServer May already be Running");
+		sprintf_s(logBuff, sizeof(logBuff), "CreateEvent opened an existing Event\nServer May already be Running");
 		logDHCPMess(logBuff, 0);
 		exit(-1);
 	}
@@ -8696,12 +8701,12 @@ void __cdecl init(void *lpParam)
 		if (tempbuff[0])
 			logMess(tempbuff, 1);
 
-		sprintf_s(logBuff,sizeof(logBuff), "%s Starting...", sVersion);
+		sprintf_s(logBuff, sizeof(logBuff), "%s Starting...", sVersion);
 		logMess(logBuff, 1);
 	}
 	else
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "%s Starting...", sVersion);
+		sprintf_s(logBuff, sizeof(logBuff), "%s Starting...", sVersion);
 		logMess(logBuff, 1);
 	}
 
@@ -8710,7 +8715,7 @@ void __cdecl init(void *lpParam)
 
 	if (cfig.wsaData.wVersion != wVersionRequested)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "WSAStartup Error");
+		sprintf_s(logBuff, sizeof(logBuff), "WSAStartup Error");
 		logMess(logBuff, 1);
 	}
 
@@ -8726,7 +8731,7 @@ void __cdecl init(void *lpParam)
 				dhcpService = true;
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Section [SERVICES] invalid entry %s ignored", raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Section [SERVICES] invalid entry %s ignored", raw);
 				logMess(logBuff, 1);
 			}
 
@@ -8739,7 +8744,7 @@ void __cdecl init(void *lpParam)
 
 	if (dnsService)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Starting DNS Service");
+		sprintf_s(logBuff, sizeof(logBuff), "Starting DNS Service");
 		logDNSMess(logBuff, 1);
 
 		if (FILE *f = openSection("FORWARDING_SERVERS", 1))
@@ -8754,7 +8759,7 @@ void __cdecl init(void *lpParam)
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Section [FORWARDING_SERVERS] Invalid Entry: %s ignored", raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Section [FORWARDING_SERVERS] Invalid Entry: %s ignored", raw);
 					logDNSMess(logBuff, 1);
 				}
 			}
@@ -8763,20 +8768,20 @@ void __cdecl init(void *lpParam)
 
 	if (dhcpService)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Starting DHCP Service");
+		sprintf_s(logBuff, sizeof(logBuff), "Starting DHCP Service");
 		logDHCPMess(logBuff, 1);
 	}
 
 	if (dnsService)
 	{
 		if (cfig.dnsLogLevel == 3)
-			sprintf_s(logBuff,sizeof(logBuff), "DNS Logging: All");
+			sprintf_s(logBuff, sizeof(logBuff), "DNS Logging: All");
 		else if (cfig.dnsLogLevel == 2)
-			sprintf_s(logBuff,sizeof(logBuff), "DNS Logging: All");
+			sprintf_s(logBuff, sizeof(logBuff), "DNS Logging: All");
 		else if (cfig.dnsLogLevel == 1)
-			sprintf_s(logBuff,sizeof(logBuff), "DNS Logging: Normal");
+			sprintf_s(logBuff, sizeof(logBuff), "DNS Logging: Normal");
 		else
-			sprintf_s(logBuff,sizeof(logBuff), "DNS Logging: None");
+			sprintf_s(logBuff, sizeof(logBuff), "DNS Logging: None");
 
 		logDNSMess(logBuff, 1);
 	}
@@ -8784,13 +8789,13 @@ void __cdecl init(void *lpParam)
 	if (dhcpService)
 	{
 		if (cfig.dhcpLogLevel == 3)
-			sprintf_s(logBuff,sizeof(logBuff), "DHCP Logging: Debug");
+			sprintf_s(logBuff, sizeof(logBuff), "DHCP Logging: Debug");
 		else if (cfig.dhcpLogLevel == 2)
-			sprintf_s(logBuff,sizeof(logBuff), "DHCP Logging: All");
+			sprintf_s(logBuff, sizeof(logBuff), "DHCP Logging: All");
 		else if (cfig.dhcpLogLevel == 1)
-			sprintf_s(logBuff,sizeof(logBuff), "DHCP Logging: Normal");
+			sprintf_s(logBuff, sizeof(logBuff), "DHCP Logging: Normal");
 		else
-			sprintf_s(logBuff,sizeof(logBuff), "DHCP Logging: None");
+			sprintf_s(logBuff, sizeof(logBuff), "DHCP Logging: None");
 
 		logDHCPMess(logBuff, 1);
 	}
@@ -8807,7 +8812,7 @@ void __cdecl init(void *lpParam)
 			}
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [LISTEN_ON], Invalid Interface Address %s, ignored", raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: Section [LISTEN_ON], Invalid Interface Address %s, ignored", raw);
 				logMess(logBuff, 1);
 			}
 		}
@@ -8846,19 +8851,19 @@ void __cdecl init(void *lpParam)
 						cfig.maxCache = atoi(value);
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Section [TIMINGS], Invalid Entry: %s ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Section [TIMINGS], Invalid Entry: %s ignored", raw);
 						logDNSMess(logBuff, 1);
 					}
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Section [TIMINGS], Invalid value: %s ignored", value);
+					sprintf_s(logBuff, sizeof(logBuff), "Section [TIMINGS], Invalid value: %s ignored", value);
 					logDNSMess(logBuff, 1);
 				}
 			}
 			else
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Section [TIMINGS], Missing value, entry %s ignored", raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Section [TIMINGS], Missing value, entry %s ignored", raw);
 				logDNSMess(logBuff, 1);
 			}
 		}
@@ -8943,15 +8948,15 @@ void __cdecl init(void *lpParam)
 					strcat_s(cfig.authority,sizeof(cfig.authority), arpa + 1);
 					cfig.aLen = (unsigned char)strlen(cfig.authority);
 					calcRangeLimits(network.ip, mask.ip, &cfig.rangeStart, &cfig.rangeEnd);
-					//IP2String(logBuff, htonl(cfig.rangeStart));
+					//IP2String(logBuff, sizeof(logBuff), htonl(cfig.rangeStart));
 					//logMess(logBuff, 1);
-					//IP2String(logBuff, htonl(cfig.rangeEnd));
+					//IP2String(logBuff, sizeof(logBuff), htonl(cfig.rangeEnd));
 					//logMess(logBuff, 1);
 					cfig.authorized = 1;
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: Invalid Domain Name (Part %s), ignored", cfig.authority);
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: Invalid Domain Name (Part %s), ignored", cfig.authority);
 					cfig.aLen = 0;
 					cfig.authority[0] = 0;
 					logDNSMess(logBuff, 1);
@@ -8967,7 +8972,7 @@ void __cdecl init(void *lpParam)
 			{
 				cfig.aLen = 0;
 				cfig.authority[0] = 0;
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: Invalid Domain Name %s, ignored", raw);
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: Invalid Domain Name %s, ignored", raw);
 				logDNSMess(logBuff, 1);
 			}
 		}
@@ -8985,7 +8990,7 @@ void __cdecl init(void *lpParam)
 			{
 				if (dnsService && !cfig.authorized)
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Section [ZONE_REPLICATION], Server is not an authority, entry %s ignored", raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Section [ZONE_REPLICATION], Server is not an authority, entry %s ignored", raw);
 					logDNSMess(logBuff, 1);
 					continue;
 				}
@@ -9007,19 +9012,19 @@ void __cdecl init(void *lpParam)
 						}
 						else
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Section [ZONE_REPLICATION] Invalid Entry: %s ignored", raw);
+							sprintf_s(logBuff, sizeof(logBuff), "Section [ZONE_REPLICATION] Invalid Entry: %s ignored", raw);
 							logDNSMess(logBuff, 1);
 						}
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Section [ZONE_REPLICATION] Invalid Entry: %s ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Section [ZONE_REPLICATION] Invalid Entry: %s ignored", raw);
 						logDNSMess(logBuff, 1);
 					}
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Section [ZONE_REPLICATION], Missing value, entry %s ignored", raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Section [ZONE_REPLICATION], Missing value, entry %s ignored", raw);
 					logDNSMess(logBuff, 1);
 				}
 			}
@@ -9028,19 +9033,19 @@ void __cdecl init(void *lpParam)
 
 	if (!cfig.zoneServers[0] && cfig.zoneServers[1])
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Section [ZONE_REPLICATION] Missing Primary Server");
+		sprintf_s(logBuff, sizeof(logBuff), "Section [ZONE_REPLICATION] Missing Primary Server");
 		logDNSMess(logBuff, 1);
 	}
 	else if (cfig.zoneServers[0] && !cfig.zoneServers[1])
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Section [ZONE_REPLICATION] Missing Secondary Server");
+		sprintf_s(logBuff, sizeof(logBuff), "Section [ZONE_REPLICATION] Missing Secondary Server");
 		logDNSMess(logBuff, 1);
 	}
 	else if (cfig.zoneServers[0] && cfig.zoneServers[1])
 	{
 		if (findServer(network.staticServers, MAX_SERVERS, cfig.zoneServers[0]) && findServer(network.staticServers, MAX_SERVERS, cfig.zoneServers[1]))
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Section [ZONE_REPLICATION] Primary & Secondary should be Different Boxes");
+			sprintf_s(logBuff, sizeof(logBuff), "Section [ZONE_REPLICATION] Primary & Secondary should be Different Boxes");
 			logDNSMess(logBuff, 1);
 		}
 		else if (findServer(network.staticServers, MAX_SERVERS, cfig.zoneServers[0]))
@@ -9049,7 +9054,7 @@ void __cdecl init(void *lpParam)
 			cfig.replication = 2;
 		else
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Section [ZONE_REPLICATION] No Server IP not found on this Machine");
+			sprintf_s(logBuff, sizeof(logBuff), "Section [ZONE_REPLICATION] No Server IP not found on this Machine");
 			logDNSMess(logBuff, 1);
 		}
 	}
@@ -9087,7 +9092,7 @@ void __cdecl init(void *lpParam)
 		}
 		else if ( GetLastError() == ERROR_ALREADY_EXISTS )
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "CreateEvent opened an existing Event\nServer May already be Running");
+			sprintf_s(logBuff, sizeof(logBuff), "CreateEvent opened an existing Event\nServer May already be Running");
 			logDHCPMess(logBuff, 0);
 			exit(-1);
 		}
@@ -9107,7 +9112,7 @@ void __cdecl init(void *lpParam)
 		}
 		else if ( GetLastError() == ERROR_ALREADY_EXISTS )
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "CreateEvent opened an existing Event\nServer May already be Running");
+			sprintf_s(logBuff, sizeof(logBuff), "CreateEvent opened an existing Event\nServer May already be Running");
 			logDHCPMess(logBuff, 0);
 			exit(-1);
 		}
@@ -9117,9 +9122,9 @@ void __cdecl init(void *lpParam)
 		{
 			char *logPtr = logBuff;
 			logPtr += sprintf_s(logPtr,sizeof(logPtr), "DHCP Range: ");
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", IP2String(ipbuff, htonl(cfig.dhcpRanges[i].rangeStart)));
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "-%s", IP2String(ipbuff, htonl(cfig.dhcpRanges[i].rangeEnd)));
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "/%s", IP2String(ipbuff, cfig.dhcpRanges[i].mask));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeStart)));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "-%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeEnd)));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "/%s", IP2String(ipbuff, sizeof(ipbuff), cfig.dhcpRanges[i].mask));
 			logDHCPMess(logBuff, 1);
 		}
 
@@ -9173,7 +9178,7 @@ void __cdecl init(void *lpParam)
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Section [DNS_ALLOWED_HOSTS] Invalid entry %s in ini file, ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_ALLOWED_HOSTS] Invalid entry %s in ini file, ignored", raw);
 						logDNSMess(logBuff, 1);
 					}
 				}
@@ -9202,7 +9207,7 @@ void __cdecl init(void *lpParam)
 						}
 						else if (!ip)
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Section [DNS_HOSTS] Invalid Entry %s ignored", raw);
+							sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] Invalid Entry %s ignored", raw);
 							logDNSMess(logBuff, 1);
 							continue;
 						}
@@ -9218,7 +9223,7 @@ void __cdecl init(void *lpParam)
 							default:
 								if (cfig.replication)
 								{
-									sprintf_s(logBuff,sizeof(logBuff), "Section [DNS_HOSTS] forward entry for %s not in Forward Zone, ignored", raw);
+									sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] forward entry for %s not in Forward Zone, ignored", raw);
 									logDNSMess(logBuff, 1);
 								}
 								else
@@ -9234,7 +9239,7 @@ void __cdecl init(void *lpParam)
 						}
 						else if (cfig.replication)
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Section [DNS_HOSTS] reverse entry for %s not in Reverse Zone, ignored", raw);
+							sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] reverse entry for %s not in Reverse Zone, ignored", raw);
 							logDNSMess(logBuff, 1);
 						}
 						else
@@ -9242,13 +9247,13 @@ void __cdecl init(void *lpParam)
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Section [DNS_HOSTS] Invalid Entry: %s ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] Invalid Entry: %s ignored", raw);
 						logDNSMess(logBuff, 1);
 					}
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Section [DNS_HOSTS], Missing value, entry %s ignored", raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS], Missing value, entry %s ignored", raw);
 					logDNSMess(logBuff, 1);
 				}
 			}
@@ -9295,25 +9300,25 @@ void __cdecl init(void *lpParam)
 							}
 							else
 							{
-								sprintf_s(logBuff,sizeof(logBuff), "Section [ALIASES] duplicate entry %s ignored", raw);
+								sprintf_s(logBuff, sizeof(logBuff), "Section [ALIASES] duplicate entry %s ignored", raw);
 								logDNSMess(logBuff, 1);
 							}
 						}
 						else
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Section [ALIASES] alias %s should be bare/local name, entry ignored", name);
+							sprintf_s(logBuff, sizeof(logBuff), "Section [ALIASES] alias %s should be bare/local name, entry ignored", name);
 							logDNSMess(logBuff, 1);
 						}
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Section [ALIASES] Invalid Entry: %s ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Section [ALIASES] Invalid Entry: %s ignored", raw);
 						logDNSMess(logBuff, 1);
 					}
 				}
 				else
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Section [ALIASES], Missing value, entry %s ignored", raw);
+					sprintf_s(logBuff, sizeof(logBuff), "Section [ALIASES], Missing value, entry %s ignored", raw);
 					logDNSMess(logBuff, 1);
 				}
 			}
@@ -9347,13 +9352,13 @@ void __cdecl init(void *lpParam)
 						}
 						else
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Section [MAIL_SERVERS] Invalid Entry: %s ignored", raw);
+							sprintf_s(logBuff, sizeof(logBuff), "Section [MAIL_SERVERS] Invalid Entry: %s ignored", raw);
 							logDNSMess(logBuff, 1);
 						}
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Section [MAIL_SERVERS], Missing value, entry %s ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Section [MAIL_SERVERS], Missing value, entry %s ignored", raw);
 						logDNSMess(logBuff, 1);
 					}
 				}
@@ -9379,7 +9384,7 @@ void __cdecl init(void *lpParam)
 						{
 							if (!strcasecmp(cfig.dnsRoutes[j].zone, name))
 							{
-								sprintf_s(logBuff,sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS], Duplicate Entry for Child Zone %s ignored", raw);
+								sprintf_s(logBuff, sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS], Duplicate Entry for Child Zone %s ignored", raw);
 								logDNSMess(logBuff, 1);
 								break;
 							}
@@ -9411,7 +9416,7 @@ void __cdecl init(void *lpParam)
 									}
 									else
 									{
-										sprintf_s(logBuff,sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS] Invalid Entry: %s ignored", raw);
+										sprintf_s(logBuff, sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS] Invalid Entry: %s ignored", raw);
 										logDNSMess(logBuff, 1);
 									}
 								}
@@ -9429,21 +9434,21 @@ void __cdecl init(void *lpParam)
 									}
 									else
 									{
-										sprintf_s(logBuff,sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS] Invalid Entry: %s ignored", raw);
+										sprintf_s(logBuff, sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS] Invalid Entry: %s ignored", raw);
 										logDNSMess(logBuff, 1);
 									}
 								}
 							}
 							else
 							{
-								sprintf_s(logBuff,sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS] Invalid Entry: %s ignored", raw);
+								sprintf_s(logBuff, sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS] Invalid Entry: %s ignored", raw);
 								logDNSMess(logBuff, 1);
 							}
 						}
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS], Missing value, entry %s ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Section [CONDITIONAL_FORWARDERS], Missing value, entry %s ignored", raw);
 						logDNSMess(logBuff, 1);
 					}
 				}
@@ -9473,13 +9478,13 @@ void __cdecl init(void *lpParam)
 						}
 						else
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Section [WILD_HOSTS] Invalid Entry: %s ignored", raw);
+							sprintf_s(logBuff, sizeof(logBuff), "Section [WILD_HOSTS] Invalid Entry: %s ignored", raw);
 							logDNSMess(logBuff, 1);
 						}
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Section [WILD_HOSTS], Missing value, entry %s ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Section [WILD_HOSTS], Missing value, entry %s ignored", raw);
 						logDNSMess(logBuff, 1);
 					}
 				}
@@ -9493,7 +9498,7 @@ void __cdecl init(void *lpParam)
 
 			while (kRunning)
 			{
-//				//if (!dhcpService && !findEntry(IP2String(ipbuff, htonl(cfig.zoneServers[1])), DNS_TYPE_PTR))
+//				//if (!dhcpService && !findEntry(IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.zoneServers[1])), DNS_TYPE_PTR))
 //				if (!dhcpService)
 //				{
 //					sendServerName();
@@ -9525,7 +9530,7 @@ void __cdecl init(void *lpParam)
 					break;
 				}
 
-				sprintf_s(logBuff,sizeof(logBuff), "Failed to get Zone(s) from Primary Server, waiting %d seconds to retry", cfig.retry);
+				sprintf_s(logBuff, sizeof(logBuff), "Failed to get Zone(s) from Primary Server, waiting %d seconds to retry", cfig.retry);
 				logDNSMess(logBuff, 1);
 
 				Sleep(cfig.retry*1000);
@@ -9572,7 +9577,7 @@ void __cdecl init(void *lpParam)
 
 			if (!dhcpService)
 			{
-				findHost(cfig.nsS, cfig.zoneServers[1]);
+				findHost(cfig.nsS, sizeof(cfig.nsS), cfig.zoneServers[1]);
 
 				if (cfig.nsS[0])
 				{
@@ -9626,7 +9631,7 @@ void __cdecl init(void *lpParam)
 
 			if (cfig.dhcpReplConn.sock == INVALID_SOCKET)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Failed to Create DHCP Replication Socket");
+				sprintf_s(logBuff, sizeof(logBuff), "Failed to Create DHCP Replication Socket");
 				logDHCPMess(logBuff, 1);
 			}
 			else
@@ -9647,7 +9652,7 @@ void __cdecl init(void *lpParam)
 				if (nRet == SOCKET_ERROR)
 				{
 					cfig.dhcpReplConn.ready = false;
-					sprintf_s(logBuff,sizeof(logBuff), "DHCP Replication Server, Bind Failed");
+					sprintf_s(logBuff, sizeof(logBuff), "DHCP Replication Server, Bind Failed");
 					logDHCPMess(logBuff, 1);
 				}
 				else
@@ -9711,52 +9716,52 @@ void __cdecl init(void *lpParam)
 		}
 
 		if (cfig.lease >= INT_MAX)
-			sprintf_s(logBuff,sizeof(logBuff), "Default Lease: Infinity");
+			sprintf_s(logBuff, sizeof(logBuff), "Default Lease: Infinity");
 		else
-			sprintf_s(logBuff,sizeof(logBuff), "Default Lease: %u (sec)", cfig.lease);
+			sprintf_s(logBuff, sizeof(logBuff), "Default Lease: %u (sec)", cfig.lease);
 
 		logDHCPMess(logBuff, 1);
 	}
 
 	if (cfig.replication == 1)
-		sprintf_s(logBuff,sizeof(logBuff), "Server Name: %s (Primary)", cfig.servername);
+		sprintf_s(logBuff, sizeof(logBuff), "Server Name: %s (Primary)", cfig.servername);
 	else if (cfig.replication == 2)
-		sprintf_s(logBuff,sizeof(logBuff), "Server Name: %s (Secondary)", cfig.servername);
+		sprintf_s(logBuff, sizeof(logBuff), "Server Name: %s (Secondary)", cfig.servername);
 	else
-		sprintf_s(logBuff,sizeof(logBuff), "Server Name: %s", cfig.servername);
+		sprintf_s(logBuff, sizeof(logBuff), "Server Name: %s", cfig.servername);
 
 	logDNSMess(logBuff, 1);
 
 	if (dnsService)
 	{
 		if (cfig.authorized)
-			sprintf_s(logBuff,sizeof(logBuff), "Authority for Zone: %s (%s)", cfig.zone, cfig.authority);
+			sprintf_s(logBuff, sizeof(logBuff), "Authority for Zone: %s (%s)", cfig.zone, cfig.authority);
 		else
-			sprintf_s(logBuff,sizeof(logBuff), "Domain Name: %s", cfig.zone);
+			sprintf_s(logBuff, sizeof(logBuff), "Domain Name: %s", cfig.zone);
 
 		logDNSMess(logBuff, 1);
 
 		if (cfig.lease >= INT_MAX)
-			sprintf_s(logBuff,sizeof(logBuff), "Default Host Expiry: Infinity");
+			sprintf_s(logBuff, sizeof(logBuff), "Default Host Expiry: Infinity");
 		else
-			sprintf_s(logBuff,sizeof(logBuff), "Default Host Expiry: %u (sec)", cfig.lease);
+			sprintf_s(logBuff, sizeof(logBuff), "Default Host Expiry: %u (sec)", cfig.lease);
 
 		logDNSMess(logBuff, 1);
 
 		if (cfig.replication)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Refresh: %u (sec)", cfig.refresh);
+			sprintf_s(logBuff, sizeof(logBuff), "Refresh: %u (sec)", cfig.refresh);
 			logDNSMess(logBuff, 1);
-			sprintf_s(logBuff,sizeof(logBuff), "Retry: %u (sec)", cfig.retry);
+			sprintf_s(logBuff, sizeof(logBuff), "Retry: %u (sec)", cfig.retry);
 			logDNSMess(logBuff, 1);
 
 			if (cfig.expire == UINT_MAX)
-				sprintf_s(logBuff,sizeof(logBuff), "Expire: Infinity");
+				sprintf_s(logBuff, sizeof(logBuff), "Expire: Infinity");
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "Expire: %u (sec)", cfig.expire);
+				sprintf_s(logBuff, sizeof(logBuff), "Expire: %u (sec)", cfig.expire);
 
 			logDNSMess(logBuff, 1);
-			sprintf_s(logBuff,sizeof(logBuff), "Min: %u (sec)", cfig.minimum);
+			sprintf_s(logBuff, sizeof(logBuff), "Min: %u (sec)", cfig.minimum);
 			logDNSMess(logBuff, 1);
 		}
 
@@ -9765,16 +9770,16 @@ void __cdecl init(void *lpParam)
 			char temp[256];
 
 			if (!cfig.dnsRoutes[i].dns[1])
-				sprintf_s(logBuff,sizeof(logBuff), "Conditional Forwarder: %s for %s", IP2String(ipbuff, cfig.dnsRoutes[i].dns[0]), cfig.dnsRoutes[i].zone);
+				sprintf_s(logBuff, sizeof(logBuff), "Conditional Forwarder: %s for %s", IP2String(ipbuff, sizeof(ipbuff), cfig.dnsRoutes[i].dns[0]), cfig.dnsRoutes[i].zone);
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "Conditional Forwarder: %s, %s for %s", IP2String(temp, cfig.dnsRoutes[i].dns[0]), IP2String(ipbuff, cfig.dnsRoutes[i].dns[1]), cfig.dnsRoutes[i].zone);
+				sprintf_s(logBuff, sizeof(logBuff), "Conditional Forwarder: %s, %s for %s", IP2String(temp, sizeof(temp), cfig.dnsRoutes[i].dns[0]), IP2String(ipbuff, sizeof(ipbuff), cfig.dnsRoutes[i].dns[1]), cfig.dnsRoutes[i].zone);
 
 			logDNSMess(logBuff, 1);
 		}
 
 		for (int i = 0; i < MAX_SERVERS && network.dns[i]; i++)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Default Forwarding Server: %s", IP2String(ipbuff, network.dns[i]));
+			sprintf_s(logBuff, sizeof(logBuff), "Default Forwarding Server: %s", IP2String(ipbuff, sizeof(ipbuff), network.dns[i]));
 			logDNSMess(logBuff, 1);
 		}
 
@@ -9784,18 +9789,18 @@ void __cdecl init(void *lpParam)
 		{
 			char *logPtr = logBuff;
 			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", "DNS Service Permitted Hosts: ");
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s-", IP2String(ipbuff, htonl(cfig.dnsRanges[i].rangeStart)));
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", IP2String(ipbuff, htonl(cfig.dnsRanges[i].rangeEnd)));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s-", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dnsRanges[i].rangeStart)));
+			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dnsRanges[i].rangeEnd)));
 			logDNSMess(logBuff, 1);
 		}
 	}
 	else
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "Domain Name: %s", cfig.zone);
+		sprintf_s(logBuff, sizeof(logBuff), "Domain Name: %s", cfig.zone);
 		logDNSMess(logBuff, 1);
 	}
 
-	sprintf_s(logBuff,sizeof(logBuff), "Detecting Static Interfaces..");
+	sprintf_s(logBuff, sizeof(logBuff), "Detecting Static Interfaces..");
 	logMess(logBuff, 1);
 
 	do
@@ -9819,7 +9824,7 @@ void __cdecl init(void *lpParam)
 				if (network.dhcpConn[i].sock == INVALID_SOCKET)
 				{
 					bindfailed = true;
-					sprintf_s(logBuff,sizeof(logBuff), "Failed to Create Socket");
+					sprintf_s(logBuff, sizeof(logBuff), "Failed to Create Socket");
 					logDHCPMess(logBuff, 1);
 					continue;
 				}
@@ -9834,7 +9839,7 @@ void __cdecl init(void *lpParam)
 				network.dhcpConn[i].broadCastSize = sizeof(network.dhcpConn[i].broadCastVal);
 				if (SOCKET_ERROR == setsockopt(network.dhcpConn[i].sock, SOL_SOCKET, SO_BROADCAST, (char*)(&network.dhcpConn[i].broadCastVal), network.dhcpConn[i].broadCastSize))
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Failed to set SO_BROADCAST on socket");
+					sprintf_s(logBuff, sizeof(logBuff), "Failed to set SO_BROADCAST on socket");
 					logDHCPMess(logBuff, 1);
 				}
 
@@ -9847,7 +9852,7 @@ void __cdecl init(void *lpParam)
 				{
 					bindfailed = true;
 					closesocket(network.dhcpConn[i].sock);
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: %s UDP Port 67 already in use", IP2String(ipbuff, network.listenServers[j]));
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: %s UDP Port 67 already in use", IP2String(ipbuff, sizeof(ipbuff), network.listenServers[j]));
 					logDHCPMess(logBuff, 1);
 					continue;
 				}
@@ -9885,7 +9890,7 @@ void __cdecl init(void *lpParam)
 						else
 						{
 							network.httpConn.loaded = false;
-							sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], Invalid IP Address %s, ignored", name);
+							sprintf_s(logBuff, sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], Invalid IP Address %s, ignored", name);
 							logDHCPMess(logBuff, 1);
 						}
 
@@ -9896,7 +9901,7 @@ void __cdecl init(void *lpParam)
 							else
 							{
 								network.httpConn.loaded = false;
-								sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], Invalid port %s, ignored", value);
+								sprintf_s(logBuff, sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], Invalid port %s, ignored", value);
 								logDHCPMess(logBuff, 1);
 							}
 						}
@@ -9907,7 +9912,7 @@ void __cdecl init(void *lpParam)
 						{
 							bindfailed = true;
 							network.httpConn.loaded = false;
-							sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], %s not available, ignored", raw);
+							sprintf_s(logBuff, sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], %s not available, ignored", raw);
 							logDHCPMess(logBuff, 1);
 						}
 					}
@@ -9921,7 +9926,7 @@ void __cdecl init(void *lpParam)
 						}
 						else
 						{
-							sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], invalid client IP %s, ignored", raw);
+							sprintf_s(logBuff, sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], invalid client IP %s, ignored", raw);
 							logDHCPMess(logBuff, 1);
 						}
 					}
@@ -9932,7 +9937,7 @@ void __cdecl init(void *lpParam)
 					}
 					else
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], invalid entry %s, ignored", raw);
+						sprintf_s(logBuff, sizeof(logBuff), "Warning: Section [HTTP_INTERFACE], invalid entry %s, ignored", raw);
 						logDHCPMess(logBuff, 1);
 					}
 				}
@@ -9946,7 +9951,7 @@ void __cdecl init(void *lpParam)
 			if (network.httpConn.sock == INVALID_SOCKET)
 			{
 				bindfailed = true;
-				sprintf_s(logBuff,sizeof(logBuff), "Failed to Create Socket");
+				sprintf_s(logBuff, sizeof(logBuff), "Failed to Create Socket");
 				logDHCPMess(logBuff, 1);
 			}
 			else
@@ -9970,7 +9975,7 @@ void __cdecl init(void *lpParam)
 				if (nRet == SOCKET_ERROR)
 				{
 					bindfailed = true;
-					sprintf_s(logBuff,sizeof(logBuff), "Http Interface %s TCP Port %u not available", IP2String(ipbuff, network.httpConn.server), network.httpConn.port);
+					sprintf_s(logBuff, sizeof(logBuff), "Http Interface %s TCP Port %u not available", IP2String(ipbuff, sizeof(ipbuff), network.httpConn.server), network.httpConn.port);
 					logDHCPMess(logBuff, 1);
 					closesocket(network.httpConn.sock);
 				}
@@ -9981,7 +9986,7 @@ void __cdecl init(void *lpParam)
 					if (nRet == SOCKET_ERROR)
 					{
 						bindfailed = true;
-						sprintf_s(logBuff,sizeof(logBuff), "%s TCP Port %u Error on Listen", IP2String(ipbuff, network.httpConn.server), network.httpConn.port);
+						sprintf_s(logBuff, sizeof(logBuff), "%s TCP Port %u Error on Listen", IP2String(ipbuff, sizeof(ipbuff), network.httpConn.server), network.httpConn.port);
 						logDHCPMess(logBuff, 1);
 						closesocket(network.httpConn.sock);
 					}
@@ -10008,7 +10013,7 @@ void __cdecl init(void *lpParam)
 				if (network.dnsUdpConn[i].sock == INVALID_SOCKET)
 				{
 					bindfailed = true;
-					sprintf_s(logBuff,sizeof(logBuff), "Failed to Create Socket");
+					sprintf_s(logBuff, sizeof(logBuff), "Failed to Create Socket");
 					logDNSMess(logBuff, 1);
 					continue;
 				}
@@ -10028,7 +10033,7 @@ void __cdecl init(void *lpParam)
 				{
 					bindfailed = true;
 					closesocket(network.dnsUdpConn[i].sock);
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: %s UDP Port 53 already in use", IP2String(ipbuff, network.listenServers[j]));
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: %s UDP Port 53 already in use", IP2String(ipbuff, sizeof(ipbuff), network.listenServers[j]));
 					logDNSMess(logBuff, 1);
 					continue;
 				}
@@ -10050,7 +10055,7 @@ void __cdecl init(void *lpParam)
 			if (network.forwConn.sock == INVALID_SOCKET)
 			{
 				bindfailed = true;
-				sprintf_s(logBuff,sizeof(logBuff), "Failed to Create Socket");
+				sprintf_s(logBuff, sizeof(logBuff), "Failed to Create Socket");
 				logDNSMess(logBuff, 1);
 			}
 			else
@@ -10076,7 +10081,7 @@ void __cdecl init(void *lpParam)
 				if (network.dnsTcpConn[i].sock == INVALID_SOCKET)
 				{
 					bindfailed = true;
-					sprintf_s(logBuff,sizeof(logBuff), "Failed to Create Socket");
+					sprintf_s(logBuff, sizeof(logBuff), "Failed to Create Socket");
 					logDNSMess(logBuff, 1);
 				}
 				else
@@ -10094,7 +10099,7 @@ void __cdecl init(void *lpParam)
 					{
 						bindfailed = true;
 						closesocket(network.dnsTcpConn[i].sock);
-						sprintf_s(logBuff,sizeof(logBuff), "Warning: %s TCP Port 53 already in use", IP2String(ipbuff, network.listenServers[j]));
+						sprintf_s(logBuff, sizeof(logBuff), "Warning: %s TCP Port 53 already in use", IP2String(ipbuff, sizeof(ipbuff), network.listenServers[j]));
 						logDNSMess(logBuff, 1);
 					}
 					else
@@ -10104,7 +10109,7 @@ void __cdecl init(void *lpParam)
 						if (nRet == SOCKET_ERROR)
 						{
 							closesocket(network.dnsTcpConn[i].sock);
-							sprintf_s(logBuff,sizeof(logBuff), "TCP Port 53 Error on Listen");
+							sprintf_s(logBuff, sizeof(logBuff), "TCP Port 53 Error on Listen");
 							logDNSMess(logBuff, 1);
 						}
 						else
@@ -10145,20 +10150,20 @@ void __cdecl init(void *lpParam)
 
 		if ((dhcpService && !network.dhcpConn[0].ready) || (dnsService && !(network.dnsUdpConn[0].ready && network.dnsTcpConn[0].ready)))
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "No Static Interface ready, Waiting...");
+			sprintf_s(logBuff, sizeof(logBuff), "No Static Interface ready, Waiting...");
 			logMess(logBuff, 1);
 			continue;
 		}
 
 		if (dhcpService && network.httpConn.ready)
 		{
-			sprintf_s(logBuff,sizeof(logBuff), "Lease Status URL: http://%s:%u", IP2String(ipbuff, network.httpConn.server), network.httpConn.port);
+			sprintf_s(logBuff, sizeof(logBuff), "Lease Status URL: http://%s:%u", IP2String(ipbuff, sizeof(ipbuff), network.httpConn.server), network.httpConn.port);
 			logDHCPMess(logBuff, 1);
 			FILE *f;
 
 			if (0== fopen_s(&f,htmFile, "wt"))
 			{
-				fprintf(f, "<html><head><meta http-equiv=\"refresh\" content=\"0;url=http://%s:%u\"</head></html>", IP2String(ipbuff, network.httpConn.server), network.httpConn.port);
+				fprintf(f, "<html><head><meta http-equiv=\"refresh\" content=\"0;url=http://%s:%u\"</head></html>", IP2String(ipbuff, sizeof(ipbuff), network.httpConn.server), network.httpConn.port);
 				fclose(f);
 			}
 		}
@@ -10179,7 +10184,7 @@ void __cdecl init(void *lpParam)
 			{
 				if (network.dhcpConn[j].server == network.staticServers[i] || network.dnsUdpConn[j].server == network.staticServers[i])
 				{
-					sprintf_s(logBuff,sizeof(logBuff), "Listening On: %s", IP2String(ipbuff, network.staticServers[i]));
+					sprintf_s(logBuff, sizeof(logBuff), "Listening On: %s", IP2String(ipbuff, sizeof(ipbuff), network.staticServers[i]));
 					logMess(logBuff, 1);
 					break;
 				}
@@ -10203,7 +10208,7 @@ bool detectChange()
 	{
 		MYDWORD eventWait = (MYDWORD)(10000 * pow(2, cfig.failureCount));
 		Sleep(eventWait);
-		sprintf_s(logBuff,sizeof(logBuff), "Retrying failed Listening Interfaces..");
+		sprintf_s(logBuff, sizeof(logBuff), "Retrying failed Listening Interfaces..");
 		logDHCPMess(logBuff, 1);
 		network.ready = false;
 
@@ -10217,12 +10222,12 @@ bool detectChange()
 
 	if ((errno = WSAGetLastError()) && errno != WSA_IO_PENDING)
 	{
-		sprintf_s(logBuff,sizeof(logBuff), "NotifyAddrChange error...%d", errno);
+		sprintf_s(logBuff, sizeof(logBuff), "NotifyAddrChange error...%d", errno);
 		logDHCPMess(logBuff, 1);
 	}
 
 	Sleep(1000);
-	sprintf_s(logBuff,sizeof(logBuff), "Network changed, re-detecting Static Interfaces..");
+	sprintf_s(logBuff, sizeof(logBuff), "Network changed, re-detecting Static Interfaces..");
 	logDHCPMess(logBuff, 1);
 	network.ready = false;
 
@@ -10320,13 +10325,13 @@ void getInterfaces(data1 *network)
 	PIP_ADAPTER_INFO pAdapterInfo;
 	PIP_ADAPTER_INFO pAdapter;
 
-	pAdapterInfo = (IP_ADAPTER_INFO*) calloc(1, sizeof(IP_ADAPTER_INFO));
+	pAdapterInfo = (IP_ADAPTER_INFO*) calloc(sizeof(char), sizeof(IP_ADAPTER_INFO));
 	DWORD ulOutBufLen = sizeof(IP_ADAPTER_INFO);
 
 	if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW)
 	{
 		free(pAdapterInfo);
-		pAdapterInfo = (IP_ADAPTER_INFO*)calloc(1, ulOutBufLen);
+		pAdapterInfo = (IP_ADAPTER_INFO*)calloc(sizeof(char), ulOutBufLen);
 	}
 
 	if ((GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR)
@@ -10395,9 +10400,9 @@ void getInterfaces(data1 *network)
 			if (j == MAX_SERVERS || !network->staticServers[j])
 			{
 				if (findServer(network->allServers, MAX_SERVERS, cfig.specifiedServers[i]))
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [LISTEN_ON] Interface %s is not static, ignored", IP2String(ipbuff, cfig.specifiedServers[i]));
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: Section [LISTEN_ON] Interface %s is not static, ignored", IP2String(ipbuff, sizeof(ipbuff), cfig.specifiedServers[i]));
 				else
-					sprintf_s(logBuff,sizeof(logBuff), "Warning: Section [LISTEN_ON] Interface %s is not found, ignored", IP2String(ipbuff, cfig.specifiedServers[i]));
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: Section [LISTEN_ON] Interface %s is not found, ignored", IP2String(ipbuff, sizeof(ipbuff), cfig.specifiedServers[i]));
 
 				logMess(logBuff, 2);
 			}
@@ -10424,7 +10429,7 @@ void getInterfaces(data1 *network)
 
 			if (j == MAX_SERVERS || !network->staticServers[j])
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "Warning: Interface %s is not Static, ignored", IP2String(ipbuff, network->allServers[i]));
+				sprintf_s(logBuff, sizeof(logBuff), "Warning: Interface %s is not Static, ignored", IP2String(ipbuff, sizeof(ipbuff), network->allServers[i]));
 				logMess(logBuff, 2);
 			}
 		}
@@ -10549,7 +10554,7 @@ MYWORD gdmess(data9 *req, MYBYTE sockInd)
 	                      (sockaddr*)&req->remote,
 	                      &req->sockLen);
 
-	//printf("IP=%s bytes=%u\n", IP2String(ipbuff,req->remote.sin_addr.s_addr), req->bytes);
+	//printf("IP=%s bytes=%u\n", IP2String(ipbuff, sizeof(ipbuff), req->remote.sin_addr.s_addr), req->bytes);
 
 	errno = WSAGetLastError();
 
@@ -10661,7 +10666,7 @@ MYWORD gdmess(data9 *req, MYBYTE sockInd)
 
 //	if (!req->hostname[0] && req->dhcpp.header.bp_ciaddr)
 //	{
-//		data7* cache = findEntry(IP2String(ipbuff, htonl(req->dhcpp.header.bp_ciaddr)), DNS_TYPE_PTR);
+//		data7* cache = findEntry(IP2String(ipbuff, sizeof(ipbuff), htonl(req->dhcpp.header.bp_ciaddr)), DNS_TYPE_PTR);
 //
 //		if (cache)
 //			strcpy_s(req->hostname, sizeof(req->hostname), cache->hostname);
@@ -10679,27 +10684,27 @@ MYWORD gdmess(data9 *req, MYBYTE sockInd)
 		if (req->req_type == DHCP_MESS_NONE)
 		{
 			if (req->dhcpp.header.bp_giaddr)
-				sprintf_s(logBuff,sizeof(logBuff), "BOOTPREQUEST for %s (%s) from RelayAgent %s received", req->chaddr, req->hostname, IP2String(ipbuff, req->dhcpp.header.bp_giaddr));
+				sprintf_s(logBuff, sizeof(logBuff), "BOOTPREQUEST for %s (%s) from RelayAgent %s received", req->chaddr, req->hostname, IP2String(ipbuff, sizeof(ipbuff), req->dhcpp.header.bp_giaddr));
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "BOOTPREQUEST for %s (%s) from interface %s received", req->chaddr, req->hostname, IP2String(ipbuff, network.dhcpConn[req->sockInd].server));
+				sprintf_s(logBuff, sizeof(logBuff), "BOOTPREQUEST for %s (%s) from interface %s received", req->chaddr, req->hostname, IP2String(ipbuff, sizeof(ipbuff), network.dhcpConn[req->sockInd].server));
 
 			logDHCPMess(logBuff, 2);
 		}
 		else if (req->req_type == DHCP_MESS_DISCOVER)
 		{
 			if (req->dhcpp.header.bp_giaddr)
-				sprintf_s(logBuff,sizeof(logBuff), "DHCPDISCOVER for %s (%s) from RelayAgent %s received", req->chaddr, req->hostname, IP2String(ipbuff, req->dhcpp.header.bp_giaddr));
+				sprintf_s(logBuff, sizeof(logBuff), "DHCPDISCOVER for %s (%s) from RelayAgent %s received", req->chaddr, req->hostname, IP2String(ipbuff, sizeof(ipbuff), req->dhcpp.header.bp_giaddr));
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "DHCPDISCOVER for %s (%s) from interface %s received", req->chaddr, req->hostname, IP2String(ipbuff, network.dhcpConn[req->sockInd].server));
+				sprintf_s(logBuff, sizeof(logBuff), "DHCPDISCOVER for %s (%s) from interface %s received", req->chaddr, req->hostname, IP2String(ipbuff, sizeof(ipbuff), network.dhcpConn[req->sockInd].server));
 
 			logDHCPMess(logBuff, 2);
 		}
 		else if (req->req_type == DHCP_MESS_REQUEST)
 		{
 			if (req->dhcpp.header.bp_giaddr)
-				sprintf_s(logBuff,sizeof(logBuff), "DHCPREQUEST for %s (%s) from RelayAgent %s received", req->chaddr, req->hostname, IP2String(ipbuff, req->dhcpp.header.bp_giaddr));
+				sprintf_s(logBuff, sizeof(logBuff), "DHCPREQUEST for %s (%s) from RelayAgent %s received", req->chaddr, req->hostname, IP2String(ipbuff, sizeof(ipbuff), req->dhcpp.header.bp_giaddr));
 			else
-				sprintf_s(logBuff,sizeof(logBuff), "DHCPREQUEST for %s (%s) from interface %s received", req->chaddr, req->hostname, IP2String(ipbuff, network.dhcpConn[req->sockInd].server));
+				sprintf_s(logBuff, sizeof(logBuff), "DHCPREQUEST for %s (%s) from interface %s received", req->chaddr, req->hostname, IP2String(ipbuff, sizeof(ipbuff), network.dhcpConn[req->sockInd].server));
 
 			logDHCPMess(logBuff, 2);
 		}
@@ -10967,7 +10972,7 @@ void logDNSMess(data5 *req, char *logBuff, MYBYTE logLevel)
 
 	if (logLevel <= cfig.dnsLogLevel)
 	{
-		char *mess = (char*)calloc(1, 512);
+		char *mess = (char*)calloc(sizeof(char), 512);
 		char ipBuf[16];
 		inet_ntop(AF_INET, &(req->remote.sin_addr), ipBuf, sizeof(ipBuf));
 		sprintf_s(mess,sizeof(mess), "Client %s, %s", ipBuf, logBuff);
@@ -10982,7 +10987,7 @@ void logTCPMess(data5 *req, char *logBuff, MYBYTE logLevel)
 
 	if (logLevel <= cfig.dnsLogLevel)
 	{
-		char *mess = (char*)calloc(1, 512);
+		char *mess = (char*)calloc(sizeof(char), 512);
 		char ipBuf[16];
 		inet_ntop(AF_INET, &(req->remote.sin_addr), ipBuf, sizeof(ipBuf));
 		sprintf_s(mess,sizeof(mess), "TCP Client %s, %s", ipBuf, logBuff);
@@ -11001,7 +11006,7 @@ data7 *createCache(data71 *lump)
 		{
 			dataSize += 64;
 			dataSize += lump->optionSize;
-			cache = (data7*)calloc(1, dataSize);
+			cache = (data7*)calloc(sizeof(char), dataSize);
 
 			if (!cache)
 				return NULL;
@@ -11032,7 +11037,7 @@ data7 *createCache(data71 *lump)
 			//debug("about to create queue");
 			dataSize += (unsigned short)strlen(lump->query);
 			dataSize +=  sizeof(SOCKADDR_IN);
-			cache = (data7*)calloc(1, dataSize);
+			cache = (data7*)calloc(sizeof(char), dataSize);
 
 			if (!cache)
 				return NULL;
@@ -11062,7 +11067,7 @@ data7 *createCache(data71 *lump)
 		case CTYPE_CACHED:
 		{
 			dataSize += lump->bytes;
-			cache = (data7*)calloc(1, dataSize);
+			cache = (data7*)calloc(sizeof(char), dataSize);
 
 			if (!cache)
 				return NULL;
@@ -11093,7 +11098,7 @@ data7 *createCache(data71 *lump)
 		case CTYPE_EXT_CNAME:
 		{
 			dataSize += (unsigned short)strlen(lump->hostname);
-			cache = (data7*)calloc(1, dataSize);
+			cache = (data7*)calloc(sizeof(char), dataSize);
 
 			if (!cache)
 				return NULL;
@@ -11114,7 +11119,7 @@ data7 *createCache(data71 *lump)
 
 		default:
 		{
-			cache = (data7*)calloc(1, dataSize);
+			cache = (data7*)calloc(sizeof(char), dataSize);
 
 			if (!cache)
 				return NULL;
@@ -11130,7 +11135,7 @@ data7 *createCache(data71 *lump)
 		}
 	}
 
-	//sprintf_s(logBuff,sizeof(logBuff), "New Cache cType=%d dnsType=%u name=%s", cache->cType, cache->dnsType, cache->name);
+	//sprintf_s(logBuff, sizeof(logBuff), "New Cache cType=%d dnsType=%u name=%s", cache->cType, cache->dnsType, cache->name);
 	//logMess(logBuff, 1);
 	return cache;
 }
