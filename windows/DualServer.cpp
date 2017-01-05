@@ -1181,15 +1181,16 @@ MYWORD fQu(char *query, dnsPacket *mess, char *raw)
 		}
 		else
 		{
+			USHORT nameOffset = 0;
 			if (!goneout)
 				retvalue += 2;
 
 			goneout = true;
-			size %= 128;
-			size %= 64;
-			size *= 256;
-			size += *xraw;
-			xraw = (MYBYTE*)mess + size;
+			// 'size' if the offset to the real name
+			// Drop the high 2 bits (indicator of offset), and shift over 1 byte
+			nameOffset = (size << 8) & 0x3F00;
+			nameOffset += *xraw;
+			xraw = (BYTE*)mess + nameOffset;
 		}
 	}
 
