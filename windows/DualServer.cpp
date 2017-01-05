@@ -6247,10 +6247,16 @@ void addDHCPRange(char *dp)
 	char value[512];
 	mySplit(name, value, dp, '-');
 
+	sprintf_s(logBuff, sizeof(logBuff), "Loading DHCP range %s to %s", name, value);
+	logDHCPMess(logBuff, 1);
+
 	if (isIP(name) && isIP(value))
 	{
 		inet_pton(AF_INET, name, &rs);
 		inet_pton(AF_INET, value, &re);
+
+		rs = ntohl(rs);
+		re = ntohl(re);
 
 		if (rs && re && rs <= re)
 		{
@@ -6278,6 +6284,8 @@ void addDHCPRange(char *dp)
 				range = &cfig.dhcpRanges[m];
 				range->rangeStart = rs;
 				range->rangeEnd = re;
+				sprintf_s(logBuff, sizeof(logBuff), "Allocating %d slots for DHCP Range", (re - rs + 1));
+				logDHCPMess(logBuff, 1);
 				range->expiry = (time_t*)calloc((re - rs + 1), sizeof(time_t));
 				range->dhcpEntry = (data7**)calloc((re - rs + 1), sizeof(data7*));
 
@@ -8924,17 +8932,17 @@ void __cdecl init(void *lpParam)
 	GetModuleFileName(NULL, filePATH, _MAX_PATH);
 	char *fileExt = strrchr(filePATH, '.');
 	*fileExt = 0;
-	sprintf_s(leaFile,sizeof(leaFile), "%s.state", filePATH);
-	sprintf_s(iniFile,sizeof(iniFile), "%s.ini", filePATH);
-	sprintf_s(lnkFile,sizeof(lnkFile), "%s.url", filePATH);
-	sprintf_s(htmFile,sizeof(htmFile), "%s.htm", filePATH);
-	sprintf_s(tempFile,sizeof(tempFile), "%s.tmp", filePATH);
+	if (strlen(leaFile) == 0) sprintf_s(leaFile, sizeof(leaFile), "%s.state", filePATH);
+	if (strlen(iniFile) == 0) sprintf_s(iniFile, sizeof(iniFile), "%s.ini", filePATH);
+	sprintf_s(lnkFile, sizeof(lnkFile), "%s.url", filePATH);
+	sprintf_s(htmFile, sizeof(htmFile), "%s.htm", filePATH);
+	sprintf_s(tempFile, sizeof(tempFile), "%s.tmp", filePATH);
 	fileExt = strrchr(filePATH, '\\');
 	*fileExt = 0;
 	fileExt++;
-	sprintf_s(logFile,sizeof(logFile), "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
-	sprintf_s(cliFile,sizeof(cliFile), "%s\\log\\%%s.log", filePATH);
-	strcat_s(filePATH,sizeof(filePATH), "\\");
+	sprintf_s(logFile, sizeof(logFile), "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
+	sprintf_s(cliFile, sizeof(cliFile), "%s\\log\\%%s.log", filePATH);
+	strcat_s(filePATH, sizeof(filePATH), "\\");
 
 	//printf("log=%s\n", logFile);
 
@@ -9425,10 +9433,10 @@ void __cdecl init(void *lpParam)
 		for (int i = 0; i < cfig.rangeCount; i++)
 		{
 			char *logPtr = logBuff;
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "DHCP Range: ");
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeStart)));
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "-%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeEnd)));
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "/%s", IP2String(ipbuff, sizeof(ipbuff), cfig.dhcpRanges[i].mask));
+			logPtr += sprintf_s(logPtr, sizeof(logBuff) - (logPtr - logBuff), "DHCP Range: ");
+			logPtr += sprintf_s(logPtr, sizeof(logBuff) - (logPtr - logBuff), "%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeStart)));
+			logPtr += sprintf_s(logPtr, sizeof(logBuff) - (logPtr - logBuff), "-%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeEnd)));
+			logPtr += sprintf_s(logPtr, sizeof(logBuff) - (logPtr - logBuff), "/%s", IP2String(ipbuff, sizeof(ipbuff), cfig.dhcpRanges[i].mask));
 			logDHCPMess(logBuff, 1);
 		}
 
@@ -11317,14 +11325,14 @@ data7 *createCache(data71 *lump)
 
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			strcpy_s(cache->mapname, sizeof(cache->mapname), lump->mapname);
+			strcpy_s(cache->mapname, dataSize - ((char *)dp - (char *)cache), lump->mapname);
 			myLower(cache->mapname);
 			dp += strlen(cache->mapname);
 			dp++;
 			cache->hostname = (char*)dp;
 
 			if (lump->hostname)
-				strcpy_s(cache->hostname, sizeof(cache->hostname), lump->hostname);
+				strcpy_s(cache->hostname, dataSize - ((char *)dp - (char *)cache), lump->hostname);
 
 			dp += 65;
 
@@ -11351,12 +11359,12 @@ data7 *createCache(data71 *lump)
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
 			cache->name = (char*)dp;
-			strcpy_s(cache->mapname, sizeof(cache->mapname), lump->mapname);
+			strcpy_s(cache->mapname, dataSize - ((char *)dp - (char *)cache), lump->mapname);
 			//myLower(cache->mapname);
 			dp += strlen(cache->mapname);
 			dp++;
 			cache->query = (char*)dp;
-			strcpy_s(cache->query, sizeof(cache->query), lump->query);
+			strcpy_s(cache->query, dataSize - ((char *)dp - (char *)cache), lump->query);
 			//debug(cache->query);
 			//debug(strlen(cache->query));
 			dp += strlen(cache->query);
@@ -11380,7 +11388,7 @@ data7 *createCache(data71 *lump)
 			cache->dnsType = lump->dnsType;
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			setMapName(cache->mapname, dataSize - sizeof(data7), lump->mapname, lump->dnsType);
+			setMapName(cache->mapname, dataSize - ((char *)dp - (char *)cache), lump->mapname, lump->dnsType);
 			dp++;
 			cache->name = (char*)dp;
 			dp += strlen(lump->mapname);
@@ -11411,13 +11419,13 @@ data7 *createCache(data71 *lump)
 			cache->dnsType = lump->dnsType;
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			setMapName(cache->mapname, dataSize - sizeof(data7), lump->mapname, lump->dnsType);
+			setMapName(cache->mapname, dataSize - ((char *)dp - (char *)cache), lump->mapname, lump->dnsType);
 			dp++;
 			cache->name = (char*)dp;
 			dp += strlen(lump->mapname);
 			dp++;
 			cache->hostname = (char*)dp;
-			strcpy_s(cache->hostname, dataSize - ((int)dp - (int)cache), lump->hostname);
+			strcpy_s(cache->hostname, dataSize - ((char *)dp - (char *)cache), lump->hostname);
 			break;
 		}
 
