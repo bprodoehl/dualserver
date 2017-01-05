@@ -5014,7 +5014,7 @@ void addOptions(data9 *req)
 			if (!req->hostname[0])
 				genHostName(req->hostname, sizeof(req->hostname), req->dhcpp.header.bp_chaddr, req->dhcpp.header.bp_hlen);
 
-			strcpy_s(req->dhcpEntry->hostname, sizeof(req->dhcpEntry->hostname), req->hostname);
+			strcpy_s(req->dhcpEntry->hostname, 64, req->hostname);
 /*
 			if (!req->opAdded[DHCP_OPTION_ROUTER])
 			{
@@ -5530,7 +5530,7 @@ void recvRepl(data9 *req)
 			hangTime = req->rebind;
 
 		setLeaseExpiry(req->dhcpEntry, hangTime);
-		strcpy_s(req->dhcpEntry->hostname, sizeof(req->dhcpEntry->hostname), req->hostname);
+		strcpy_s(req->dhcpEntry->hostname, 64, req->hostname);
 
 		_beginthread(updateStateFile, 0, (void*)req->dhcpEntry);
 
