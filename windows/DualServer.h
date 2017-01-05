@@ -937,6 +937,7 @@ void debug(int i);
 void delDnsEntry(data7* cache);
 void emptyCache(MYBYTE ind);
 void expireEntry(MYDWORD ip);
+void getHostPhysAddresses();
 void getInterfaces(data1 *network);
 void holdIP(MYDWORD ip);
 void installService();

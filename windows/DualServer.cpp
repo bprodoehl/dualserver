@@ -75,6 +75,7 @@ fd_set writefds;
 HANDLE lEvent;
 HANDLE fEvent;
 HANDLE rEvent;
+byte hostPhysAddress[MAX_SERVERS][8];
 
 // Ports
 unsigned short dnsPort = IPPORT_DNS;
@@ -4357,8 +4358,25 @@ MYDWORD sdmess(data9 *req)
 
 		return 0;
 	}
-	else if (req->req_type == DHCP_MESS_DISCOVER && strcasecmp(req->hostname, cfig.servername))
+	else if (req->req_type == DHCP_MESS_DISCOVER)
 	{
+		if (0 == strcasecmp(req->hostname, cfig.servername))
+		{
+			// hostname is the same, check if mac is local
+			int i = 0;
+			byte blankAddress[8];
+			memset(blankAddress, 0, 8);
+			while (memcmp(hostPhysAddress[i], blankAddress, 8) && i < MAX_SERVERS)
+			{
+				if (memcmp(hostPhysAddress[i], req->dhcpp.header.bp_chaddr, 8) == 0)
+				{
+					// This is a local request, so ignore 
+					return 0;
+				}
+				i++;
+			}
+		}
+
 		req->dhcpp.header.bp_yiaddr = resad(req);
 
 		if (!req->dhcpp.header.bp_yiaddr)
@@ -4386,13 +4404,21 @@ MYDWORD sdmess(data9 *req)
 				}
 				else
 				{
-					req->resp_type = DHCP_MESS_NAK;
-					req->dhcpp.header.bp_yiaddr = 0;
-
-					if (verbatim || cfig.dhcpLogLevel)
+					req->dhcpp.header.bp_yiaddr = resad(req);
+					if (!req->dhcpp.header.bp_yiaddr)
 					{
-						sprintf_s(logBuff,sizeof(logBuff), "DHCPREQUEST from Host %s (%s) without Discover, NAKed", req->chaddr, req->hostname);
-						logDHCPMess(logBuff, 1);
+						req->resp_type = DHCP_MESS_NAK;
+						req->dhcpp.header.bp_yiaddr = 0;
+
+						if (verbatim || cfig.dhcpLogLevel)
+						{
+							sprintf_s(logBuff, sizeof(logBuff), "DHCPREQUEST from Host %s (%s) without Discover, could not allocate address, NAKed", req->chaddr, req->hostname);
+							logDHCPMess(logBuff, 1);
+						}
+					}
+					else
+					{
+						req->resp_type = DHCP_MESS_ACK;
 					}
 				}
 			}
@@ -4411,13 +4437,21 @@ MYDWORD sdmess(data9 *req)
 		}
 		else
 		{
-			req->resp_type = DHCP_MESS_NAK;
-			req->dhcpp.header.bp_yiaddr = 0;
-
-			if (verbatim || cfig.dhcpLogLevel)
+			req->dhcpp.header.bp_yiaddr = resad(req);
+			if (!req->dhcpp.header.bp_yiaddr)
 			{
-				sprintf_s(logBuff,sizeof(logBuff), "DHCPREQUEST from Host %s (%s) without Discover, NAKed", req->chaddr, req->hostname);
-				logDHCPMess(logBuff, 1);
+				req->resp_type = DHCP_MESS_NAK;
+				req->dhcpp.header.bp_yiaddr = 0;
+
+				if (verbatim || cfig.dhcpLogLevel)
+				{
+					sprintf_s(logBuff, sizeof(logBuff), "DHCPREQUEST from Host %s (%s) without Discover, could not allocate address, NAKed", req->chaddr, req->hostname);
+					logDHCPMess(logBuff, 1);
+				}
+			}
+			else
+			{
+				req->resp_type = DHCP_MESS_ACK;
 			}
 		}
 	}
@@ -9768,6 +9802,7 @@ void __cdecl init(void *lpParam)
 	{
 		closeConn();
 		getInterfaces(&network);
+		getHostPhysAddresses();
 
 		network.maxFD = cfig.dhcpReplConn.sock;
 
@@ -9917,6 +9952,14 @@ void __cdecl init(void *lpParam)
 			else
 			{
 				//printf("Socket %u\n", network.httpConn.sock);
+
+				BOOL bOptVal = TRUE;
+				int bOptLen = sizeof(BOOL);
+				if (SOCKET_ERROR == setsockopt(network.httpConn.sock, SOL_SOCKET, SO_REUSEADDR, (char*)&bOptVal, bOptLen))
+				{
+					sprintf_s(logBuff, sizeof(logBuff), "Failed to set SO_REUSEADDR");
+					logDHCPMess(logBuff, 1);
+				}
 
 				network.httpConn.addr.sin_family = AF_INET;
 				network.httpConn.addr.sin_addr.s_addr = network.httpConn.server;
@@ -10187,6 +10230,57 @@ bool detectChange()
 		Sleep(500);
 
 	return true;
+}
+
+#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
+#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
+void getHostPhysAddresses()
+{
+	for (int i = 0; i < MAX_SERVERS; i++)
+	{
+		memset(hostPhysAddress[i], 0, 8 * sizeof(byte));
+	}
+
+	/* Declare and initialize variables */
+
+	// It is possible for an adapter to have multiple 
+	// IPv4 addresses, gateways, and secondary WINS servers 
+	// assigned to the adapter.  
+	// 
+	// Note that this sample code only prints out the  
+	// first entry for the IP address/mask, and gateway, and 
+	// the primary and secondary WINS server for each adapter.  
+
+	PIP_ADAPTER_INFO pAdapterInfo;
+	PIP_ADAPTER_INFO pAdapter = NULL;
+	DWORD dwRetVal = 0;
+	UINT i = 0;
+
+	ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
+	pAdapterInfo = (IP_ADAPTER_INFO *)MALLOC(sizeof(IP_ADAPTER_INFO));
+	if (pAdapterInfo == NULL) {
+		return;
+	}
+	// Make an initial call to GetAdaptersInfo to get 
+	// the necessary size into the ulOutBufLen variable 
+	if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
+		FREE(pAdapterInfo);
+		pAdapterInfo = (IP_ADAPTER_INFO *)MALLOC(ulOutBufLen);
+		if (pAdapterInfo == NULL) {
+			return;
+		}
+	}
+
+	if ((dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR) {
+		pAdapter = pAdapterInfo;
+		while (pAdapter) {
+			memcpy(hostPhysAddress[i], pAdapter->Address, 8);
+			i++;
+			pAdapter = pAdapter->Next;
+		}
+	}
+	if (pAdapterInfo)
+		FREE(pAdapterInfo);
 }
 
 void getInterfaces(data1 *network)
