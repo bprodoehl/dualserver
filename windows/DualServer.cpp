@@ -5651,7 +5651,10 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 				logDHCPMess(logBuff, 1);
 			}
 			else
+			{
 				inet_pton(AF_INET, value, &(optionData->ip));
+				//optionData->ip = ntohl(optionData->ip);
+			}
 
 			continue;
 		}
@@ -6247,10 +6250,16 @@ void addDHCPRange(char *dp)
 	char value[512];
 	mySplit(name, value, dp, '-');
 
+	sprintf_s(logBuff, sizeof(logBuff), "Loading DHCP range %s to %s", name, value);
+	logDHCPMess(logBuff, 1);
+
 	if (isIP(name) && isIP(value))
 	{
 		inet_pton(AF_INET, name, &rs);
 		inet_pton(AF_INET, value, &re);
+
+		rs = ntohl(rs);
+		re = ntohl(re);
 
 		if (rs && re && rs <= re)
 		{
@@ -6278,6 +6287,8 @@ void addDHCPRange(char *dp)
 				range = &cfig.dhcpRanges[m];
 				range->rangeStart = rs;
 				range->rangeEnd = re;
+				sprintf_s(logBuff, sizeof(logBuff), "Allocating %d slots for DHCP Range", (re - rs + 1));
+				logDHCPMess(logBuff, 1);
 				range->expiry = (time_t*)calloc((re - rs + 1), sizeof(time_t));
 				range->dhcpEntry = (data7**)calloc((re - rs + 1), sizeof(data7*));
 
@@ -6456,7 +6467,10 @@ void loadDHCP()
 	}
 
 	if (!cfig.mask)
+	{
 		inet_pton(AF_INET, "255.255.255.0", &(cfig.mask));
+		//cfig.mask = ntohl(cfig.mask);
+	}
 
 	for (MYBYTE i = 1; i <= MAX_RANGE_SETS ; i++)
 	{
@@ -7188,7 +7202,8 @@ bool isIP(char *str)
 		return false;
 
 	MYDWORD ip;
-	inet_pton(AF_INET,str,&ip);
+	inet_pton(AF_INET, str, &ip);
+	ip = ntohl(ip);
 
 	if (ip == INADDR_NONE || ip == INADDR_ANY)
 		return false;
@@ -8418,6 +8433,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 	if (cache)
 	{
 		inet_pton(AF_INET, localhost_ip, &(cache->ip));
+		//cache->ip = ntohl(cache->ip);
 		cache->expiry = INT_MAX;
 		dnsCache[ind].insert(pair<string, data7*>(cache->mapname, cache));
 	}
@@ -8863,6 +8879,7 @@ bool getSecondary()
 					{
 						*dp = 0;
 						inet_pton(AF_INET, req.mapname, &ip);
+						//ip = ntohl(ip);
 						fQu(req.cname, req.dnsp, data);
 						makeLocal(req.cname);
 
@@ -8924,17 +8941,17 @@ void __cdecl init(void *lpParam)
 	GetModuleFileName(NULL, filePATH, _MAX_PATH);
 	char *fileExt = strrchr(filePATH, '.');
 	*fileExt = 0;
-	sprintf_s(leaFile,sizeof(leaFile), "%s.state", filePATH);
-	sprintf_s(iniFile,sizeof(iniFile), "%s.ini", filePATH);
-	sprintf_s(lnkFile,sizeof(lnkFile), "%s.url", filePATH);
-	sprintf_s(htmFile,sizeof(htmFile), "%s.htm", filePATH);
-	sprintf_s(tempFile,sizeof(tempFile), "%s.tmp", filePATH);
+	if (strlen(leaFile) == 0) sprintf_s(leaFile, sizeof(leaFile), "%s.state", filePATH);
+	if (strlen(iniFile) == 0) sprintf_s(iniFile, sizeof(iniFile), "%s.ini", filePATH);
+	sprintf_s(lnkFile, sizeof(lnkFile), "%s.url", filePATH);
+	sprintf_s(htmFile, sizeof(htmFile), "%s.htm", filePATH);
+	sprintf_s(tempFile, sizeof(tempFile), "%s.tmp", filePATH);
 	fileExt = strrchr(filePATH, '\\');
 	*fileExt = 0;
 	fileExt++;
-	sprintf_s(logFile,sizeof(logFile), "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
-	sprintf_s(cliFile,sizeof(cliFile), "%s\\log\\%%s.log", filePATH);
-	strcat_s(filePATH,sizeof(filePATH), "\\");
+	sprintf_s(logFile, sizeof(logFile), "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
+	sprintf_s(cliFile, sizeof(cliFile), "%s\\log\\%%s.log", filePATH);
+	strcat_s(filePATH, sizeof(filePATH), "\\");
 
 	//printf("log=%s\n", logFile);
 
@@ -9059,6 +9076,7 @@ void __cdecl init(void *lpParam)
 				{
 					MYDWORD addr;
 					inet_pton(AF_INET, raw, &addr);
+					//addr = ntohl(addr);
 					addServer(cfig.specifiedDnsServers, MAX_SERVERS, addr);
 				}
 				else
@@ -9112,6 +9130,7 @@ void __cdecl init(void *lpParam)
 			{
 				MYDWORD addr;
 				inet_pton(AF_INET, raw, &addr);
+				//addr = ntohl(addr);
 				addServer(cfig.specifiedServers, MAX_SERVERS, addr);
 			}
 			else
@@ -9306,12 +9325,19 @@ void __cdecl init(void *lpParam)
 					if (chkQu(name) && !isIP(name) && isIP(value))
 					{
 						if (!strcasecmp(name, "Primary"))
+						{
 							inet_pton(AF_INET, value, &(cfig.zoneServers[0]));
+							//cfig.zoneServers[0] = ntohl(cfig.zoneServers[0]);
+						}
 						else if (!strcasecmp(name, "Secondary"))
+						{
 							inet_pton(AF_INET, value, &(cfig.zoneServers[1]));
+							//cfig.zoneServers[1] = ntohl(cfig.zoneServers[1]);
+						}
 						else if (dnsService && !strcasecmp(name, "AXFRClient"))
 						{
 							inet_pton(AF_INET, value, &(cfig.zoneServers[i]));
+							//cfig.zoneServers[i] = ntohl(cfig.zoneServers[i]);
 							i++;
 						}
 						else
@@ -9425,10 +9451,10 @@ void __cdecl init(void *lpParam)
 		for (int i = 0; i < cfig.rangeCount; i++)
 		{
 			char *logPtr = logBuff;
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "DHCP Range: ");
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeStart)));
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "-%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeEnd)));
-			logPtr += sprintf_s(logPtr,sizeof(logPtr), "/%s", IP2String(ipbuff, sizeof(ipbuff), cfig.dhcpRanges[i].mask));
+			logPtr += sprintf_s(logPtr, sizeof(logBuff) - (logPtr - logBuff), "DHCP Range: ");
+			logPtr += sprintf_s(logPtr, sizeof(logBuff) - (logPtr - logBuff), "%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeStart)));
+			logPtr += sprintf_s(logPtr, sizeof(logBuff) - (logPtr - logBuff), "-%s", IP2String(ipbuff, sizeof(ipbuff), htonl(cfig.dhcpRanges[i].rangeEnd)));
+			logPtr += sprintf_s(logPtr, sizeof(logBuff) - (logPtr - logBuff), "/%s", IP2String(ipbuff, sizeof(ipbuff), cfig.dhcpRanges[i].mask));
 			logDHCPMess(logBuff, 1);
 		}
 
@@ -9464,11 +9490,14 @@ void __cdecl init(void *lpParam)
 					if (isIP(name) && isIP(value))
 					{
 						inet_pton(AF_INET, name, &rs);
+						//rs = ntohl(rs);
 						inet_pton(AF_INET, value, &re);
+						//re = ntohl(re);
 					}
 					else if (isIP(name) && !value[0])
 					{
 						inet_pton(AF_INET, name, &rs);
+						//rs = ntohl(rs);
 						re = rs;
 					}
 
@@ -9501,6 +9530,7 @@ void __cdecl init(void *lpParam)
 					{
 						MYDWORD ip;
 						inet_pton(AF_INET, value, &ip);
+						//ip = ntohl(ip);
 						MYBYTE nameType = makeLocal(name);
 						bool ipLocal = isLocal(ip);
 
@@ -9707,8 +9737,10 @@ void __cdecl init(void *lpParam)
 
 									MYDWORD ip;
 									inet_pton(AF_INET, myTrim(value, value), &ip);
+									//ip = ntohl(ip);
 									MYDWORD ip1;
 									inet_pton(AF_INET, myTrim(value1, value1), &ip1);
+									//ip1 = ntohl(ip1);
 
 									if (isIP(value) && isIP(value1))
 									{
@@ -9728,6 +9760,7 @@ void __cdecl init(void *lpParam)
 								{
 									MYDWORD ip;
 									inet_pton(AF_INET, value, &ip);
+									//ip = ntohl(ip);
 
 									if (isIP(value))
 									{
@@ -9775,6 +9808,7 @@ void __cdecl init(void *lpParam)
 						{
 							MYDWORD ip;
 							inet_pton(AF_INET, value, &ip);
+							//ip = ntohl(ip);
 							strcpy_s(cfig.wildHosts[i].wildcard,sizeof(cfig.wildHosts[i].wildcard), name);
 							myLower(cfig.wildHosts[i].wildcard);
 							cfig.wildHosts[i].ip = ip;
@@ -9858,6 +9892,7 @@ void __cdecl init(void *lpParam)
 						case CTYPE_STATIC_PTR_AUTH:
 							unsigned __int32 ipTmp;
 							inet_pton(AF_INET, cache->mapname, &ipTmp);
+							//ipTmp = ntohl(ipTmp);
 							holdIP(ipTmp);
 							break;
 					}
@@ -9896,6 +9931,7 @@ void __cdecl init(void *lpParam)
 			char localhost[] = "localhost";
 			unsigned __int32 ipTmp;
 			inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+			//ipTmp = ntohl(ipTmp);
 			add2Cache(localhost, ipTmp, INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
 
 			if (isLocal(cfig.zoneServers[0]))
@@ -9915,6 +9951,7 @@ void __cdecl init(void *lpParam)
 			char localhost[] = "localhost";
 			unsigned __int32 ipTmp;
 			inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+			//ipTmp = ntohl(ipTmp);
 			add2Cache(localhost, ipTmp, INT_MAX, CTYPE_LOCALHOST_A, CTYPE_LOCALHOST_PTR);
 
 			for (int i = 0; i < MAX_SERVERS && network.listenServers[i]; i++)
@@ -10175,7 +10212,8 @@ void __cdecl init(void *lpParam)
 			}
 
 			network.httpConn.port = 6789;
-			inet_pton(AF_INET,"127.0.0.1",&(network.httpConn.server));
+			inet_pton(AF_INET, "127.0.0.1", &(network.httpConn.server));
+			//network.httpConn.server = ntohl(network.httpConn.server);
 
 			if (f = openSection("HTTP_INTERFACE", 1))
 			{
@@ -10190,6 +10228,7 @@ void __cdecl init(void *lpParam)
 						if (isIP(name))
 						{
 							inet_pton(AF_INET, name, &(network.httpConn.server));
+							//network.httpConn.server = ntohl(network.httpConn.server);
 						}
 						else
 						{
@@ -10212,6 +10251,7 @@ void __cdecl init(void *lpParam)
 
 						unsigned __int32 ipTmp;
 						inet_pton(AF_INET, "127.0.0.1", &ipTmp);
+						//ipTmp = ntohl(ipTmp);
 						if (network.httpConn.server != ipTmp && !findServer(network.allServers, MAX_SERVERS, network.httpConn.server))
 						{
 							bindfailed = true;
@@ -10226,6 +10266,7 @@ void __cdecl init(void *lpParam)
 						{
 							unsigned __int32 ipTmp;
 							inet_pton(AF_INET, value, &ipTmp);
+							//ipTmp = ntohl(ipTmp);
 							addServer(cfig.httpClients, 8, ipTmp);
 						}
 						else
@@ -10649,7 +10690,8 @@ void getInterfaces(data1 *network)
 				while (sList)
 				{
 					MYDWORD iaddr;
-					inet_pton(AF_INET,sList->IpAddress.String,&iaddr);
+					inet_pton(AF_INET, sList->IpAddress.String, &iaddr);
+					//iaddr = ntohl(iaddr);
 
 					if (iaddr)
 					{
@@ -10661,6 +10703,7 @@ void getInterfaces(data1 *network)
 							{
 								network->staticServers[k] = iaddr;
 								inet_pton(AF_INET, sList->IpMask.String, &network->staticMasks[k]);
+								//network->staticMasks[k] = ntohl(network->staticMasks[k]);
 								break;
 							}
 						}
@@ -10778,6 +10821,7 @@ void getInterfaces(data1 *network)
 			{
 				MYDWORD addr;
 				inet_pton(AF_INET, pIPAddr->IpAddress.String, &addr);
+				//addr = ntohl(addr);
 
 				if (!dnsService || !findServer(network->allServers, MAX_SERVERS, addr))
 					addServer(network->dns, MAX_SERVERS, addr);
@@ -11317,14 +11361,14 @@ data7 *createCache(data71 *lump)
 
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			strcpy_s(cache->mapname, dataSize - sizeof(data7), lump->mapname);
+			strcpy_s(cache->mapname, dataSize - ((char *)dp - (char *)cache), lump->mapname);
 			myLower(cache->mapname);
 			dp += strlen(cache->mapname);
 			dp++;
 			cache->hostname = (char*)dp;
 
 			if (lump->hostname)
-				strcpy_s(cache->hostname, dataSize - sizeof(data7) - strlen(cache->mapname), lump->hostname);
+				strcpy_s(cache->hostname, dataSize - ((char *)dp - (char *)cache), lump->hostname);
 
 			dp += 65;
 
@@ -11351,12 +11395,12 @@ data7 *createCache(data71 *lump)
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
 			cache->name = (char*)dp;
-			strcpy_s(cache->mapname, dataSize - sizeof(data7), lump->mapname);
+			strcpy_s(cache->mapname, dataSize - ((char *)dp - (char *)cache), lump->mapname);
 			//myLower(cache->mapname);
 			dp += strlen(cache->mapname);
 			dp++;
 			cache->query = (char*)dp;
-			strcpy_s(cache->query, dataSize - sizeof(data7) - strlen(cache->mapname), lump->query);
+			strcpy_s(cache->query, dataSize - ((char *)dp - (char *)cache), lump->query);
 			//debug(cache->query);
 			//debug(strlen(cache->query));
 			dp += strlen(cache->query);
@@ -11380,7 +11424,7 @@ data7 *createCache(data71 *lump)
 			cache->dnsType = lump->dnsType;
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			setMapName(cache->mapname, dataSize - sizeof(data7), lump->mapname, lump->dnsType);
+			setMapName(cache->mapname, dataSize - ((char *)dp - (char *)cache), lump->mapname, lump->dnsType);
 			dp++;
 			cache->name = (char*)dp;
 			dp += strlen(lump->mapname);
@@ -11411,13 +11455,13 @@ data7 *createCache(data71 *lump)
 			cache->dnsType = lump->dnsType;
 			MYBYTE *dp = &cache->data;
 			cache->mapname = (char*)dp;
-			setMapName(cache->mapname, dataSize - sizeof(data7), lump->mapname, lump->dnsType);
+			setMapName(cache->mapname, dataSize - ((char *)dp - (char *)cache), lump->mapname, lump->dnsType);
 			dp++;
 			cache->name = (char*)dp;
 			dp += strlen(lump->mapname);
 			dp++;
 			cache->hostname = (char*)dp;
-			strcpy_s(cache->hostname, dataSize - ((int)dp - (int)cache), lump->hostname);
+			strcpy_s(cache->hostname, dataSize - ((char *)dp - (char *)cache), lump->hostname);
 			break;
 		}
 
