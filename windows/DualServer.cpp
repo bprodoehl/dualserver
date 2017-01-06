@@ -751,7 +751,7 @@ void uninstallService()
 }
 
 #ifdef USE_RAYGUN
-typedef int(__cdecl *raygunSetup)(const char*, const char*);
+typedef void(__cdecl *raygunSetup)(const char*, const char*);
 #endif
 
 int main(int argc, TCHAR* argv[])
