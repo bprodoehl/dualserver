@@ -4678,7 +4678,7 @@ MYDWORD sdmess(data9 *req)
 			{
 				if (memcmp(hostPhysAddress[i], req->dhcpp.header.bp_chaddr, 8) == 0)
 				{
-					// This is a local request, so ignore 
+					// This is a local request, so ignore
 					return 0;
 				}
 				i++;
@@ -5014,7 +5014,7 @@ void addOptions(data9 *req)
 			if (!req->hostname[0])
 				genHostName(req->hostname, sizeof(req->hostname), req->dhcpp.header.bp_chaddr, req->dhcpp.header.bp_hlen);
 
-			strcpy_s(req->dhcpEntry->hostname, 64, req->hostname);
+			strcpy_s(req->dhcpEntry->hostname, MAX_HOSTNAME_STR_SIZE, req->hostname);
 /*
 			if (!req->opAdded[DHCP_OPTION_ROUTER])
 			{
@@ -5113,9 +5113,14 @@ void pvdata(data9 *req, data3 *op)
 				req->rebind = fULong(op->value);
 			else if (op->opt_code == DHCP_OPTION_HOSTNAME)
 			{
+				if (op->size >= MAX_HOSTNAME_STR_SIZE)
+				{
+					printf("DHCP_OPTION_HOSTNAME is too long to copy into the req!\n");
+					op->size = MAX_HOSTNAME_STR_SIZE-1;
+				}
 				memcpy(req->hostname, op->value, op->size);
 				req->hostname[op->size] = 0;
-				req->hostname[64] = 0;
+				req->hostname[MAX_HOSTNAME_STR_SIZE-1] = 0;
 
 				if (char *ptr = strchr(req->hostname, '.'))
 					*ptr = 0;
@@ -5267,7 +5272,7 @@ void __cdecl sendToken(void *lpParam)
 			sizeof(token.remote)))
 		{
 //			errno = WSAGetLastError();
-//	
+//
 //			if (!errno && verbatim || cfig.dhcpLogLevel >= 2)
 //			{
 //				sprintf_s(logBuff, sizeof(logBuff), "Token Sent");
@@ -5434,7 +5439,7 @@ void recvRepl(data9 *req)
 				sizeof(token.remote)))
 			{
 //				errno = WSAGetLastError();
-//	
+//
 //				if (!errno && (verbatim || cfig.dhcpLogLevel >= 2))
 //				{
 //					sprintf_s(logBuff, sizeof(logBuff), "Token Responded");
@@ -5530,7 +5535,7 @@ void recvRepl(data9 *req)
 			hangTime = req->rebind;
 
 		setLeaseExpiry(req->dhcpEntry, hangTime);
-		strcpy_s(req->dhcpEntry->hostname, 64, req->hostname);
+		strcpy_s(req->dhcpEntry->hostname, MAX_HOSTNAME_STR_SIZE, req->hostname);
 
 		_beginthread(updateStateFile, 0, (void*)req->dhcpEntry);
 
@@ -6525,7 +6530,7 @@ void loadDHCP()
 		else
 			break;
 	}
-	
+
 	if (0 == fopen_s(&ff, iniFile, "rt"))
 	{
 		char sectionName[512];
@@ -6727,7 +6732,10 @@ void loadDHCP()
 					dhcpEntry->display = true;
 
 					if (dhcpData.hostname[0])
-						dhcpEntry->hostname = cloneString(dhcpData.hostname);
+					{
+						dhcpEntry->hostname = (char *)calloc(1, MAX_HOSTNAME_STR_SIZE);
+						strcpy_s(dhcpEntry->hostname, MAX_HOSTNAME_STR_SIZE, dhcpData.hostname);
+					}
 
 					setLeaseExpiry(dhcpEntry);
 
@@ -6870,7 +6878,7 @@ FILE *openSection(const char *sectionName, MYBYTE serial)
 								strcpy_s(tempbuff, sizeof(tempbuff), buff);
 							else
 								sprintf_s(tempbuff,sizeof(tempbuff), "%s%s", filePATH, buff);
-							
+
 							if (0== fopen_s(&f,tempbuff, "rt"))
 								return f;
 							else
@@ -7721,6 +7729,7 @@ void listDhcpCache()
 
 void checkSize()
 {
+	char logBuff[512];
 	//listCache();
 	//listDhcpCache();
 	//printf("Start %u=%u\n",dnsCache[currentInd].size(),dnsAge[currentInd].size());
@@ -7788,8 +7797,8 @@ void checkSize()
 					cfig.serial2 = (unsigned int)t;
 			}
 
-			//sprintf_s(logBuff, sizeof(logBuff), "Data Type=%u Cache Size=%u, Age Size=%u, Entry %s being deleted", cache->cType, dnsCache[currentInd].size(), dnsAge[currentInd].size(), cache->name);
-			//logMess(logBuff, 1);
+			sprintf_s(logBuff, sizeof(logBuff), "Data Type=%u Cache Size=%u, Age Size=%u, Entry %s being deleted", cache->cType, dnsCache[currentInd].size(), dnsAge[currentInd].size(), cache->name);
+			logMess(logBuff, 1);
 			delDnsEntry(cache);
 			//maxDelete--;
 		}
@@ -7838,6 +7847,7 @@ void checkSize()
 
 void delDnsEntry(data7* cache)
 {
+	char logBuff[512];
 	hostMap::iterator r = dnsCache[currentInd].find(cache->mapname);
 
 	for (; r != dnsCache[currentInd].end(); r++)
@@ -7846,8 +7856,8 @@ void delDnsEntry(data7* cache)
 			break;
 		else if (r->second == cache)
 		{
-			//sprintf_s(logBuff, sizeof(logBuff), "cType=%u dnsType=%u Size=%u, Entry %s being deleted", cache->cType, cache->dnsType, dnsCache[currentInd].size(), cache->name);
-			//debug(logBuff);
+			sprintf_s(logBuff, sizeof(logBuff), "cType=%u dnsType=%u Size=%u, Entry %s being deleted", cache->cType, cache->dnsType, dnsCache[currentInd].size(), cache->name);
+			debug(logBuff);
 			dnsCache[currentInd].erase(r);
 			free(cache);
 			break;
@@ -10574,13 +10584,13 @@ void getHostPhysAddresses()
 
 	/* Declare and initialize variables */
 
-	// It is possible for an adapter to have multiple 
-	// IPv4 addresses, gateways, and secondary WINS servers 
-	// assigned to the adapter.  
-	// 
-	// Note that this sample code only prints out the  
-	// first entry for the IP address/mask, and gateway, and 
-	// the primary and secondary WINS server for each adapter.  
+	// It is possible for an adapter to have multiple
+	// IPv4 addresses, gateways, and secondary WINS servers
+	// assigned to the adapter.
+	//
+	// Note that this sample code only prints out the
+	// first entry for the IP address/mask, and gateway, and
+	// the primary and secondary WINS server for each adapter.
 
 	PIP_ADAPTER_INFO pAdapterInfo;
 	PIP_ADAPTER_INFO pAdapter = NULL;
@@ -10592,8 +10602,8 @@ void getHostPhysAddresses()
 	if (pAdapterInfo == NULL) {
 		return;
 	}
-	// Make an initial call to GetAdaptersInfo to get 
-	// the necessary size into the ulOutBufLen variable 
+	// Make an initial call to GetAdaptersInfo to get
+	// the necessary size into the ulOutBufLen variable
 	if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
 		FREE(pAdapterInfo);
 		pAdapterInfo = (IP_ADAPTER_INFO *)MALLOC(ulOutBufLen);
@@ -10932,9 +10942,14 @@ MYWORD gdmess(data9 *req, MYBYTE sockInd)
 				break;
 
 			case DHCP_OPTION_HOSTNAME:
+				if (op->size >= MAX_HOSTNAME_STR_SIZE)
+				{
+					printf("DHCP_OPTION_HOSTNAME is too long to copy into the req!\n");
+					op->size = MAX_HOSTNAME_STR_SIZE-1;
+				}
 				memcpy(req->hostname, op->value, op->size);
 				req->hostname[op->size] = 0;
-				req->hostname[64] = 0;
+				req->hostname[MAX_HOSTNAME_STR_SIZE-1] = 0;
 
 				if (char *ptr = strchr(req->hostname, '.'))
 					*ptr = 0;
@@ -11330,7 +11345,7 @@ data7 *createCache(data71 *lump)
 	{
 		case CTYPE_DHCP_ENTRY:
 		{
-			dataSize += 64;
+			dataSize += MAX_HOSTNAME_STR_SIZE;
 			dataSize += lump->optionSize;
 			cache = (data7*)calloc(sizeof(char), dataSize);
 

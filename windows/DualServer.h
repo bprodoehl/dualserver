@@ -43,6 +43,7 @@ using namespace std;
 #define MAX_COND_FORW 125
 #define MAX_TCP_CLIENTS 16
 #define MAX_WILD_HOSTS 125
+#define MAX_HOSTNAME_STR_SIZE 64
 
 #define RCODE_NOERROR 		0
 #define RCODE_FORMATERROR	1
@@ -972,4 +973,3 @@ void showError(MYDWORD enumber);
 void uninstallService();
 void updateDNS(data9 *req);
 FILE *pullZone(SOCKET sock);
-
