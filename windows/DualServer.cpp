@@ -2401,68 +2401,76 @@ void sendJSONStatus(data19 *req)
 	strftime(tempbuff, sizeof(tempbuff), "%a, %d %b %Y %H:%M:%S GMT", &ttm);
 	fp += sprintf_s(fp, maxData - fp, send200, tempbuff, tempbuff);
 	char *contentStart = fp;
-	fp += sprintf_s(fp, maxData - fp, htmlStart, htmlTitle);
-	fp += sprintf_s(fp, maxData - fp, bodyStart, sVersion);
-	fp += sprintf_s(fp, maxData - fp, "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
+	//fp += sprintf_s(fp, maxData - fp, htmlStart, htmlTitle);
+	//fp += sprintf_s(fp, maxData - fp, bodyStart, sVersion);
+	fp += sprintf_s(fp, maxData - fp, "{\n");
+	fp += sprintf_s(fp, maxData - fp, "  \"version\":\"%s\",\n", sVersion);
+	fp += sprintf_s(fp, maxData - fp, "  \"activeLeases\":[\n");
 
-	if (cfig.dhcpRepl > t)
-	{
-		fp += sprintf_s(fp, maxData - fp, "<tr><th colspan=\"5\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
-		fp += sprintf_s(fp, maxData - fp, "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th><th>Server</th></tr>\n");
-	}
-	else
-	{
-		fp += sprintf_s(fp, maxData - fp, "<tr><th colspan=\"4\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
-		fp += sprintf_s(fp, maxData - fp, "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th></tr>\n");
-	}
-
+	// if (cfig.dhcpRepl > t)
+	// {
+	// 	fp += sprintf_s(fp, maxData - fp, "<tr><th colspan=\"5\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
+	// 	fp += sprintf_s(fp, maxData - fp, "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th><th>Server</th></tr>\n");
+	// }
+	// else
+	// {
+	// 	fp += sprintf_s(fp, maxData - fp, "<tr><th colspan=\"4\"><font size=\"5\"><i>Active Leases</i></font></th></tr>\n");
+	// 	fp += sprintf_s(fp, maxData - fp, "<tr><th>Mac Address</th><th>IP</th><th>Lease Expiry</th><th>Hostname (first 20 chars)</th></tr>\n");
+	// }
+	bool firstItem = true;
 	for (p = dhcpCache.begin(); kRunning && p != dhcpCache.end() && fp < maxData; p++)
 	{
 		if ((dhcpEntry = p->second) && dhcpEntry->display && dhcpEntry->expiry >= t)
 		{
-			fp += sprintf_s(fp, maxData - fp, "<tr>");
-			fp += sprintf_s(fp, maxData - fp, td200, dhcpEntry->mapname);
-			fp += sprintf_s(fp, maxData - fp, td200, IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
+			if (!firstItem)
+			{
+				fp += sprintf_s(fp, maxData - fp, ",\n");
+			}
+			fp += sprintf_s(fp, maxData - fp, "    {");
+			fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\", ", "mac", dhcpEntry->mapname);
+			// fp += sprintf_s(fp, maxData - fp, td200, dhcpEntry->mapname);
+			fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\", ", "ip", IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
 
 			if (dhcpEntry->expiry >= INT_MAX)
-				fp += sprintf_s(fp, maxData - fp, td200, "Infinity");
+				fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\", ", "leaseExpiry", "Infinity");
 			else
 			{
 				tm ttm;
 				localtime_s(&ttm, &dhcpEntry->expiry);
 				strftime(tempbuff, sizeof(tempbuff), "%d-%b-%y %X", &ttm);
-				fp += sprintf_s(fp, maxData - fp, td200, tempbuff);
+				fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\", ", "leaseExpiry", tempbuff);
 			}
 
 			if (dhcpEntry->hostname[0])
 			{
 				strcpy_s(tempbuff, sizeof(tempbuff), dhcpEntry->hostname);
 				tempbuff[20] = 0;
-				fp += sprintf_s(fp, maxData - fp, td200, tempbuff);
+				fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\"", "hostname", tempbuff);
 			}
 			else
-				fp += sprintf_s(fp, maxData - fp, td200, "&nbsp;");
+				fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\"", "hostname", "");
 
 			if (cfig.dhcpRepl > t)
 			{
 				if (dhcpEntry->local && cfig.replication == 1)
-					fp += sprintf_s(fp, maxData - fp, td200, "Primary");
+					fp += sprintf_s(fp, maxData - fp, ", \"%s\":\"%s\"", "server", "Primary");
 				else if (dhcpEntry->local && cfig.replication == 2)
-					fp += sprintf_s(fp, maxData - fp, td200, "Secondary");
+					fp += sprintf_s(fp, maxData - fp, ", \"%s\":\"%s\"", "server", "Secondary");
 				else if (cfig.replication == 1)
-					fp += sprintf_s(fp, maxData - fp, td200, "Secondary");
+					fp += sprintf_s(fp, maxData - fp, ", \"%s\":\"%s\"", "server", "Secondary");
 				else
-					fp += sprintf_s(fp, maxData - fp, td200, "Primary");
+					fp += sprintf_s(fp, maxData - fp, ", \"%s\":\"%s\"", "server", "Primary");
 			}
 
-			fp += sprintf_s(fp, maxData - fp, "</tr>\n");
+			fp += sprintf_s(fp, maxData - fp, "}");
+			firstItem = false;
 		}
 	}
 
-	fp += sprintf_s(fp, maxData - fp, "</table>\n<br>\n<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
-	fp += sprintf_s(fp, maxData - fp, "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Dynamic Leases</i></font></th></tr>\n");
-	fp += sprintf_s(fp, maxData - fp, "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>Available Leases</b></td><td align=\"right\"><b>Free Leases</b></td></tr>\n");
-
+	fp += sprintf_s(fp, maxData - fp, "  ],\n");
+	fp += sprintf_s(fp, maxData - fp, "  \"freeDynamicLeases\": [\n");
+	// fp += sprintf_s(fp, maxData - fp, "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>Available Leases</b></td><td align=\"right\"><b>Free Leases</b></td></tr>\n");
+	firstItem = true;
 	for (char rangeInd = 0; kRunning && rangeInd < cfig.rangeCount && fp < maxData; rangeInd++)
 	{
 		float ipused = 0;
@@ -2479,12 +2487,17 @@ void sendJSONStatus(data19 *req)
 
 		IP2String(tempbuff, sizeof(tempbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeStart));
 		IP2String(ipbuff, sizeof(ipbuff), ntohl(cfig.dhcpRanges[rangeInd].rangeEnd));
-		fp += sprintf_s(fp, maxData - fp, "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td></tr>\n", tempbuff, ipbuff, (ipused + ipfree), ipfree);
+		if (!firstItem)
+		{
+			fp += sprintf_s(fp, maxData - fp, ",\n");
+		}
+		fp += sprintf_s(fp, maxData - fp, "  {\"rangeStart\":\"%s\", \"rangeEnd\":\"%s\", \"availableLeases\":%5.0f, \"freeLeases\":%5.0f}", tempbuff, ipbuff, (ipused + ipfree), ipfree);
+		//fp += sprintf_s(fp, maxData - fp, "<tr><td>%s - %s</td><td align=\"right\">%5.0f</td><td align=\"right\">%5.0f</td></tr>\n", tempbuff, ipbuff, (ipused + ipfree), ipfree);
+		firstItem = false;
 	}
 
-	fp += sprintf_s(fp, maxData - fp, "</table>\n<br>\n<table border=\"1\" width=\"640\" cellpadding=\"1\" bgcolor=\"#b8b8b8\">\n");
-	fp += sprintf_s(fp, maxData - fp, "<tr><th colspan=\"4\"><font size=\"5\"><i>Free Static Leases</i></font></th></tr>\n");
-	fp += sprintf_s(fp, maxData - fp, "<tr><th>Mac Address</th><th>IP</th><th>Mac Address</th><th>IP</th></tr>\n");
+	fp += sprintf_s(fp, maxData - fp, "  ],\n");
+	fp += sprintf_s(fp, maxData - fp, "  \"freeStaticLeases\": [\n");
 
 	MYBYTE colNum = 0;
 
@@ -2494,7 +2507,7 @@ void sendJSONStatus(data19 *req)
 		{
 			if (!colNum)
 			{
-				fp += sprintf_s(fp, maxData - fp, "<tr>");
+				fp += sprintf_s(fp, maxData - fp, "    {");
 				colNum = 1;
 			}
 			else if (colNum == 1)
@@ -2503,19 +2516,18 @@ void sendJSONStatus(data19 *req)
 			}
 			else if (colNum == 2)
 			{
-				fp += sprintf_s(fp, maxData - fp, "</tr>\n<tr>");
+				fp += sprintf_s(fp, maxData - fp, "    },\n    {");
 				colNum = 1;
 			}
 
-			fp += sprintf_s(fp, maxData - fp, td200, dhcpEntry->mapname);
-			fp += sprintf_s(fp, maxData - fp, td200, IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
+			fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\", ", "mac", dhcpEntry->mapname);
+			fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\"", "ip", IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
 		}
 	}
 
-	if (colNum)
-		fp += sprintf_s(fp, maxData - fp, "</tr>\n");
+	fp += sprintf_s(fp, maxData - fp, "  ]\n");
 
-	fp += sprintf_s(fp, maxData - fp, "</table>\n</body>\n</html>");
+	fp += sprintf_s(fp, maxData - fp, "}\n");
 	MYBYTE x = sprintf_s(tempbuff, sizeof(tempbuff), "%u", (fp - contentStart));
 	memcpy((contentStart - 12), tempbuff, x);
 	req->bytes = fp - req->dp;
