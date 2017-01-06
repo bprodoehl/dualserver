@@ -965,7 +965,6 @@ void sendScopeStatus(data19 *req);
 void sendServerName();
 void sendStatus(data19 *req);
 void sendJSONStatus(data19 *req);
-void sendXMLStatus(data19 *req);
 void setLeaseExpiry(data7 *dhcpEntry);
 void setLeaseExpiry(data7 *dhcpEntry, MYDWORD lease);
 void setTempLease(data7 *dhcpEntry);
