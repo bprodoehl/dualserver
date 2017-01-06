@@ -2374,7 +2374,7 @@ void sendScopeStatus(data19 *req)
 
 void sendJSONStatus(data19 *req)
 {
-	debug("sendJSONStatus");
+	// debug("sendJSONStatus");
 	char ipbuff[16];
 	char logBuff[512];
 	char tempbuff[512];
@@ -2500,28 +2500,18 @@ void sendJSONStatus(data19 *req)
 	fp += sprintf_s(fp, maxData - fp, "  \"freeStaticLeases\": [\n");
 
 	MYBYTE colNum = 0;
-
+	firstItem = true;
 	for (p = dhcpCache.begin(); kRunning && p != dhcpCache.end() && fp < maxData; p++)
 	{
 		if ((dhcpEntry = p->second) && dhcpEntry->fixed && dhcpEntry->expiry < t)
 		{
-			if (!colNum)
+			if (!firstItem)
 			{
-				fp += sprintf_s(fp, maxData - fp, "    {");
-				colNum = 1;
+				fp += sprintf_s(fp, maxData - fp, ",\n");
 			}
-			else if (colNum == 1)
-			{
-				colNum = 2;
-			}
-			else if (colNum == 2)
-			{
-				fp += sprintf_s(fp, maxData - fp, "    },\n    {");
-				colNum = 1;
-			}
-
-			fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\", ", "mac", dhcpEntry->mapname);
-			fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\"", "ip", IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
+			fp += sprintf_s(fp, maxData - fp, "    {\"%s\":\"%s\", ", "mac", dhcpEntry->mapname);
+			fp += sprintf_s(fp, maxData - fp, "\"%s\":\"%s\"}", "ip", IP2String(tempbuff, sizeof(tempbuff), dhcpEntry->ip));
+			firstItem = false;
 		}
 	}
 
