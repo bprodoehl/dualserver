@@ -7587,7 +7587,7 @@ void listDhcpCache()
 
 void checkSize()
 {
-	char logBuff[512];
+	//char logBuff[512];
 	//listCache();
 	//listDhcpCache();
 	//printf("Start %u=%u\n",dnsCache[currentInd].size(),dnsAge[currentInd].size());
@@ -7655,8 +7655,8 @@ void checkSize()
 					cfig.serial2 = (unsigned int)t;
 			}
 
-			sprintf_s(logBuff, sizeof(logBuff), "Data Type=%u Cache Size=%u, Age Size=%u, Entry %s being deleted", cache->cType, dnsCache[currentInd].size(), dnsAge[currentInd].size(), cache->name);
-			logMess(logBuff, 1);
+			//sprintf_s(logBuff, sizeof(logBuff), "Data Type=%u Cache Size=%u, Age Size=%u, Entry %s being deleted", cache->cType, dnsCache[currentInd].size(), dnsAge[currentInd].size(), cache->name);
+			//logMess(logBuff, 1);
 			delDnsEntry(cache);
 			//maxDelete--;
 		}
@@ -7705,8 +7705,7 @@ void checkSize()
 
 void delDnsEntry(data7* cache)
 {
-	return;
-	char logBuff[512];
+	//char logBuff[512];
 	hostMap::iterator r = dnsCache[currentInd].find(cache->mapname);
 
 	for (; r != dnsCache[currentInd].end(); r++)
@@ -7715,8 +7714,8 @@ void delDnsEntry(data7* cache)
 			break;
 		else if (r->second == cache)
 		{
-			sprintf_s(logBuff, sizeof(logBuff), "cType=%u dnsType=%u Size=%u, Entry %s being deleted", cache->cType, cache->dnsType, dnsCache[currentInd].size(), cache->name);
-			debug(logBuff);
+			//sprintf_s(logBuff, sizeof(logBuff), "cType=%u dnsType=%u Size=%u, Entry %s being deleted", cache->cType, cache->dnsType, dnsCache[currentInd].size(), cache->name);
+			//debug(logBuff);
 			dnsCache[currentInd].erase(r);
 			free(cache);
 			break;
