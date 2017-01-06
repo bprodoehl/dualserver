@@ -29,6 +29,7 @@
 #include <math.h>
 #include <VersionHelpers.h>
 #include "DualServer.h"
+#include <iostream>
 
 //Global Variables
 bool kRunning = true;
@@ -93,10 +94,12 @@ const char send200[] = "HTTP/1.1 200 OK\r\nDate: %s\r\nLast-Modified: %s\r\nCont
 const char send403[] = "HTTP/1.1 403 Forbidden\r\n\r\n<h1>403 Forbidden</h1>";
 const char send404[] = "HTTP/1.1 404 Not Found\r\n\r\n<h1>404 Not Found</h1>";
 const char td200[] = "<td>%s</td>";
-const char sVersion[] = "Dual DHCP DNS Server Version 7.29 Windows Build 7035";
+const char sVersionName[] = "Dual DHCP DNS Server Windows";
+const char sVersionNumber[] = "7.3";
+
 const char htmlStart[] = "<html>\n<head>\n<title>%s</title><meta http-equiv=\"refresh\" content=\"60\">\n<meta http-equiv=\"cache-control\" content=\"no-cache\">\n</head>\n";
 //const char bodyStart[] = "<body bgcolor=\"#cccccc\"><table width=\"800\"><tr><td align=\"center\"><font size=\"5\"><b>%s</b></font></b></b></td></tr><tr><td align=\"right\"><a target=\"_new\" href=\"http://dhcp-dns-server.sourceforge.net/\">http://dhcp-dns-server.sourceforge.net/</b></b></td></tr></table>";
-const char bodyStart[] = "<body bgcolor=\"#cccccc\"><table width=640><tr><td align=\"center\"><font size=\"5\"><b>%s</b></font></td></tr><tr><td align=\"right\"><a target=\"_new\" href=\"http://dhcp-dns-server.sourceforge.net\">http://dhcp-dns-server.sourceforge.net</td></tr></table>";
+const char bodyStart[] = "<body bgcolor=\"#cccccc\"><table width=640><tr><td align=\"center\"><font size=\"5\"><b>%s Version %s</b></font></td></tr><tr><td align=\"right\"><a target=\"_new\" href=\"http://dhcp-dns-server.sourceforge.net\">http://dhcp-dns-server.sourceforge.net</td></tr></table>";
 //const char bodyStart[] = "<body bgcolor=\"#cccccc\"><table width=640><tr><td align=\"center\"><font size=\"5\"><b>%s</b></font></td></tr><tr><td align=\"center\"><font size=\"5\">%s</font></td></tr></table>";
 const data4 opData[] =
     {
@@ -747,8 +750,30 @@ void uninstallService()
 	}
 }
 
+#ifdef USE_RAYGUN
+typedef int(__cdecl *raygunSetup)(const char*, const char*);
+#endif
+
 int main(int argc, TCHAR* argv[])
 {
+#ifdef USE_RAYGUN
+	HINSTANCE hGetProcIDDLL = LoadLibrary("raygun4cpp.dll");
+
+	if (!hGetProcIDDLL) {
+		std::cout << "could not load the raygun library" << std::endl;
+	}
+	else
+	{
+		raygunSetup funci = (raygunSetup)GetProcAddress(hGetProcIDDLL, "startVectoredHandler");
+		if (!funci) {
+			std::cout << "could not locate the function" << std::endl;
+		}
+		else
+		{
+			funci(sVersionNumber, RAYGUN_KEY);
+		}
+	}
+#endif
 
 	if (IsWindowsXPOrGreater())
 	{
@@ -2157,7 +2182,7 @@ void sendStatus(data19 *req)
 	fp += sprintf_s(fp, maxData - fp, send200, tempbuff, tempbuff);
 	char *contentStart = fp;
 	fp += sprintf_s(fp,maxData - fp, htmlStart, htmlTitle);
-	fp += sprintf_s(fp,maxData - fp, bodyStart, sVersion);
+	fp += sprintf_s(fp,maxData - fp, bodyStart, sVersionName,sVersionNumber);
 	fp += sprintf_s(fp,maxData - fp, "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
 
 	if (cfig.dhcpRepl > t)
@@ -2336,7 +2361,7 @@ void sendScopeStatus(data19 *req)
 	fp += sprintf_s(fp,sizeof(fp), send200, tempbuff, tempbuff);
 	char *contentStart = fp;
 	fp += sprintf_s(fp,sizeof(fp), htmlStart, htmlTitle);
-	fp += sprintf_s(fp,sizeof(fp), bodyStart, sVersion);
+	fp += sprintf_s(fp,sizeof(fp), bodyStart, sVersionName,sVersionNumber);
 	fp += sprintf_s(fp,sizeof(fp), "<table border=\"1\" cellpadding=\"1\" width=\"640\" bgcolor=\"#b8b8b8\">\n");
 	fp += sprintf_s(fp,sizeof(fp), "<tr><th colspan=\"4\"><font size=\"5\"><i>Scope Status</i></font></th></tr>\n");
 	fp += sprintf_s(fp,sizeof(fp), "<tr><td><b>DHCP Range</b></td><td align=\"right\"><b>IPs Used</b></td><td align=\"right\"><b>IPs Free</b></td><td align=\"right\"><b>%% Free</b></td></tr>\n");
@@ -2400,9 +2425,9 @@ void sendJSONStatus(data19 *req)
 	fp += sprintf_s(fp, maxData - fp, send200, tempbuff, tempbuff);
 	char *contentStart = fp;
 	//fp += sprintf_s(fp, maxData - fp, htmlStart, htmlTitle);
-	//fp += sprintf_s(fp, maxData - fp, bodyStart, sVersion);
+	//fp += sprintf_s(fp, maxData - fp, bodyStart, sVersionName,sVersionNumber);
 	fp += sprintf_s(fp, maxData - fp, "{\n");
-	fp += sprintf_s(fp, maxData - fp, "  \"version\":\"%s\",\n", sVersion);
+	fp += sprintf_s(fp, maxData - fp, "  \"version\":\"%s %s\",\n", sVersionName, sVersionNumber);
 	fp += sprintf_s(fp, maxData - fp, "  \"activeLeases\":[\n");
 
 	// if (cfig.dhcpRepl > t)
@@ -8887,12 +8912,12 @@ void __cdecl init(void *lpParam)
 		if (tempbuff[0])
 			logMess(tempbuff, 1);
 
-		sprintf_s(logBuff, sizeof(logBuff), "%s Starting...", sVersion);
+		sprintf_s(logBuff, sizeof(logBuff), "%s %s Starting...", sVersionName, sVersionNumber);
 		logMess(logBuff, 1);
 	}
 	else
 	{
-		sprintf_s(logBuff, sizeof(logBuff), "%s Starting...", sVersion);
+		sprintf_s(logBuff, sizeof(logBuff), "%s %s Starting...", sVersionName, sVersionNumber);
 		logMess(logBuff, 1);
 	}
 
@@ -10953,7 +10978,7 @@ void logDirect(char *mess)
 
 			if (0 == fopen_s(&f, cfig.logFileName, "at"))
 			{
-				fprintf(f, "%s\n\n", sVersion);
+				fprintf(f, "%s %s\n\n", sVersionName, sVersionNumber);
 				fclose(f);
 			}
 		}
@@ -11007,7 +11032,7 @@ void __cdecl logThread(void *lpParam)
 
 			if (0== fopen_s(&f, cfig.logFileName, "at"))
 			{
-				fprintf(f, "%s\n\n", sVersion);
+				fprintf(f, "%s %s\n\n", sVersionName, sVersionNumber);
 				fclose(f);
 			}
 		}
