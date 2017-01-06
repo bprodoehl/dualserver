@@ -2225,7 +2225,7 @@ void sendStatus(data19 *req)
 	{
 		for (MYDWORD ind = 0, iip = cfig.dhcpRanges[rangeInd].rangeStart; kRunning && iip <= cfig.dhcpRanges[rangeInd].rangeEnd; iip++, ind++)
 		{
-			if (cfig.dhcpRanges[rangeInd].expiry[ind] < t)
+			if (cfig.dhcpRanges[rangeInd].expiry && cfig.dhcpRanges[rangeInd].expiry[ind] < t)
 			{
 				if (!colNum)
 				{
@@ -2260,9 +2260,9 @@ void sendStatus(data19 *req)
 
 		for (MYDWORD iip = cfig.dhcpRanges[rangeInd].rangeStart; iip <= cfig.dhcpRanges[rangeInd].rangeEnd; iip++, ind++)
 		{
-			if (cfig.dhcpRanges[rangeInd].expiry[ind] < t)
+			if (cfig.dhcpRanges[rangeInd].expiry && cfig.dhcpRanges[rangeInd].expiry[ind] < t)
 				ipfree++;
-			else if (cfig.dhcpRanges[rangeInd].dhcpEntry[ind] && !(cfig.dhcpRanges[rangeInd].dhcpEntry[ind]->fixed))
+			else if (cfig.dhcpRanges[rangeInd].dhcpEntry && cfig.dhcpRanges[rangeInd].dhcpEntry[ind] && !(cfig.dhcpRanges[rangeInd].dhcpEntry[ind]->fixed))
 				ipused++;
 		}
 
@@ -2352,7 +2352,7 @@ void sendScopeStatus(data19 *req)
 
 		for (MYDWORD iip = cfig.dhcpRanges[rangeInd].rangeStart; iip <= cfig.dhcpRanges[rangeInd].rangeEnd; iip++, ind++)
 		{
-			if (cfig.dhcpRanges[rangeInd].expiry[ind] > t)
+			if (cfig.dhcpRanges[rangeInd].expiry && cfig.dhcpRanges[rangeInd].expiry[ind] > t)
 				ipused++;
 			else
 				ipfree++;
@@ -2471,9 +2471,9 @@ void sendJSONStatus(data19 *req)
 
 		for (MYDWORD iip = cfig.dhcpRanges[rangeInd].rangeStart; iip <= cfig.dhcpRanges[rangeInd].rangeEnd; iip++, ind++)
 		{
-			if (cfig.dhcpRanges[rangeInd].expiry[ind] < t)
+			if (cfig.dhcpRanges[rangeInd].expiry && cfig.dhcpRanges[rangeInd].expiry[ind] < t)
 				ipfree++;
-			else if (cfig.dhcpRanges[rangeInd].dhcpEntry[ind] && !(cfig.dhcpRanges[rangeInd].dhcpEntry[ind]->fixed))
+			else if (cfig.dhcpRanges[rangeInd].dhcpEntry && cfig.dhcpRanges[rangeInd].dhcpEntry[ind] && !(cfig.dhcpRanges[rangeInd].dhcpEntry[ind]->fixed))
 				ipused++;
 		}
 
@@ -2623,9 +2623,9 @@ void sendXMLStatus(data19 *req)
 
 		for (MYDWORD iip = cfig.dhcpRanges[rangeInd].rangeStart; iip <= cfig.dhcpRanges[rangeInd].rangeEnd; iip++, ind++)
 		{
-			if (cfig.dhcpRanges[rangeInd].expiry[ind] < t)
+			if (cfig.dhcpRanges[rangeInd].expiry && cfig.dhcpRanges[rangeInd].expiry[ind] < t)
 				ipfree++;
-			else if (cfig.dhcpRanges[rangeInd].dhcpEntry[ind] && !(cfig.dhcpRanges[rangeInd].dhcpEntry[ind]->fixed))
+			else if (cfig.dhcpRanges[rangeInd].dhcpEntry && cfig.dhcpRanges[rangeInd].dhcpEntry[ind] && !(cfig.dhcpRanges[rangeInd].dhcpEntry[ind]->fixed))
 				ipused++;
 		}
 
@@ -4330,7 +4330,7 @@ MYDWORD resad(data9 *req)
 		{
 			int ind = getIndex(req->dhcpEntry->rangeInd, req->dhcpEntry->ip);
 
-			if (cfig.dhcpRanges[req->dhcpEntry->rangeInd].dhcpEntry[ind] == req->dhcpEntry && checkRange(&rangeData, req->dhcpEntry->rangeInd))
+			if (cfig.dhcpRanges[req->dhcpEntry->rangeInd].dhcpEntry && cfig.dhcpRanges[req->dhcpEntry->rangeInd].dhcpEntry[ind] == req->dhcpEntry && checkRange(&rangeData, req->dhcpEntry->rangeInd))
 			{
 				MYBYTE rangeSetInd = cfig.dhcpRanges[req->dhcpEntry->rangeInd].rangeSetInd;
 
@@ -4383,7 +4383,7 @@ MYDWORD resad(data9 *req)
 							data13 *range = &cfig.dhcpRanges[k];
 							int ind = getIndex(k, cache->ip);
 
-							if (ind >= 0 && range->expiry[ind] <= t)
+							if (ind >= 0 && range->expiry && range->expiry[ind] <= t)
 							{
 								MYDWORD iip = htonl(cache->ip);
 
@@ -4423,7 +4423,7 @@ MYDWORD resad(data9 *req)
 				data13 *range = &cfig.dhcpRanges[k];
 				int ind = getIndex(k, req->reqIP);
 
-				if (range->expiry[ind] <= t)
+				if (range->expiry && range->expiry[ind] <= t)
 				{
 					if (!cfig.rangeSet[range->rangeSetInd].subnetIP[0])
 					{
@@ -4477,13 +4477,13 @@ MYDWORD resad(data9 *req)
 					{
 						int ind = m - range->rangeStart;
 
-						if (!range->expiry[ind])
+						if (!range->expiry || !range->expiry[ind])
 						{
 							iipNew = m;
 							rangeInd = k;
 							break;
 						}
-						else if (!iipExp && range->expiry[ind] < t)
+						else if (!iipExp && range->expiry && range->expiry[ind] < t)
 						{
 							iipExp = m;
 							rangeInd = k;
@@ -4496,13 +4496,13 @@ MYDWORD resad(data9 *req)
 					{
 						int ind = m - range->rangeStart;
 
-						if (!range->expiry[ind])
+						if (!range->expiry || !range->expiry[ind])
 						{
 							iipNew = m;
 							rangeInd = k;
 							break;
 						}
-						else if (!iipExp && range->expiry[ind] < t)
+						else if (!iipExp && range->expiry && range->expiry[ind] < t)
 						{
 							iipExp = m;
 							rangeInd = k;
@@ -5165,10 +5165,10 @@ void setTempLease(data7 *dhcpEntry)
 
 		if (ind >= 0)
 		{
-			if (cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] != INT_MAX)
+			if (cfig.dhcpRanges[dhcpEntry->rangeInd].expiry && cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] != INT_MAX)
 				cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] = dhcpEntry->expiry;
 
-			cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry[ind] = dhcpEntry;
+			if (cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry) cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry[ind] = dhcpEntry;
 		}
 	}
 }
@@ -5187,10 +5187,10 @@ void setLeaseExpiry(data7 *dhcpEntry, MYDWORD lease)
 
 		if (ind >= 0)
 		{
-			if (cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] != INT_MAX)
+			if (cfig.dhcpRanges[dhcpEntry->rangeInd].expiry && cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] != INT_MAX)
 				cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] = dhcpEntry->expiry;
 
-			cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry[ind] = dhcpEntry;
+			if (cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry) cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry[ind] = dhcpEntry;
 		}
 	}
 }
@@ -5203,10 +5203,10 @@ void setLeaseExpiry(data7 *dhcpEntry)
 
 		if (ind >= 0)
 		{
-			if (cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] != INT_MAX)
+			if (cfig.dhcpRanges[dhcpEntry->rangeInd].expiry && cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] != INT_MAX)
 				cfig.dhcpRanges[dhcpEntry->rangeInd].expiry[ind] = dhcpEntry->expiry;
 
-			cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry[ind] = dhcpEntry;
+			if (cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry) cfig.dhcpRanges[dhcpEntry->rangeInd].dhcpEntry[ind] = dhcpEntry;
 		}
 	}
 }
@@ -5224,7 +5224,7 @@ void lockIP(MYDWORD ip)
 			{
 				int ind = iip - cfig.dhcpRanges[rangeInd].rangeStart;
 
-				if (cfig.dhcpRanges[rangeInd].expiry[ind] != INT_MAX)
+				if (cfig.dhcpRanges[rangeInd].expiry && cfig.dhcpRanges[rangeInd].expiry[ind] != INT_MAX)
 					cfig.dhcpRanges[rangeInd].expiry[ind] = INT_MAX;
 
 				break;
@@ -5245,7 +5245,7 @@ void holdIP(MYDWORD ip)
 			{
 				int ind = iip - cfig.dhcpRanges[rangeInd].rangeStart;
 
-				if (cfig.dhcpRanges[rangeInd].expiry[ind] == 0)
+				if (cfig.dhcpRanges[rangeInd].expiry && cfig.dhcpRanges[rangeInd].expiry[ind] == 0)
 					cfig.dhcpRanges[rangeInd].expiry[ind] = 1;
 
 				break;
@@ -5461,7 +5461,8 @@ void recvRepl(data9 *req)
 	if (rInd >= 0)
 	{
 		int ind  = getIndex(rInd, ip);
-		req->dhcpEntry = cfig.dhcpRanges[rInd].dhcpEntry[ind];
+		if (cfig.dhcpRanges[req->dhcpEntry->rangeInd].dhcpEntry)
+			req->dhcpEntry = cfig.dhcpRanges[rInd].dhcpEntry[ind];
 
 		if (req->dhcpEntry && !req->dhcpEntry->fixed && strcasecmp(req->dhcpEntry->mapname, req->chaddr))
 			req->dhcpEntry->expiry = 0;
@@ -5486,7 +5487,8 @@ void recvRepl(data9 *req)
 			int ind  = getIndex(req->dhcpEntry->rangeInd, req->dhcpEntry->ip);
 
 			if (ind >= 0)
-				cfig.dhcpRanges[req->dhcpEntry->rangeInd].dhcpEntry[ind] = 0;
+				if (cfig.dhcpRanges[req->dhcpEntry->rangeInd].dhcpEntry)
+					cfig.dhcpRanges[req->dhcpEntry->rangeInd].dhcpEntry[ind] = 0;
 		}
 	}
 
@@ -6299,10 +6301,16 @@ void addDHCPRange(char *dp)
 				if (!range->expiry || !range->dhcpEntry)
 				{
 					if (range->expiry)
+					{
 						free(range->expiry);
+						range->expiry = NULL;
+					}
 
 					if (range->dhcpEntry)
+					{
 						free(range->dhcpEntry);
+						range->dhcpEntry = NULL;
+					}
 
 					sprintf_s(logBuff, sizeof(logBuff), "DHCP Ranges Load, Memory Allocation Error");
 					logDHCPMess(logBuff, 1);
@@ -6516,7 +6524,8 @@ void loadDHCP()
 			MYDWORD ip = htonl(iip);
 
 			if ((cfig.dhcpRanges[rangeInd].mask | (~ip)) == UINT_MAX || (cfig.dhcpRanges[rangeInd].mask | ip) == UINT_MAX)
-				cfig.dhcpRanges[rangeInd].expiry[iip - cfig.dhcpRanges[rangeInd].rangeStart] = INT_MAX;
+				if (cfig.dhcpRanges[rangeInd].expiry)
+					cfig.dhcpRanges[rangeInd].expiry[iip - cfig.dhcpRanges[rangeInd].rangeStart] = INT_MAX;
 		}
 	}
 
@@ -6734,7 +6743,8 @@ void loadDHCP()
 					if (dhcpData.hostname[0])
 					{
 						dhcpEntry->hostname = (char *)calloc(1, MAX_HOSTNAME_STR_SIZE);
-						strcpy_s(dhcpEntry->hostname, MAX_HOSTNAME_STR_SIZE, dhcpData.hostname);
+						if (dhcpEntry->hostname)
+							strcpy_s(dhcpEntry->hostname, MAX_HOSTNAME_STR_SIZE, dhcpData.hostname);
 					}
 
 					setLeaseExpiry(dhcpEntry);
