@@ -8814,7 +8814,8 @@ void __cdecl init(void *lpParam)
 	fileExt = strrchr(filePATH, '\\');
 	*fileExt = 0;
 	fileExt++;
-	sprintf_s(logFile, sizeof(logFile), "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
+	if (strlen(logPath)==0) sprintf_s(logFile, sizeof(logFile), "%s\\log\\%s%%Y%%m%%d.log", filePATH, fileExt);
+	else sprintf_s(logFile, sizeof(logFile), "%s\\%s%%Y%%m%%d.log", logPath, fileExt);
 	sprintf_s(cliFile, sizeof(cliFile), "%s\\log\\%%s.log", filePATH);
 	strcat_s(filePATH, sizeof(filePATH), "\\");
 
