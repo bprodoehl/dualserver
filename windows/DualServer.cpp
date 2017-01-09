@@ -2091,8 +2091,8 @@ void procHTTP(data19 *req)
 	}
 	else if (verbatim || cfig.dhcpLogLevel >= 2)
 	{
-		sprintf_s(logBuff, sizeof(logBuff), "Client %s, HTTP Request Received", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr));
-		logDHCPMess(logBuff, 2);
+		//sprintf_s(logBuff, sizeof(logBuff), "Client %s, HTTP Request Received", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr));
+		//logDHCPMess(logBuff, 2);
 		//printf("%s\n", buffer);
 	}
 
