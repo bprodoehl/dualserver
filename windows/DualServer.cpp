@@ -3829,6 +3829,7 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 		IP2String(tempbuff, sizeof(tempbuff), htonl(ip), DNS_TYPE_PTR);
 		p = dnsCache[currentInd].find(tempbuff);
 
+#if 0
 		for (; p != dnsCache[currentInd].end(); p++)
 		{
 			if (strcasecmp(p->second->mapname, tempbuff))
@@ -3840,7 +3841,12 @@ void add2Cache(char *hostname, MYDWORD ip, time_t expiry, MYBYTE aType, MYBYTE p
 				break;
 			}
 		}
-
+#else
+		if (p != dnsCache[currentInd].end() && !strcasecmp(p->second->hostname, hostname))
+		{
+			cache = p->second;
+		}
+#endif
 		if (!cache)
 		{
 			memset(&lump, 0, sizeof(data71));
