@@ -80,6 +80,7 @@ byte hostPhysAddress[MAX_SERVERS][8];
 
 // Ports
 unsigned short dnsPort = IPPORT_DNS;
+unsigned short dnsForwardPort = IPPORT_DNS;
 unsigned short dhcpServerPort = IPPORT_DHCPS;
 unsigned short dhcpClientPort = IPPORT_DHCPC;
 
@@ -3457,7 +3458,7 @@ MYWORD fdnmess(data5 *req)
 			{
 				req->addr.sin_family = AF_INET;
 				req->addr.sin_addr.s_addr = cfig.dnsRoutes[zoneDNS].dns[cfig.dnsRoutes[zoneDNS].currentDNS];
-				req->addr.sin_port = htons(dnsPort);
+				req->addr.sin_port = htons(dnsForwardPort);
 				errno = 0;
 
 				nRet = sendto(network.forwConn.sock,
@@ -3562,7 +3563,7 @@ MYWORD fdnmess(data5 *req)
 		{
 			req->addr.sin_family = AF_INET;
 			req->addr.sin_addr.s_addr = network.dns[network.currentDNS];
-			req->addr.sin_port = htons(dnsPort);
+			req->addr.sin_port = htons(dnsForwardPort);
 			errno = 0;
 
 			nRet = sendto(network.forwConn.sock,
@@ -9361,6 +9362,14 @@ void __cdecl init(void *lpParam)
 		sprintf_s(logBuff, sizeof(logBuff), "Using DNS Port of %u", dnsPort);
 		logDNSMess(logBuff, 1);
 
+		if ((f = openSection("DNS_FORWARD_PORT", 1)))
+		{
+			while (readSection(raw, f))
+				dnsForwardPort = atoi(raw);
+		}
+		sprintf_s(logBuff, sizeof(logBuff), "Using DNS Forward Port of %u", dnsPort);
+		logDNSMess(logBuff, 1);
+
 		if ((f = openSection("DNS_ALLOWED_HOSTS", 1)))
 		{
 			int i = 0;
@@ -10253,7 +10262,7 @@ void __cdecl init(void *lpParam)
 				{
 					bindfailed = true;
 					closesocket(network.dnsUdpConn[i].sock);
-					sprintf_s(logBuff, sizeof(logBuff), "Warning: %s UDP Port 53 already in use", IP2String(ipbuff, sizeof(ipbuff), network.listenServers[j]));
+					sprintf_s(logBuff, sizeof(logBuff), "Warning: %s UDP Port %u already in use", IP2String(ipbuff, sizeof(ipbuff), network.listenServers[j]),dnsPort);
 					logDNSMess(logBuff, 1);
 					continue;
 				}
@@ -10319,7 +10328,7 @@ void __cdecl init(void *lpParam)
 					{
 						bindfailed = true;
 						closesocket(network.dnsTcpConn[i].sock);
-						sprintf_s(logBuff, sizeof(logBuff), "Warning: %s TCP Port 53 already in use", IP2String(ipbuff, sizeof(ipbuff), network.listenServers[j]));
+						sprintf_s(logBuff, sizeof(logBuff), "Warning: %s TCP Port %u already in use", IP2String(ipbuff, sizeof(ipbuff), network.listenServers[j]), dnsPort);
 						logDNSMess(logBuff, 1);
 					}
 					else
@@ -10329,7 +10338,7 @@ void __cdecl init(void *lpParam)
 						if (nRet == SOCKET_ERROR)
 						{
 							closesocket(network.dnsTcpConn[i].sock);
-							sprintf_s(logBuff, sizeof(logBuff), "TCP Port 53 Error on Listen");
+							sprintf_s(logBuff, sizeof(logBuff), "TCP Port %u Error on Listen",dnsPort);
 							logDNSMess(logBuff, 1);
 						}
 						else
