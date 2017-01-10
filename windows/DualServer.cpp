@@ -8823,7 +8823,6 @@ bool getSecondary()
 	}
 }
 
-class Polymorphic { virtual void member() {} };
 void __cdecl init(void *lpParam)
 {
 	FILE *f = NULL;
@@ -10437,13 +10436,6 @@ bool detectChange()
 {
 	char logBuff[512];
 	//debug("Calling detectChange()");
-
-
-
-	volatile int *pInt = 0x00000000;
-	*pInt = 20;
-	Polymorphic * pb = 0;
-	if (typeid(*pb) == typeid(Polymorphic)) {}  // throws a bad_typeid exception
 
 	network.ready = true;
 
