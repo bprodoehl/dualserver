@@ -6,7 +6,7 @@
 *   it under the terms of the GNU General Public License as published by  *
 *   the Free Software Foundation; either version 2 of the License, or     *
 *   (at your option) any later version.                                   *
-*                     a                                                   *
+*                                                                         *
 *   This program is distributed in the hope that it will be useful,       *
 *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
 *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
@@ -7552,7 +7552,7 @@ MYBYTE makeLocal(char *mapname)
 		//(*dp) = 0;
 		return QTYPE_P_ZONE;
 	}
-	else if (char *dp = strchr(mapname, '.'))
+	else if (char *dp = strrchr(mapname, '.'))
 	{
 		if (!strcasecmp(dp + 1, cfig.zone))
 		{
