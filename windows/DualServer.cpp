@@ -9373,7 +9373,7 @@ void __cdecl init(void *lpParam)
 			while (readSection(raw, f))
 				dnsForwardPort = atoi(raw);
 		}
-		sprintf_s(logBuff, sizeof(logBuff), "Using DNS Forward Port of %u", dnsPort);
+		sprintf_s(logBuff, sizeof(logBuff), "Using DNS Forward Port of %u", dnsForwardPort);
 		logDNSMess(logBuff, 1);
 
 		if ((f = openSection("DNS_ALLOWED_HOSTS", 1)))
