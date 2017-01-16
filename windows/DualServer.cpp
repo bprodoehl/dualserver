@@ -383,7 +383,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 							(sockaddr*)&dhcpr.remote,
 							&dhcpr.sockLen);
 
-						if (dhcpr.bytes <= SOCKET_ERROR)
+						if (dhcpr.bytes == SOCKET_ERROR || dhcpr.bytes == 0)
 						{
 							cfig.dhcpRepl = 0;
 						}
@@ -994,7 +994,7 @@ void runProg()
 										   &dhcpr.sockLen);
 
 
-					if (dhcpr.bytes <= SOCKET_ERROR)
+					if (dhcpr.bytes == SOCKET_ERROR || dhcpr.bytes == 0)
 					{
 						cfig.dhcpRepl = 0;
 					}
