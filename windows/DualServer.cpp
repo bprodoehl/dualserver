@@ -2972,7 +2972,7 @@ MYWORD sendTCPmess(data5 *req)
 	tv1.tv_sec = 5;
 	tv1.tv_usec = 0;
 
-	if (select((int)(req->sock + 1), NULL, &writefds, NULL, &tv1) > 0)
+	if (0 < select((int)(req->sock + 1), NULL, &writefds, NULL, &tv1))
 	{
 		errno = 0;
 		req->dnsp->header.ra = 0;
@@ -7955,7 +7955,6 @@ MYDWORD getSerial(char *zone)
 	FD_SET(req.sock, &readfds1);
 	if (0 < select(USHRT_MAX, &readfds1, NULL, NULL, &tv1))
 	{
-
 		if (FD_ISSET(req.sock, &readfds1))
 		{
 			req.sockLen = sizeof(req.remote);
@@ -8058,7 +8057,6 @@ void sendServerName()
 	FD_SET(req.sock, &readfds1);
 	if (0 < select(USHRT_MAX, &readfds1, NULL, NULL, &tv1))
 	{
-
 		if (FD_ISSET(req.sock, &readfds1))
 		{
 			req.sockLen = sizeof(req.remote);
@@ -8101,7 +8099,7 @@ MYWORD recvTcpDnsMess(char *target, SOCKET sock, MYWORD targetSize)
 				tv1.tv_sec = 5;
 				tv1.tv_usec = 0;
 
-				if (select((int)(sock + 1), &readfds1, NULL, NULL, &tv1))
+				if (0 < select((int)(sock + 1), &readfds1, NULL, NULL, &tv1))
 				{
 					errno = 0;
 					ptr = target + rcd;
@@ -8271,7 +8269,7 @@ FILE *pullZone(SOCKET sock)
 		tv1.tv_sec = 10;
 		tv1.tv_usec = 0;
 
-		if (select((int)(sock + 1), &readfds1, NULL, NULL, &tv1) > 0)
+		if (0 < select((int)(sock + 1), &readfds1, NULL, NULL, &tv1))
 		{
 			errno = 0;
 			short bytes = recv(sock, target, sizeof(target), 0);
