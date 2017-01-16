@@ -103,7 +103,7 @@ const char htmlStart[] = "<html>\n<head>\n<title>%s</title><meta http-equiv=\"re
 const char bodyStart[] = "<body bgcolor=\"#cccccc\"><table width=640><tr><td align=\"center\"><font size=\"5\"><b>%s Version %s</b></font></td></tr><tr><td align=\"right\"><a target=\"_new\" href=\"http://dhcp-dns-server.sourceforge.net\">http://dhcp-dns-server.sourceforge.net</td></tr></table>";
 //const char bodyStart[] = "<body bgcolor=\"#cccccc\"><table width=640><tr><td align=\"center\"><font size=\"5\"><b>%s</b></font></td></tr><tr><td align=\"center\"><font size=\"5\">%s</font></td></tr></table>";
 const data4 opData[] =
-    {
+	{
 		{ "SubnetMask", 1, 3 , 1},
 		{ "TimeOffset", 2, 4 , 1},
 		{ "Router", 3, 3 , 1},
@@ -220,8 +220,8 @@ const data4 opData[] =
 		{ "OPTION_6RD", 212, 1 , 1},
 		{ "OPTION_V4_ACCESS_DOMAIN", 213, 1 , 1},
 		{ "BootFileName", 253, 1 , 1},
-        { "NextServer", 254, 3, 1},
-    };
+		{ "NextServer", 254, 3, 1},
+	};
 
 void WINAPI ServiceControlHandler(DWORD controlCode)
 {
@@ -2576,7 +2576,7 @@ void __cdecl sendHTTP(void *lpParam)
 				sent  = send(req->sock, dp, 1024, 0);
 			else
 				sent  = send(req->sock, dp, req->bytes, 0);
-			
+
 			if (sent < 0)
 			{
 				errno = WSAGetLastError();
@@ -3805,7 +3805,7 @@ MYWORD sdnmess(data5 *req)
 	                    (sockaddr*)&req->remote,
 	                    sizeof(req->remote));
 
-	
+
 
 	if (req->bytes <= 0)
 	{
