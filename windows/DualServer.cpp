@@ -539,8 +539,8 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 		logMess(logBuff, 1);
 		closeConn();
 
-        if (cfig.dhcpReplConn.ready)
-            closesocket(cfig.dhcpReplConn.sock);
+		if (cfig.dhcpReplConn.ready)
+			closesocket(cfig.dhcpReplConn.sock);
 
 		sprintf_s(logBuff, sizeof(logBuff), "Dual Server Stopped !\n");
 		logMess(logBuff, 1);
@@ -560,36 +560,36 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 
 void closeConn()
 {
-    if (dhcpService)
-    {
+	if (dhcpService)
+	{
 		if (network.httpConn.ready)
 			closesocket(network.httpConn.sock);
 
-        for (int i = 0; i < MAX_SERVERS && network.dhcpConn[i].loaded; i++)
-        	if (network.dhcpConn[i].ready)
-            	closesocket(network.dhcpConn[i].sock);
-    }
+		for (int i = 0; i < MAX_SERVERS && network.dhcpConn[i].loaded; i++)
+			if (network.dhcpConn[i].ready)
+				closesocket(network.dhcpConn[i].sock);
+	}
 
-    if (dnsService)
-    {
-        for (int i = 0; i < MAX_SERVERS && network.dnsUdpConn[i].loaded; i++)
-        	if (network.dnsUdpConn[i].ready)
-           		closesocket(network.dnsUdpConn[i].sock);
+	if (dnsService)
+	{
+		for (int i = 0; i < MAX_SERVERS && network.dnsUdpConn[i].loaded; i++)
+			if (network.dnsUdpConn[i].ready)
+				closesocket(network.dnsUdpConn[i].sock);
 
-        for (int i = 0; i < MAX_SERVERS && network.dnsTcpConn[i].loaded; i++)
-        	if (network.dnsTcpConn[i].ready)
-            	closesocket(network.dnsTcpConn[i].sock);
+		for (int i = 0; i < MAX_SERVERS && network.dnsTcpConn[i].loaded; i++)
+			if (network.dnsTcpConn[i].ready)
+				closesocket(network.dnsTcpConn[i].sock);
 
-        if (network.forwConn.ready)
-        	closesocket(network.forwConn.sock);
-    }
+		if (network.forwConn.ready)
+			closesocket(network.forwConn.sock);
+	}
 }
 
 /*
 void closeConn()
 {
-    if (dhcpService)
-    {
+	if (dhcpService)
+	{
 		if (network.httpConn.ready)
 		{
 			closesocket(network.httpConn.sock);
@@ -597,50 +597,50 @@ void closeConn()
 			logMess(logBuff, 1);
 		}
 
-        for (int i = 0; i < MAX_SERVERS && network.dhcpConn[i].loaded; i++)
-        	if (network.dhcpConn[i].ready)
-        	{
-            	closesocket(network.dhcpConn[i].sock);
+		for (int i = 0; i < MAX_SERVERS && network.dhcpConn[i].loaded; i++)
+			if (network.dhcpConn[i].ready)
+			{
+				closesocket(network.dhcpConn[i].sock);
 				sprintf_s(logBuff, sizeof(logBuff), "dhcpConn[%u] %s:%u closed", i, IP2String(ipbuff, network.dhcpConn[i].server), network.dhcpConn[i].port);
 				logMess(logBuff, 1);
 			}
-    }
+	}
 
-    if (dnsService)
-    {
-        for (int i = 0; i < MAX_SERVERS && network.dnsUdpConn[i].loaded; i++)
-        	if (network.dnsUdpConn[i].ready)
-        	{
-           		closesocket(network.dnsUdpConn[i].sock);
+	if (dnsService)
+	{
+		for (int i = 0; i < MAX_SERVERS && network.dnsUdpConn[i].loaded; i++)
+			if (network.dnsUdpConn[i].ready)
+			{
+				closesocket(network.dnsUdpConn[i].sock);
 				sprintf_s(logBuff, sizeof(logBuff), "dnsUdpConn %s:%u closed", IP2String(ipbuff, network.dnsUdpConn[i].server), network.dnsUdpConn[i].port);
 				logMess(logBuff, 1);
 			}
 
-        for (int i = 0; i < MAX_SERVERS && network.dnsTcpConn[i].loaded; i++)
-        	if (network.dnsTcpConn[i].ready)
-        	{
-            	closesocket(network.dnsTcpConn[i].sock);
+		for (int i = 0; i < MAX_SERVERS && network.dnsTcpConn[i].loaded; i++)
+			if (network.dnsTcpConn[i].ready)
+			{
+				closesocket(network.dnsTcpConn[i].sock);
 				sprintf_s(logBuff, sizeof(logBuff), "dnsTcpConn %s:%u closed", IP2String(ipbuff, network.dnsTcpConn[i].server), network.dnsTcpConn[i].port);
 				logMess(logBuff, 1);
 			}
 
-        if (network.forwConn.ready)
-        {
-        	closesocket(network.forwConn.sock);
+		if (network.forwConn.ready)
+		{
+			closesocket(network.forwConn.sock);
 			sprintf_s(logBuff, sizeof(logBuff), "forwConn %s:%u closed", IP2String(ipbuff, network.forwConn.server), network.forwConn.port);
 			logMess(logBuff, 1);
 		}
-    }
+	}
 }
 */
 
 void runService()
 {
 	SERVICE_TABLE_ENTRY serviceTable[] =
-	    {
-	        {serviceName, ServiceMain},
-	        {0, 0}
-	    };
+		{
+			{serviceName, ServiceMain},
+			{0, 0}
+		};
 
 	StartServiceCtrlDispatcher(serviceTable);
 }
@@ -1143,15 +1143,15 @@ void runProg()
 	while (kRunning);
 
 	kRunning = false;
-    sprintf_s(logBuff, sizeof(logBuff), "Closing Network Connections...");
-    logMess(logBuff, 1);
+	sprintf_s(logBuff, sizeof(logBuff), "Closing Network Connections...");
+	logMess(logBuff, 1);
 	closeConn();
 
 	if (cfig.dhcpReplConn.ready)
 		closesocket(cfig.dhcpReplConn.sock);
 
-    sprintf_s(logBuff, sizeof(logBuff), "Dual Server Stopped !\n");
-    logMess(logBuff, 1);
+	sprintf_s(logBuff, sizeof(logBuff), "Dual Server Stopped !\n");
+	logMess(logBuff, 1);
 
 	WSACleanup();
 }
@@ -5226,8 +5226,8 @@ MYDWORD sendRepl(data9 *req)
 	                    req->raw,
 	                    req->bytes,
 	                    0,
-						(sockaddr*)&token.remote,
-						sizeof(token.remote));
+	                    (sockaddr*)&token.remote,
+	                    sizeof(token.remote));
 
 
 
@@ -8244,70 +8244,70 @@ void __cdecl checkZone(void *lpParam)
 
 FILE *pullZone(SOCKET sock)
 {
-    char target[4096];
-    timeval tv1;
-    fd_set readfds1;
-    FILE *f;
+	char target[4096];
+	timeval tv1;
+	fd_set readfds1;
+	FILE *f;
 
-    if (0== fopen_s(&f,tempFile, "wb"))
-    {
-        fclose(f);
+	if (0== fopen_s(&f,tempFile, "wb"))
+	{
+		fclose(f);
 		if (0!= fopen_s(&f,tempFile, "ab"))
 		{
 			closesocket(sock);
 			return NULL;
 		}
-    }
-    else
-    {
+	}
+	else
+	{
 		closesocket(sock);
-        return NULL;
+		return NULL;
 	}
 
-    while (true)
-    {
-        FD_ZERO(&readfds1);
-        FD_SET(sock, &readfds1);
-        tv1.tv_sec = 10;
-        tv1.tv_usec = 0;
+	while (true)
+	{
+		FD_ZERO(&readfds1);
+		FD_SET(sock, &readfds1);
+		tv1.tv_sec = 10;
+		tv1.tv_usec = 0;
 
-        if (select((int)(sock + 1), &readfds1, NULL, NULL, &tv1) > 0)
-        {
-            errno = 0;
-            short bytes = recv(sock, target, sizeof(target), 0);
+		if (select((int)(sock + 1), &readfds1, NULL, NULL, &tv1) > 0)
+		{
+			errno = 0;
+			short bytes = recv(sock, target, sizeof(target), 0);
 
-            if (bytes == SOCKET_ERROR)
+			if (bytes == SOCKET_ERROR)
 			{
 				errno = WSAGetLastError();
 				closesocket(sock);
-                fclose(f);
+				fclose(f);
 				return NULL;
 			}
 
-            //debug(bytes);
+			//debug(bytes);
 
-            if (bytes == 0)
-                break;
+			if (bytes == 0)
+				break;
 
-            if (bytes != (short)fwrite(target, 1, bytes, f))
+			if (bytes != (short)fwrite(target, 1, bytes, f))
 			{
 				closesocket(sock);
-                fclose(f);
+				fclose(f);
 				return NULL;
 			}
-        }
-        else
+		}
+		else
 		{
 			break;
 			//closesocket(sock);
 			//fclose(f);
 			//return NULL;
 		}
-    }
+	}
 
 	closesocket(sock);
 	fclose(f);
-    if (0== fopen_s(&f,tempFile, "rb"))
+	if (0== fopen_s(&f,tempFile, "rb"))
 		return f;
 	return 0;
 }
