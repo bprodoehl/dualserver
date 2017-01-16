@@ -339,7 +339,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 					FD_SET(network.forwConn.sock, &readfds);
 			}
 
-			if (select((int)(network.maxFD), &readfds, NULL, NULL, &tv))
+			if (0 < select((int)(network.maxFD), &readfds, NULL, NULL, &tv))
 			{
 				t = time(NULL);
 
@@ -949,7 +949,7 @@ void runProg()
 				FD_SET(network.forwConn.sock, &readfds);
 		}
 
-		if (select((int)(network.maxFD), &readfds, NULL, NULL, &tv))
+		if (0 < select((int)(network.maxFD), &readfds, NULL, NULL, &tv))
 		{
 			t = time(NULL);
 
@@ -2069,7 +2069,7 @@ void procHTTP(data19 *req)
 	tv1.tv_usec = 0;
 	FD_SET(req->sock, &readfds1);
 
-	if (!select((int)(req->sock + 1), &readfds1, NULL, NULL, &tv1))
+	if (0 >= select((int)(req->sock + 1), &readfds1, NULL, NULL, &tv1))
 	{
 		sprintf_s(logBuff, sizeof(logBuff), "Client %s, HTTP Message Receive failed", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr));
 		logDHCPMess(logBuff, 1);
@@ -2081,10 +2081,10 @@ void procHTTP(data19 *req)
 	errno = 0;
 	char buffer[1024];
 	req->bytes = recv(req->sock, buffer, sizeof(buffer), 0);
-	errno = WSAGetLastError();
 
-	if (errno || req->bytes <= 0)
+	if (req->bytes == SOCKET_ERROR || req->bytes <= 0)
 	{
+		if (req->bytes == SOCKET_ERROR) errno = WSAGetLastError();
 		sprintf_s(logBuff, sizeof(logBuff), "Client %s, HTTP Message Receive failed, WSAError %d", IP2String(tempbuff, sizeof(tempbuff), req->remote.sin_addr.s_addr), errno);
 		logDHCPMess(logBuff, 1);
 		closesocket(req->sock);
@@ -2570,17 +2570,18 @@ void __cdecl sendHTTP(void *lpParam)
 		FD_ZERO(&writefds1);
 		FD_SET(req->sock, &writefds1);
 
-		if (select((int)(req->sock + 1), NULL, &writefds1, NULL, &tv1))
+		if (0 < select((int)(req->sock + 1), NULL, &writefds1, NULL, &tv1))
 		{
 			if (req->bytes > 1024)
 				sent  = send(req->sock, dp, 1024, 0);
 			else
 				sent  = send(req->sock, dp, req->bytes, 0);
-
-			errno = WSAGetLastError();
-
-			if (errno || sent < 0)
+			
+			if (sent < 0)
+			{
+				errno = WSAGetLastError();
 				break;
+			}
 
 			dp += sent;
 			req->bytes -= sent;
@@ -2978,7 +2979,7 @@ MYWORD sendTCPmess(data5 *req)
 		req->bytes = (int)(req->dp - req->raw);
 		pUShort(req->raw, req->bytes - 2);
 
-		if (req->bytes == send(req->sock, req->raw, req->bytes, 0) && !WSAGetLastError())
+		if (req->bytes == send(req->sock, req->raw, req->bytes, 0))
 			return 1;
 	}
 
@@ -3006,10 +3007,11 @@ MYWORD gdnmess(data5 *req, MYBYTE sockInd)
 	                      (sockaddr*)&req->remote,
 	                      &req->sockLen);
 
-	errno = WSAGetLastError();
-
-	if (errno || req->bytes <= 0)
+	if (req->bytes <= 0)
+	{
+		if (req->bytes == SOCKET_ERROR) errno = WSAGetLastError();
 		return 0;
+	}
 
 	req->sockInd = sockInd;
 	req->dnsp = (dnsPacket*)req->raw;
@@ -3469,10 +3471,9 @@ MYWORD fdnmess(data5 *req)
 							  (sockaddr*)&req->addr,
 							  sizeof(req->addr));
 
-				errno = WSAGetLastError();
-
-				if (errno || nRet <= 0)
+				if (nRet <= 0)
 				{
+					if (req->bytes == SOCKET_ERROR) errno = WSAGetLastError();
 					if (verbatim || cfig.dnsLogLevel)
 					{
 						sprintf_s(logBuff, sizeof(logBuff), "Error Forwarding UDP DNS Message to Conditional Forwarder %s", IP2String(ipbuff, sizeof(ipbuff), req->addr.sin_addr.s_addr));
@@ -3574,10 +3575,10 @@ MYWORD fdnmess(data5 *req)
 						  (sockaddr*)&req->addr,
 						  sizeof(req->addr));
 
-			errno = WSAGetLastError();
-
-			if (errno || nRet <= 0)
+			if (nRet <= 0)
 			{
+
+				if (req->bytes == SOCKET_ERROR) errno = WSAGetLastError();
 				if (verbatim || cfig.dnsLogLevel)
 				{
 					sprintf_s(logBuff, sizeof(logBuff), "Error forwarding UDP DNS Message to Forwarding Server %s", IP2String(ipbuff, sizeof(ipbuff), network.dns[network.currentDNS]));
@@ -3660,10 +3661,12 @@ MYWORD frdnmess(data5 *req)
 	                      (sockaddr*)&req->remote,
 	                      &req->sockLen);
 
-	errno = WSAGetLastError();
 
-	if (errno || req->bytes <= 0)
+	if (req->bytes <= 0)
+	{
+		if (req->bytes==SOCKET_ERROR) errno = WSAGetLastError();
 		return 0;
+	}
 
 	req->dnsp = (dnsPacket*)req->raw;
 	req->dp = &req->dnsp->data;
@@ -3802,10 +3805,13 @@ MYWORD sdnmess(data5 *req)
 	                    (sockaddr*)&req->remote,
 	                    sizeof(req->remote));
 
-	errno = WSAGetLastError();
+	
 
-	if (errno || req->bytes <= 0)
+	if (req->bytes <= 0)
+	{
+		if (req->bytes == SOCKET_ERROR) errno = WSAGetLastError();
 		return 0;
+	}
 	else
 		return req->bytes;
 }
@@ -5223,10 +5229,11 @@ MYDWORD sendRepl(data9 *req)
 						(sockaddr*)&token.remote,
 						sizeof(token.remote));
 
-	errno = WSAGetLastError();
 
-	if (errno || req->bytes <= 0)
+
+	if (req->bytes <= 0)
 	{
+		if (req->bytes==SOCKET_ERROR) errno = WSAGetLastError();
 		cfig.dhcpRepl = 0;
 
 		if (verbatim || cfig.dhcpLogLevel >= 1)
@@ -7946,50 +7953,52 @@ MYDWORD getSerial(char *zone)
 	tv1.tv_sec = 3;
 	tv1.tv_usec = 0;
 	FD_SET(req.sock, &readfds1);
-	select(USHRT_MAX, &readfds1, NULL, NULL, &tv1);
-
-	if (FD_ISSET(req.sock, &readfds1))
+	if (0 < select(USHRT_MAX, &readfds1, NULL, NULL, &tv1))
 	{
-		req.sockLen = sizeof(req.remote);
-		req.bytes = recvfrom(req.sock, req.raw, sizeof(req.raw), 0, (sockaddr*)&req.remote, &req.sockLen);
 
-		if (req.bytes > 0 && !req.dnsp->header.rcode && req.dnsp->header.qr && ntohs(req.dnsp->header.ancount))
+		if (FD_ISSET(req.sock, &readfds1))
 		{
-			req.dp = &req.dnsp->data;
+			req.sockLen = sizeof(req.remote);
+			req.bytes = recvfrom(req.sock, req.raw, sizeof(req.raw), 0, (sockaddr*)&req.remote, &req.sockLen);
 
-			for (int j = 1; j <= ntohs(req.dnsp->header.qdcount); j++)
+			if (req.bytes > 0 && !req.dnsp->header.rcode && req.dnsp->header.qr && ntohs(req.dnsp->header.ancount))
 			{
-				req.dp += fQu(tempbuff, req.dnsp, req.dp);
-				req.dp += 4;
-			}
+				req.dp = &req.dnsp->data;
 
-			for (int i = 1; i <= ntohs(req.dnsp->header.ancount); i++)
-			{
-				req.dp += fQu(tempbuff, req.dnsp, req.dp);
-				req.dnsType = (unsigned char)fUShort(req.dp);
-				req.dp += 2; //type
-				req.qclass = fUShort(req.dp);
-				req.dp += 2; //class
-				fULong(req.dp);
-				req.dp += 4; //ttl
-				req.dp += 2; //datalength
-
-				if (req.dnsType == DNS_TYPE_SOA)
+				for (int j = 1; j <= ntohs(req.dnsp->header.qdcount); j++)
 				{
 					req.dp += fQu(tempbuff, req.dnsp, req.dp);
-					req.dp += fQu(tempbuff, req.dnsp, req.dp);
-					serial1 = fULong(req.dp);
+					req.dp += 4;
 				}
+
+				for (int i = 1; i <= ntohs(req.dnsp->header.ancount); i++)
+				{
+					req.dp += fQu(tempbuff, req.dnsp, req.dp);
+					req.dnsType = (unsigned char)fUShort(req.dp);
+					req.dp += 2; //type
+					req.qclass = fUShort(req.dp);
+					req.dp += 2; //class
+					fULong(req.dp);
+					req.dp += 4; //ttl
+					req.dp += 2; //datalength
+
+					if (req.dnsType == DNS_TYPE_SOA)
+					{
+						req.dp += fQu(tempbuff, req.dnsp, req.dp);
+						req.dp += fQu(tempbuff, req.dnsp, req.dp);
+						serial1 = fULong(req.dp);
+					}
+				}
+				closesocket(req.sock);
+				return serial1;
 			}
-			closesocket(req.sock);
-			return serial1;
-		}
-		else
-		{
-			closesocket(req.sock);
-			//sprintf_s(logBuff, sizeof(logBuff), "Zone %s not found on Primary Server %s", zone, IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr));
-			//logDNSMess(logBuff, 1);
-			return 0;
+			else
+			{
+				closesocket(req.sock);
+				//sprintf_s(logBuff, sizeof(logBuff), "Zone %s not found on Primary Server %s", zone, IP2String(ipbuff, sizeof(ipbuff), req.remote.sin_addr.s_addr));
+				//logDNSMess(logBuff, 1);
+				return 0;
+			}
 		}
 	}
 
@@ -8047,12 +8056,14 @@ void sendServerName()
 	tv1.tv_sec = 5;
 	tv1.tv_usec = 0;
 	FD_SET(req.sock, &readfds1);
-	select(USHRT_MAX, &readfds1, NULL, NULL, &tv1);
-
-	if (FD_ISSET(req.sock, &readfds1))
+	if (0 < select(USHRT_MAX, &readfds1, NULL, NULL, &tv1))
 	{
-		req.sockLen = sizeof(req.remote);
-		req.bytes = recvfrom(req.sock, req.raw, sizeof(req.raw), 0, (sockaddr*)&req.remote, &req.sockLen);
+
+		if (FD_ISSET(req.sock, &readfds1))
+		{
+			req.sockLen = sizeof(req.remote);
+			req.bytes = recvfrom(req.sock, req.raw, sizeof(req.raw), 0, (sockaddr*)&req.remote, &req.sockLen);
+		}
 	}
 
 	closesocket(req.sock);
@@ -8068,13 +8079,13 @@ MYWORD recvTcpDnsMess(char *target, SOCKET sock, MYWORD targetSize)
 	tv1.tv_sec = 5;
 	tv1.tv_usec = 0;
 
-	if (select((int)(sock + 1), &readfds1, NULL, NULL, &tv1))
+	if (0 < select((int)(sock + 1), &readfds1, NULL, NULL, &tv1))
 	{
 		errno = 0;
 		short chunk = recv(sock, target, 2, 0);
-		errno = WSAGetLastError();
+		if (chunk==SOCKET_ERROR) errno = WSAGetLastError();
 
-		if (!errno && chunk == 2)
+		if (chunk == 2)
 		{
 			char *ptr;
 			MYWORD rcd = chunk;
@@ -8095,10 +8106,12 @@ MYWORD recvTcpDnsMess(char *target, SOCKET sock, MYWORD targetSize)
 					errno = 0;
 					ptr = target + rcd;
 					chunk = recv(sock, ptr, bytes - rcd, 0);
-					errno = WSAGetLastError();
 
-					if (chunk <= 0 || errno)
+					if (chunk == SOCKET_ERROR || chunk == 0)
+					{
+						errno = WSAGetLastError();
 						return 0;
+					}
 					else
 						rcd += chunk;
 				}
@@ -8262,10 +8275,10 @@ FILE *pullZone(SOCKET sock)
         {
             errno = 0;
             short bytes = recv(sock, target, sizeof(target), 0);
-            errno = WSAGetLastError();
 
-            if (errno)
+            if (bytes == SOCKET_ERROR)
 			{
+				errno = WSAGetLastError();
 				closesocket(sock);
                 fclose(f);
 				return NULL;
@@ -8273,7 +8286,7 @@ FILE *pullZone(SOCKET sock)
 
             //debug(bytes);
 
-            if (bytes <= 0)
+            if (bytes == 0)
                 break;
 
             if (bytes != (short)fwrite(target, 1, bytes, f))
@@ -10454,12 +10467,16 @@ bool detectChange()
 		return true;
 	}
 
-	NotifyAddrChange(NULL, NULL);
-
-	if ((errno = WSAGetLastError()) && errno != WSA_IO_PENDING)
+	DWORD err = NotifyAddrChange(NULL, NULL);
+	if (NO_ERROR != err)
 	{
-		sprintf_s(logBuff, sizeof(logBuff), "NotifyAddrChange error...%d", errno);
-		logDHCPMess(logBuff, 1);
+		errno = err;
+
+		if (errno != WSA_IO_PENDING)
+		{
+			sprintf_s(logBuff, sizeof(logBuff), "NotifyAddrChange error...%d", errno);
+			logDHCPMess(logBuff, 1);
+		}
 	}
 
 	Sleep(1000);
@@ -10784,20 +10801,22 @@ MYWORD gdmess(data9 *req, MYBYTE sockInd)
 	errno = 0;
 
 	req->bytes = recvfrom(network.dhcpConn[req->sockInd].sock,
-	                      req->raw,
-	                      sizeof(req->raw),
-	                      0,
-	                      (sockaddr*)&req->remote,
-	                      &req->sockLen);
+		req->raw,
+		sizeof(req->raw),
+		0,
+		(sockaddr*)&req->remote,
+		&req->sockLen);
 
 	//printf("IP=%s bytes=%u\n", IP2String(ipbuff, sizeof(ipbuff), req->remote.sin_addr.s_addr), req->bytes);
 
-	errno = WSAGetLastError();
 
 	//printf("errno=%u\n", errno);
 
-	if (errno || req->bytes <= 0 || req->dhcpp.header.bp_op != BOOTP_REQUEST)
+	if (req->bytes <= 0 || req->dhcpp.header.bp_op != BOOTP_REQUEST)
+	{
+		errno = WSAGetLastError();
 		return 0;
+	}
 
 	hex2String(req->chaddr, sizeof(req->chaddr), req->dhcpp.header.bp_chaddr, req->dhcpp.header.bp_hlen);
 
