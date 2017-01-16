@@ -353,10 +353,10 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 						{
 							req->sockLen = sizeof(req->remote);
 							req->sock = accept(network.httpConn.sock, (sockaddr*)&req->remote, &req->sockLen);
-							errno = WSAGetLastError();
 
-							if (errno || req->sock == INVALID_SOCKET)
+							if (req->sock == INVALID_SOCKET)
 							{
+								errno = WSAGetLastError();
 								sprintf_s(logBuff, sizeof(logBuff), "Accept Failed, WSAError %u", errno);
 								logDHCPMess(logBuff, 1);
 								free(req);
@@ -377,16 +377,16 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 						dhcpr.sockLen = sizeof(dhcpr.remote);
 
 						dhcpr.bytes = recvfrom(cfig.dhcpReplConn.sock,
-											   dhcpr.raw,
-											   sizeof(dhcpr.raw),
-											   0,
-											   (sockaddr*)&dhcpr.remote,
-											   &dhcpr.sockLen);
+							dhcpr.raw,
+							sizeof(dhcpr.raw),
+							0,
+							(sockaddr*)&dhcpr.remote,
+							&dhcpr.sockLen);
 
-						errno = WSAGetLastError();
-
-						if (errno || dhcpr.bytes <= 0)
+						if (dhcpr.bytes <= SOCKET_ERROR)
+						{
 							cfig.dhcpRepl = 0;
+						}
 					}
 
 					for (int i = 0; i < MAX_SERVERS && network.dhcpConn[i].ready; i++)
@@ -462,12 +462,12 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 							dnsr.sockLen = sizeof(dnsr.remote);
 							errno = 0;
 							dnsr.sock = accept(network.dnsTcpConn[i].sock, (sockaddr*)&dnsr.remote, &dnsr.sockLen);
-							errno = WSAGetLastError();
 
-							if (dnsr.sock == INVALID_SOCKET || errno)
+							if (dnsr.sock == INVALID_SOCKET)
 							{
 								if (verbatim || cfig.dnsLogLevel)
 								{
+									errno = WSAGetLastError();
 									sprintf_s(logBuff, sizeof(logBuff), "Accept Failed, WSAError=%u", errno);
 									logDNSMess(logBuff, 1);
 								}
@@ -963,10 +963,10 @@ void runProg()
 					{
 						req->sockLen = sizeof(req->remote);
 						req->sock = accept(network.httpConn.sock, (sockaddr*)&req->remote, &req->sockLen);
-						errno = WSAGetLastError();
 
-						if (errno || req->sock == INVALID_SOCKET)
+						if (req->sock == INVALID_SOCKET)
 						{
+							errno = WSAGetLastError();
 							sprintf_s(logBuff, sizeof(logBuff), "Accept Failed, WSAError %u", errno);
 							logDHCPMess(logBuff, 1);
 							free(req);
@@ -993,10 +993,11 @@ void runProg()
 										   (sockaddr*)&dhcpr.remote,
 										   &dhcpr.sockLen);
 
-					errno = WSAGetLastError();
 
-					if (errno || dhcpr.bytes <= 0)
+					if (dhcpr.bytes <= SOCKET_ERROR)
+					{
 						cfig.dhcpRepl = 0;
+					}
 				}
 
 				for (int i = 0; i < MAX_SERVERS && network.dhcpConn[i].ready; i++)
@@ -1072,12 +1073,12 @@ void runProg()
 						dnsr.sockLen = sizeof(dnsr.remote);
 						errno = 0;
 						dnsr.sock = accept(network.dnsTcpConn[i].sock, (sockaddr*)&dnsr.remote, &dnsr.sockLen);
-						errno = WSAGetLastError();
 
-						if (dnsr.sock == INVALID_SOCKET || errno)
+						if (dnsr.sock == INVALID_SOCKET)
 						{
 							if (verbatim || cfig.dnsLogLevel)
 							{
+								errno = WSAGetLastError();
 								sprintf_s(logBuff, sizeof(logBuff), "Accept Failed, WSAError=%u", errno);
 								logDNSMess(logBuff, 1);
 							}
