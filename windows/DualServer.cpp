@@ -77,6 +77,7 @@ HANDLE lEvent;
 HANDLE fEvent;
 HANDLE rEvent;
 byte hostPhysAddress[MAX_SERVERS][8];
+unsigned int adBlockCounter = 0;
 
 // Ports
 unsigned short dnsPort = IPPORT_DNS;
@@ -1042,6 +1043,11 @@ void runProg()
 										sprintf_s(logBuff, sizeof(logBuff), "%s not found", strquery(&dnsr));
 										logDNSMess(&dnsr, logBuff, 2);
 									}
+									// check for adblock
+									if (dnsr.dnsType != DNS_TYPE_SOA && dnsr.dnsType != DNS_TYPE_NS && dnsr.cType != CTYPE_CACHED)
+									{
+										++adBlockCounter;
+									}
 								}
 								sDNSMessage(&dnsr);
 							}
@@ -1055,6 +1061,11 @@ void runProg()
 									{
 										sprintf_s(logBuff, sizeof(logBuff), "%s not found", strquery(&dnsr));
 										logDNSMess(&dnsr, logBuff, 2);
+									}
+									// check for adblock
+									if (dnsr.dnsType != DNS_TYPE_SOA && dnsr.dnsType != DNS_TYPE_NS && dnsr.cType != CTYPE_CACHED)
+									{
+										++adBlockCounter;
 									}
 								}
 								sDNSMessage(&dnsr);
@@ -2540,7 +2551,11 @@ void sendJSONStatus(data19 *req)
 			}
 			}
 
-	fp += sprintf_s(fp, maxData - fp, "  ]\n");
+	fp += sprintf_s(fp, maxData - fp, "  ],\n");
+
+	fp += sprintf_s(fp, maxData - fp, "  \"adblock\": {\n");
+	fp += sprintf_s(fp, maxData - fp, "    \"trackerBlocks\": %u\n",adBlockCounter);
+	fp += sprintf_s(fp, maxData - fp, "  }\n");
 
 	fp += sprintf_s(fp, maxData - fp, "}\n");
 	MYBYTE x = sprintf_s(tempbuff, sizeof(tempbuff), "%u", (fp - contentStart));
