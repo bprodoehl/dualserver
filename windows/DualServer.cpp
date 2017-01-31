@@ -391,7 +391,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 
 					for (int i = 0; i < MAX_SERVERS && network.dhcpConn[i].ready; i++)
 					{
-						if (FD_ISSET(network.dhcpConn[i].sock, &readfds) && gdmess(&dhcpr, i) && sdmess(&dhcpr))
+						if (FD_ISSET(network.dhcpConn[i].sock, &readfds) && gDHCPMessage(&dhcpr, i) && sDHCPMessage(&dhcpr))
 							alad(&dhcpr);
 					}
 				}
@@ -402,7 +402,7 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 					{
 						if (FD_ISSET(network.dnsUdpConn[i].sock, &readfds))
 						{
-							if (gdnmess(&dnsr, i))
+							if (gDNSMessage(&dnsr, i))
 							{
 								if (scanloc(&dnsr))
 								{
@@ -432,9 +432,9 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 											logDNSMess(&dnsr, logBuff, 2);
 										}
 									}
-									sdnmess(&dnsr);
+									sDNSMessage(&dnsr);
 								}
-								else if (!fdnmess(&dnsr))
+								else if (!fDNSMessage(&dnsr))
 								{
 									if (!dnsr.dnsp->header.ancount && (dnsr.dnsp->header.rcode == RCODE_NOERROR || dnsr.dnsp->header.rcode == RCODE_NAMEERROR))
 									{
@@ -446,11 +446,11 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 											logDNSMess(&dnsr, logBuff, 2);
 										}
 									}
-									sdnmess(&dnsr);
+									sDNSMessage(&dnsr);
 								}
 							}
 							else if (dnsr.dnsp)
-								sdnmess(&dnsr);
+								sDNSMessage(&dnsr);
 						}
 					}
 
@@ -479,9 +479,9 @@ void WINAPI ServiceMain(DWORD /*argc*/, TCHAR* /*argv*/[])
 
 					if (network.forwConn.ready && FD_ISSET(network.forwConn.sock, &readfds))
 					{
-						if (frdnmess(&dnsr))
+						if (frDNSMessage(&dnsr))
 						{
-							sdnmess(&dnsr);
+							sDNSMessage(&dnsr);
 
 							if (verbatim || cfig.dnsLogLevel >= 2)
 							{
@@ -1002,7 +1002,7 @@ void runProg()
 
 				for (int i = 0; i < MAX_SERVERS && network.dhcpConn[i].ready; i++)
 				{
-					if (FD_ISSET(network.dhcpConn[i].sock, &readfds) && gdmess(&dhcpr, i) && sdmess(&dhcpr))
+					if (FD_ISSET(network.dhcpConn[i].sock, &readfds) && gDHCPMessage(&dhcpr, i) && sDHCPMessage(&dhcpr))
 						alad(&dhcpr);
 				}
 			}
@@ -1013,7 +1013,7 @@ void runProg()
 				{
 					if (FD_ISSET(network.dnsUdpConn[i].sock, &readfds))
 					{
-						if (gdnmess(&dnsr, i))
+						if (gDNSMessage(&dnsr, i))
 						{
 							if (scanloc(&dnsr))
 							{
@@ -1043,9 +1043,9 @@ void runProg()
 										logDNSMess(&dnsr, logBuff, 2);
 									}
 								}
-								sdnmess(&dnsr);
+								sDNSMessage(&dnsr);
 							}
-							else if (!fdnmess(&dnsr))
+							else if (!fDNSMessage(&dnsr))
 							{
 								if (!dnsr.dnsp->header.ancount && (dnsr.dnsp->header.rcode == RCODE_NOERROR || dnsr.dnsp->header.rcode == RCODE_NAMEERROR))
 								{
@@ -1057,11 +1057,11 @@ void runProg()
 										logDNSMess(&dnsr, logBuff, 2);
 									}
 								}
-								sdnmess(&dnsr);
+								sDNSMessage(&dnsr);
 							}
 						}
 						else if (dnsr.dnsp)
-							sdnmess(&dnsr);
+							sDNSMessage(&dnsr);
 					}
 				}
 
@@ -1090,9 +1090,9 @@ void runProg()
 
 				if (network.forwConn.ready && FD_ISSET(network.forwConn.sock, &readfds))
 				{
-					if (frdnmess(&dnsr))
+					if (frDNSMessage(&dnsr))
 					{
-						sdnmess(&dnsr);
+						sDNSMessage(&dnsr);
 
 						if (verbatim || cfig.dnsLogLevel >= 2)
 						{
@@ -2992,9 +2992,9 @@ MYWORD sendTCPmess(data5 *req)
 	return 0;
 }
 
-MYWORD gdnmess(data5 *req, MYBYTE sockInd)
+MYWORD gDNSMessage(data5 *req, MYBYTE sockInd)
 {
-	//debug("gdnmess");
+	//debug("gDNSMessage");
 	char logBuff[512];
 	memset(req, 0, sizeof(data5));
 	req->sockLen = sizeof(req->remote);
@@ -3425,9 +3425,9 @@ MYWORD scanloc(data5 *req)
 	return 0;
 }
 
-MYWORD fdnmess(data5 *req)
+MYWORD fDNSMessage(data5 *req)
 {
-	//debug("fdnmess");
+	//debug("fDNSMessage");
 	//debug(req->cname);
 	//printf("before qType=%d %d\n", req->qType, QTYPE_A_SUBZONE);
 	char ipbuff[32];
@@ -3645,9 +3645,9 @@ MYWORD fdnmess(data5 *req)
 	return (nRet);
 }
 
-MYWORD frdnmess(data5 *req)
+MYWORD frDNSMessage(data5 *req)
 {
-	//debug("frdnmess");
+	//debug("frDNSMessage");
 	char tempbuff[512];
 	memset(req, 0, sizeof(data5));
 	req->sockLen = sizeof(req->remote);
@@ -3792,9 +3792,9 @@ MYWORD frdnmess(data5 *req)
 	return 0;
 }
 
-MYWORD sdnmess(data5 *req)
+MYWORD sDNSMessage(data5 *req)
 {
-	//debug("sdnmess");
+	//debug("sDNSMessage");
 
 	errno = 0;
 	req->bytes = (int)(req->dp - req->raw);
@@ -4478,9 +4478,9 @@ MYDWORD chad(data9 *req)
 		return 0;
 }
 
-MYDWORD sdmess(data9 *req)
+MYDWORD sDHCPMessage(data9 *req)
 {
-	//sprintf_s(logBuff, sizeof(logBuff), "sdmess, Request Type = %u",req->req_type);
+	//sprintf_s(logBuff, sizeof(logBuff), "sDHCPMessage, Request Type = %u",req->req_type);
 	//debug(logBuff);
 	char logBuff[512];
 	char tempbuff[512];
@@ -10788,9 +10788,9 @@ void __cdecl updateStateFile(void *lpParam)
 	return;
 }
 
-MYWORD gdmess(data9 *req, MYBYTE sockInd)
+MYWORD gDHCPMessage(data9 *req, MYBYTE sockInd)
 {
-	//debug("gdmess");
+	//debug("gDHCPMessage");
 	char ipbuff[32];
 	char logBuff[512];
 	memset(req, 0, sizeof(data9));
