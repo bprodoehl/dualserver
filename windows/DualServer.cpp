@@ -97,7 +97,7 @@ const char send403[] = "HTTP/1.1 403 Forbidden\r\n\r\n<h1>403 Forbidden</h1>";
 const char send404[] = "HTTP/1.1 404 Not Found\r\n\r\n<h1>404 Not Found</h1>";
 const char td200[] = "<td>%s</td>";
 const char sVersionName[] = "Dual DHCP DNS Server Windows";
-const char sVersionNumber[] = "7.32";
+const char sVersionNumber[] = "7.33";
 
 const char htmlStart[] = "<html>\n<head>\n<title>%s</title><meta http-equiv=\"refresh\" content=\"60\">\n<meta http-equiv=\"cache-control\" content=\"no-cache\">\n</head>\n";
 //const char bodyStart[] = "<body bgcolor=\"#cccccc\"><table width=\"800\"><tr><td align=\"center\"><font size=\"5\"><b>%s</b></font></b></b></td></tr><tr><td align=\"right\"><a target=\"_new\" href=\"http://dhcp-dns-server.sourceforge.net/\">http://dhcp-dns-server.sourceforge.net/</b></b></td></tr></table>";
@@ -1379,11 +1379,13 @@ void addRRExt(data5 *req)
 	//sprintf_s(logBuff, sizeof(logBuff), "%s=%s=%i\n", req->cname, req->query, req->bytes);
 	//logMess(logBuff, 2);
 
+	if (!req) return;
 	if (strcasecmp(req->cname, req->query))
 	{
 		memcpy(temp, req->raw, req->bytes);
 		dnsPacket *input = (dnsPacket*)temp;
 		req->dnsp = (dnsPacket*)req->raw;
+		if (!req->dnsp) return;
 
 		req->dnsp->header.aa = 0;
 		req->dnsp->header.at = 0;
@@ -1392,6 +1394,7 @@ void addRRExt(data5 *req)
 
 		//manuplate the response
 		req->dp = &req->dnsp->data;
+		if (!req->dp) return;
 		req->dp += pQu(req->dp, req->query);
 		req->dp += pUShort(req->dp, DNS_TYPE_A);
 		req->dp += pUShort(req->dp, DNS_CLASS_IN);
@@ -1403,6 +1406,7 @@ void addRRExt(data5 *req)
 		req->dp += pQu(req->dp, req->cname);
 
 		char *indp = &input->data;
+		if (!indp) return;
 
 		for (int i = 1; i <= ntohs(input->header.qdcount); i++)
 		{
@@ -1452,7 +1456,7 @@ void addRRExt(data5 *req)
 void addRRCache(data5 *req, data7 *cache)
 {
 	char tempbuff[512];
-
+	if (!req) return;
 	if (req->dnsType == DNS_TYPE_A)
 	{
 		//manuplate the response
@@ -1460,7 +1464,9 @@ void addRRCache(data5 *req, data7 *cache)
 		dnsPacket *input = (dnsPacket*)cache->response;
 		char *indp = &input->data;
 		req->dnsp = (dnsPacket*)req->raw;
+		if (!req->dnsp) return;
 		req->dp = &req->dnsp->data;
+		if (!req->dp) return;
 
 		req->dnsp->header.aa = 0;
 		req->dnsp->header.at = 0;
@@ -1528,6 +1534,7 @@ void addRRCache(data5 *req, data7 *cache)
 	else if (req->dnsType == DNS_TYPE_PTR || req->dnsType == DNS_TYPE_ANY || req->dnsType == DNS_TYPE_AAAA)
 	{
 		req->dnsp = (dnsPacket*)req->raw;
+		if (!req->dnsp) return;
 		MYWORD xid = req->dnsp->header.xid;
 		memcpy(req->raw, cache->response, cache->bytes);
 		req->dp = req->raw + cache->bytes;
@@ -3664,6 +3671,7 @@ MYWORD frDNSMessage(data5 *req)
 {
 	//debug("frDNSMessage");
 	char tempbuff[512];
+	if (!req) return 0;
 	memset(req, 0, sizeof(data5));
 	req->sockLen = sizeof(req->remote);
 	errno = 0;
@@ -3684,7 +3692,9 @@ MYWORD frDNSMessage(data5 *req)
 	}
 
 	req->dnsp = (dnsPacket*)req->raw;
+	if (!req->dnsp) return 0;
 	req->dp = &req->dnsp->data;
+	if (!req->dp) return 0;
 
 	for (int i = 1; i <= ntohs(req->dnsp->header.qdcount); i++)
 	{
@@ -4052,9 +4062,11 @@ void addHostNotFound(char *hostname)
 char* getResult(data5 *req)
 {
 	char buff[256];
-
+	if (!req) return NULL;
 	req->tempname[0] = 0;
+	if (!req->dnsp) return NULL;
 	char *raw = &req->dnsp->data;
+	if (!raw) return NULL;
 	//MYWORD queueIndex;
 
 	for (int i = 1; i <= ntohs(req->dnsp->header.qdcount); i++)
