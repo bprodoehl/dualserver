@@ -2125,9 +2125,12 @@ void procHTTP(data19 *req)
 		}
 
 		req->dp = (char*)calloc(sizeof(char), sizeof(send403));
-		req->memSize = sizeof(char)*sizeof(send403);
-		req->bytes = sprintf_s(req->dp, req->memSize, send403);
-		_beginthread(sendHTTP, 0, (void*)req);
+		if (req->dp)
+		{
+			req->memSize = sizeof(char) * sizeof(send403);
+			req->bytes = sprintf_s(req->dp, req->memSize, send403);
+			_beginthread(sendHTTP, 0, (void*)req);
+		}
 		return;
 	}
 
@@ -2163,9 +2166,12 @@ void procHTTP(data19 *req)
 		}
 
 		req->dp = (char*)calloc(sizeof(char), sizeof(send404));
-		req->memSize = sizeof(char)*sizeof(send404);
-		req->bytes = sprintf_s(req->dp, req->memSize, send404);
-		_beginthread(sendHTTP, 0, (void*)req);
+		if (req->dp)
+		{
+			req->memSize = sizeof(char) * sizeof(send404);
+			req->bytes = sprintf_s(req->dp, req->memSize, send404);
+			_beginthread(sendHTTP, 0, (void*)req);
+		}
 		return;
 	}
 }
@@ -6341,6 +6347,8 @@ void addMacRange(MYBYTE rangeSetInd, char *macRange)
 			{
 				sprintf_s(logBuff, sizeof(logBuff), "DHCP Range Load, Memory Allocation Error");
 				logDHCPMess(logBuff, 1);
+				if (macStart) free(macStart);
+				if (macEnd) free(macEnd);
 			}
 			else if (getHexValue(macStart, name, &macSize1) || getHexValue(macEnd, value, &macSize2))
 			{
@@ -6389,7 +6397,10 @@ void loadDHCP()
 		data20 optionData;
 		loadOptions(f, GLOBALOPTIONS, &optionData);
 		cfig.options = (MYBYTE*)calloc(1, optionData.optionSize);
-		memcpy(cfig.options, optionData.options, optionData.optionSize);
+		if (cfig.options)
+		{
+			memcpy(cfig.options, optionData.options, optionData.optionSize);
+		}
 		cfig.mask = optionData.mask;
 	}
 
@@ -6412,7 +6423,10 @@ void loadDHCP()
 			if (optionData.optionSize > 3)
 			{
 				options = (MYBYTE*)calloc(1, optionData.optionSize);
-				memcpy(options, optionData.options, optionData.optionSize);
+				if (options)
+				{
+					memcpy(options, optionData.options, optionData.optionSize);
+				}
 			}
 
 			for (; m < MAX_DHCP_RANGES && cfig.dhcpRanges[m].rangeStart; m++)
@@ -10606,52 +10620,55 @@ void getInterfaces(data1 *network)
 	pAdapterInfo = (IP_ADAPTER_INFO*) calloc(sizeof(char), sizeof(IP_ADAPTER_INFO));
 	DWORD ulOutBufLen = sizeof(IP_ADAPTER_INFO);
 
-	if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW)
+	if (pAdapterInfo && GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW)
 	{
 		free(pAdapterInfo);
 		pAdapterInfo = (IP_ADAPTER_INFO*)calloc(sizeof(char), ulOutBufLen);
 	}
 
-	if ((GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR)
+	if (pAdapterInfo)
 	{
-		pAdapter = pAdapterInfo;
-		while (pAdapter)
+		if ((GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR)
 		{
-			if (!pAdapter->DhcpEnabled)
+			pAdapter = pAdapterInfo;
+			while (pAdapter)
 			{
-				IP_ADDR_STRING *sList = &pAdapter->IpAddressList;
-				while (sList)
+				if (!pAdapter->DhcpEnabled)
 				{
-					MYDWORD iaddr;
-					inet_pton(AF_INET, sList->IpAddress.String, &iaddr);
-
-					if (iaddr)
+					IP_ADDR_STRING *sList = &pAdapter->IpAddressList;
+					while (sList)
 					{
-						for (MYBYTE k = 0; k < MAX_SERVERS; k++)
+						MYDWORD iaddr;
+						inet_pton(AF_INET, sList->IpAddress.String, &iaddr);
+
+						if (iaddr)
 						{
-							if (network->staticServers[k] == iaddr)
-								break;
-							else if (!network->staticServers[k])
+							for (MYBYTE k = 0; k < MAX_SERVERS; k++)
 							{
-								network->staticServers[k] = iaddr;
-								inet_pton(AF_INET, sList->IpMask.String, &network->staticMasks[k]);
-								break;
+								if (network->staticServers[k] == iaddr)
+									break;
+								else if (!network->staticServers[k])
+								{
+									network->staticServers[k] = iaddr;
+									inet_pton(AF_INET, sList->IpMask.String, &network->staticMasks[k]);
+									break;
+								}
 							}
 						}
+						sList = sList->Next;
 					}
-					sList = sList->Next;
-				}
 
-//				IP_ADDR_STRING *rList = &pAdapter->GatewayList;
-//				while (rList)
-//				{
-//					MYDWORD trouter;
-//					inet_pton(AF_INET,rList->IpAddress.String,&trouter);
-//					addServer(cfig.routers, trouter);
-//					rList = rList->Next;
-//				}
+					//				IP_ADDR_STRING *rList = &pAdapter->GatewayList;
+					//				while (rList)
+					//				{
+					//					MYDWORD trouter;
+					//					inet_pton(AF_INET,rList->IpAddress.String,&trouter);
+					//					addServer(cfig.routers, trouter);
+					//					rList = rList->Next;
+					//				}
+				}
+				pAdapter = pAdapter->Next;
 			}
-			pAdapter = pAdapter->Next;
 		}
 		free(pAdapterInfo);
 	}
@@ -10719,44 +10736,46 @@ void getInterfaces(data1 *network)
 	FixedInfo = (FIXED_INFO*)GlobalAlloc(GPTR, sizeof(FIXED_INFO));
 	ulOutBufLen = sizeof(FIXED_INFO);
 
-	if (ERROR_BUFFER_OVERFLOW == GetNetworkParams(FixedInfo, &ulOutBufLen))
+	if (FixedInfo && ERROR_BUFFER_OVERFLOW == GetNetworkParams(FixedInfo, &ulOutBufLen))
 	{
 		GlobalFree(FixedInfo);
 		FixedInfo = (FIXED_INFO*)GlobalAlloc(GPTR, ulOutBufLen);
 	}
-
-	if (!GetNetworkParams(FixedInfo, &ulOutBufLen))
+	if (FixedInfo)
 	{
-		if (!cfig.servername[0])
-			strcpy_s(cfig.servername, sizeof(cfig.servername), FixedInfo->HostName);
-
-		//printf("d=%u=%s", strlen(FixedInfo->DomainName), FixedInfo->DomainName);
-
-		if (!cfig.zone[0])
+		if (!GetNetworkParams(FixedInfo, &ulOutBufLen))
 		{
-			strcpy_s(cfig.zone, sizeof(cfig.zone), FixedInfo->DomainName);
-			cfig.zLen = (unsigned char)strlen(cfig.zone);
-		}
+			if (!cfig.servername[0])
+				strcpy_s(cfig.servername, sizeof(cfig.servername), FixedInfo->HostName);
 
-		if (!cfig.zone[0] || cfig.zone[0] == NBSP)
-		{
-			strcpy_s(cfig.zone, sizeof(cfig.zone), "workgroup");
-			cfig.zLen = (unsigned char)strlen(cfig.zone);
-		}
+			//printf("d=%u=%s", strlen(FixedInfo->DomainName), FixedInfo->DomainName);
 
-		if (!cfig.specifiedDnsServers[0])
-		{
-			pIPAddr = &FixedInfo->DnsServerList;
-
-			while (pIPAddr)
+			if (!cfig.zone[0])
 			{
-				MYDWORD addr;
-				inet_pton(AF_INET, pIPAddr->IpAddress.String, &addr);
+				strcpy_s(cfig.zone, sizeof(cfig.zone), FixedInfo->DomainName);
+				cfig.zLen = (unsigned char)strlen(cfig.zone);
+			}
 
-				if (!dnsService || !findServer(network->allServers, MAX_SERVERS, addr))
-					addServer(network->dns, MAX_SERVERS, addr);
+			if (!cfig.zone[0] || cfig.zone[0] == NBSP)
+			{
+				strcpy_s(cfig.zone, sizeof(cfig.zone), "workgroup");
+				cfig.zLen = (unsigned char)strlen(cfig.zone);
+			}
 
-				pIPAddr = pIPAddr->Next;
+			if (!cfig.specifiedDnsServers[0])
+			{
+				pIPAddr = &FixedInfo->DnsServerList;
+
+				while (pIPAddr)
+				{
+					MYDWORD addr;
+					inet_pton(AF_INET, pIPAddr->IpAddress.String, &addr);
+
+					if (!dnsService || !findServer(network->allServers, MAX_SERVERS, addr))
+						addServer(network->dns, MAX_SERVERS, addr);
+
+					pIPAddr = pIPAddr->Next;
+				}
 			}
 		}
 		GlobalFree(FixedInfo);
@@ -11258,10 +11277,13 @@ void logDNSMess(data5 *req, char *logBuff, MYBYTE logLevel)
 	if (logLevel <= cfig.dnsLogLevel)
 	{
 		char *mess = (char*)calloc(sizeof(char), 512);
-		char ipBuf[16];
-		inet_ntop(AF_INET, &(req->remote.sin_addr), ipBuf, sizeof(ipBuf));
-		sprintf_s(mess, sizeof(char)*512, "Client %s, %s", ipBuf, logBuff);
-		_beginthread(logThread, 0, mess);
+		if (!mess)
+		{
+			char ipBuf[16];
+			inet_ntop(AF_INET, &(req->remote.sin_addr), ipBuf, sizeof(ipBuf));
+			sprintf_s(mess, sizeof(char) * 512, "Client %s, %s", ipBuf, logBuff);
+			_beginthread(logThread, 0, mess);
+		}
 	}
 }
 
