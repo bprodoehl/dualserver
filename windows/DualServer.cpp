@@ -4155,6 +4155,10 @@ MYDWORD resad(data9 *req)
 
 	req->dhcpEntry = findDHCPEntry(req->chaddr);
 
+
+	sprintf_s(logBuff, sizeof(logBuff), "resad(%s)", IP2String(tempbuff, sizeof(tempbuff), req->reqIP));
+	logDHCPMess(logBuff, 1);
+
 	if (req->dhcpEntry && req->dhcpEntry->fixed)
 	{
 		if (req->dhcpEntry->ip)
@@ -4633,14 +4637,14 @@ MYDWORD sDHCPMessage(data9 *req)
 				else
 				{
 					req->dhcpp.header.bp_yiaddr = resad(req);
-					if (!req->dhcpp.header.bp_yiaddr)
+					if (!req->dhcpp.header.bp_yiaddr || req->dhcpp.header.bp_yiaddr != req->reqIP)
 					{
 						req->resp_type = DHCP_MESS_NAK;
 						req->dhcpp.header.bp_yiaddr = 0;
 
 						if (verbatim || cfig.dhcpLogLevel)
 						{
-							sprintf_s(logBuff, sizeof(logBuff), "DHCPREQUEST from Host %s (%s) without Discover, could not allocate address, NAKed", req->chaddr, req->hostname);
+							sprintf_s(logBuff, sizeof(logBuff), "DHCPREQUEST from Host %s (%s) without Discover or with wrong address, NAKed", req->chaddr, req->hostname);
 							logDHCPMess(logBuff, 1);
 						}
 					}
@@ -4666,14 +4670,14 @@ MYDWORD sDHCPMessage(data9 *req)
 		else
 		{
 			req->dhcpp.header.bp_yiaddr = resad(req);
-			if (!req->dhcpp.header.bp_yiaddr)
+			if (!req->dhcpp.header.bp_yiaddr || req->dhcpp.header.bp_yiaddr!=req->reqIP)
 			{
 				req->resp_type = DHCP_MESS_NAK;
 				req->dhcpp.header.bp_yiaddr = 0;
 
 				if (verbatim || cfig.dhcpLogLevel)
 				{
-					sprintf_s(logBuff, sizeof(logBuff), "DHCPREQUEST from Host %s (%s) without Discover, could not allocate address, NAKed", req->chaddr, req->hostname);
+					sprintf_s(logBuff, sizeof(logBuff), "DHCPREQUEST from Host %s (%s) without Discover or with wrong address, NAKed", req->chaddr, req->hostname);
 					logDHCPMess(logBuff, 1);
 				}
 			}
