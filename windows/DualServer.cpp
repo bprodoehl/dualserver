@@ -42,7 +42,7 @@ data1 network;
 data2 cfig;
 data9 token;
 data9 dhcpr;
-data5 dnsr;
+dnsRequest dnsr;
 data71 lump;
 data18 magin;
 MYBYTE currentInd = 0;
@@ -1268,7 +1268,7 @@ MYWORD qLen(char *query)
 	return fullsize;
 }
 
-MYWORD pQu(char *raw, char *query)
+MYWORD putQueryString(char *raw, char *query, int maxSize=-1)
 {
 	MYWORD fullsize = 1;
 	while (true)
@@ -1278,6 +1278,7 @@ MYWORD pQu(char *raw, char *query)
 		if (i != NULL)
 		{
 			int size = (int)(i - query);
+			if (maxSize>-1 && fullsize + size > maxSize) break;
 			*raw = size;
 			raw++;
 			memcpy(raw, query, size);
@@ -1288,6 +1289,7 @@ MYWORD pQu(char *raw, char *query)
 		else
 		{
 			int size = (int)strlen(query);
+			if (maxSize>-1 && fullsize + size > maxSize) break;
 			if (size)
 			{
 				*raw = size;
@@ -1317,25 +1319,28 @@ MYDWORD fIP(void *raw)
 	return(*((MYDWORD*)raw));
 }
 
-MYBYTE pUShort(void *raw, MYWORD data)
+MYBYTE putUnsignedShort(void *raw, MYWORD data, int maxSize=-1)
 {
+	if (maxSize>-1 && sizeof(unsigned short) > maxSize) return 0;
 	*((MYWORD*)raw) = htons(data);
 	return sizeof(MYWORD);
 }
 
-MYBYTE pULong(void *raw, MYDWORD data)
+MYBYTE putUnsignedLong(void *raw, MYDWORD data, int maxSize = -1)
 {
+	if (maxSize>-1 && sizeof(unsigned long) > maxSize) return 0;
 	*((MYDWORD*)raw) = htonl(data);
 	return sizeof(MYDWORD);
 }
 
-MYBYTE pIP(void *raw, MYDWORD data)
+MYBYTE putIP(void *raw, MYDWORD data, int maxSize = -1)
 {
+	if (maxSize > -1 && sizeof(MYDWORD) > maxSize) return 0;;
 	*((MYDWORD*)raw) = data;
 	return sizeof(MYDWORD);
 }
 
-void addRREmpty(data5 *req)
+void addRREmpty(dnsRequest *req)
 {
 	req->dnsp->header.ra = 0;
 	req->dnsp->header.at = 0;
@@ -1348,14 +1353,14 @@ void addRREmpty(data5 *req)
 	req->dp = &req->dnsp->data;
 }
 
-void addRRError(data5 *req, MYBYTE rcode)
+void addRRError(dnsRequest *req, MYBYTE rcode)
 {
 	req->dnsp->header.qr = 1;
 	req->dp = req->raw + req->bytes;
 	req->dnsp->header.rcode = rcode;
 }
 
-void addRRNone(data5 *req)
+void addRRNone(dnsRequest *req)
 {
 	if (network.dns[0])
 		req->dnsp->header.ra = 1;
@@ -1371,7 +1376,7 @@ void addRRNone(data5 *req)
 	req->dnsp->header.adcount = 0;
 }
 
-void addRRExt(data5 *req)
+void addRRExt(dnsRequest *req)
 {
 	char tempbuff[512];
 	char temp[2048];
@@ -1395,15 +1400,15 @@ void addRRExt(data5 *req)
 		//manuplate the response
 		req->dp = &req->dnsp->data;
 		if (!req->dp) return;
-		req->dp += pQu(req->dp, req->query);
-		req->dp += pUShort(req->dp, DNS_TYPE_A);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pQu(req->dp, req->query);
-		req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
-		req->dp += pUShort(req->dp, qLen(req->cname));
-		req->dp += pQu(req->dp, req->cname);
+		req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_CNAME, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, qLen(req->cname), sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
 
 		char *indp = &input->data;
 		if (!indp) return;
@@ -1418,7 +1423,7 @@ void addRRExt(data5 *req)
 		{
 			indp += fQu(tempbuff, input, indp);
 			MYWORD type = fUShort(indp);
-			req->dp += pQu(req->dp, tempbuff);
+			req->dp += putQueryString(req->dp, tempbuff, sizeof(req->raw) - (req->dp - req->raw));
 			memcpy(req->dp, indp, 8);
 			req->dp += 8;
 			indp += 8;
@@ -1431,13 +1436,13 @@ void addRRExt(data5 *req)
 			switch (type)
 			{
 				case DNS_TYPE_A:
-					req->dp += pUShort(req->dp, zLen);
-					req->dp += pIP(req->dp, fIP(indp));
+					req->dp += putUnsignedShort(req->dp, zLen, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putIP(req->dp, fIP(indp), sizeof(req->raw) - (req->dp - req->raw));
 					break;
 				case DNS_TYPE_CNAME:
 					fQu(tempbuff, input, indp);
-					MYWORD dl = pQu(req->dp + 2, tempbuff);
-					req->dp += pUShort(req->dp, dl);
+					MYWORD dl = putQueryString(req->dp + 2, tempbuff, sizeof(req->raw) - (req->dp - req->raw) - 2);
+					req->dp += putUnsignedShort(req->dp, dl, sizeof(req->raw) - (req->dp - req->raw));
 					req->dp += dl;
 					break;
 			}
@@ -1453,7 +1458,7 @@ void addRRExt(data5 *req)
 	}
 }
 
-void addRRCache(data5 *req, data7 *cache)
+void addRRCache(dnsRequest *req, data7 *cache)
 {
 	char tempbuff[512];
 	if (!req) return;
@@ -1474,18 +1479,18 @@ void addRRCache(data5 *req, data7 *cache)
 		req->dnsp->header.qdcount = htons(1);
 
 		req->dp = &req->dnsp->data;
-		req->dp += pQu(req->dp, req->query);
-		req->dp += pUShort(req->dp, req->dnsType);
-		req->dp += pUShort(req->dp, req->qclass);
+		req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, req->dnsType, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, req->qclass, sizeof(req->raw) - (req->dp - req->raw));
 
 		if(strcasecmp(req->cname, req->query))
 		{
-			req->dp += pQu(req->dp, req->query);
-			req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
-			req->dp += pUShort(req->dp, DNS_CLASS_IN);
-			req->dp += pULong(req->dp, cfig.lease);
-			req->dp += pUShort(req->dp, qLen(req->cname));
-			req->dp += pQu(req->dp, req->cname);
+			req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_TYPE_CNAME, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, qLen(req->cname), sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
 			req->dnsp->header.ancount = htons(1);
 		}
 
@@ -1503,7 +1508,7 @@ void addRRCache(data5 *req, data7 *cache)
 			if (!strcasecmp(tempbuff, req->query))
 				strcpy_s(tempbuff, sizeof(tempbuff), req->query);
 
-			req->dp += pQu(req->dp, tempbuff);
+			req->dp += putQueryString(req->dp, tempbuff, sizeof(req->raw) - (req->dp - req->raw));
 			memcpy(req->dp, indp, 8);
 			req->dp += 8;
 			indp += 8;
@@ -1516,13 +1521,13 @@ void addRRCache(data5 *req, data7 *cache)
 			switch (type)
 			{
 				case DNS_TYPE_A:
-					req->dp += pUShort(req->dp, zLen);
-					req->dp += pIP(req->dp, fIP(indp));
+					req->dp += putUnsignedShort(req->dp, zLen, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putIP(req->dp, fIP(indp), sizeof(req->raw) - (req->dp - req->raw));
 					break;
 				case DNS_TYPE_CNAME:
 					fQu(tempbuff, input, indp);
-					MYWORD dl = pQu(req->dp + 2, tempbuff);
-					req->dp += pUShort(req->dp, dl);
+					MYWORD dl = putQueryString(req->dp + 2, tempbuff, sizeof(req->raw) - (req->dp - req->raw) - 2);
+					req->dp += putUnsignedShort(req->dp, dl, sizeof(req->raw) - (req->dp - req->raw));
 					req->dp += dl;
 					break;
 			}
@@ -1542,7 +1547,7 @@ void addRRCache(data5 *req, data7 *cache)
 	}
 }
 
-void addRRA(data5 *req)
+void addRRA(dnsRequest *req)
 {
 	if (req->qType == QTYPE_A_BARE && req->cType != CTYPE_NONE)
 		sprintf_s(req->cname,sizeof(req->cname), "%s.%s", req->query, cfig.zone);
@@ -1550,12 +1555,12 @@ void addRRA(data5 *req)
 	if (strcasecmp(req->query, req->cname))
 	{
 		req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-		req->dp += pQu(req->dp, req->query);
-		req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
-		req->dp += pUShort(req->dp, qLen(req->cname));
-		req->dp += pQu(req->dp, req->cname);
+		req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_CNAME, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, qLen(req->cname), sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
 	}
 
 	for (; req->iterBegin != dnsCache[currentInd].end(); req->iterBegin++)
@@ -1568,18 +1573,18 @@ void addRRA(data5 *req)
 		if (cache->ip)
 		{
 			req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-			req->dp += pQu(req->dp, req->cname);
-			req->dp += pUShort(req->dp, DNS_TYPE_A);
-			req->dp += pUShort(req->dp, DNS_CLASS_IN);
-			req->dp += pULong(req->dp, cfig.lease);
-			req->dp += pUShort(req->dp, 4);
-			req->dp += pIP(req->dp, cache->ip);
+			req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putIP(req->dp, cache->ip, sizeof(req->raw) - (req->dp - req->raw));
 		}
 	}
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRPtr(data5 *req)
+void addRRPtr(dnsRequest *req)
 {
 	for (; req->iterBegin != dnsCache[currentInd].end(); req->iterBegin++)
 	{
@@ -1588,11 +1593,11 @@ void addRRPtr(data5 *req)
 			if (strcasecmp(cache->name, req->mapname))
 				break;
 
-			req->dp += pQu(req->dp, req->query);
-			req->dp += pUShort(req->dp, DNS_TYPE_PTR);
-			req->dp += pUShort(req->dp, DNS_CLASS_IN);
+			req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_TYPE_PTR, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
 			req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-			req->dp += pULong(req->dp, cfig.lease);
+			req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
 
 			if (!cache->hostname[0])
 				strcpy_s(req->cname,sizeof(req->cname), cfig.zone);
@@ -1601,14 +1606,14 @@ void addRRPtr(data5 *req)
 			else
 				strcpy_s(req->cname,sizeof(req->cname), cache->hostname);
 
-			req->dp += pUShort(req->dp, qLen(req->cname));
-			req->dp += pQu(req->dp, req->cname);
+			req->dp += putUnsignedShort(req->dp, qLen(req->cname), sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
 		}
 	}
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRServerA(data5 *req)
+void addRRServerA(dnsRequest *req)
 {
 	if (req->qType == QTYPE_A_BARE)
 		sprintf_s(req->cname,sizeof(req->cname), "%s.%s", req->query, cfig.zone);
@@ -1616,12 +1621,12 @@ void addRRServerA(data5 *req)
 	if (strcasecmp(req->query, req->cname))
 	{
 		req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-		req->dp += pQu(req->dp, req->query);
-		req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
-		req->dp += pUShort(req->dp, qLen(req->cname));
-		req->dp += pQu(req->dp, req->cname);
+		req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_CNAME, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, qLen(req->cname), sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
 	}
 
 	hostMap::iterator it = req->iterBegin;
@@ -1636,12 +1641,12 @@ void addRRServerA(data5 *req)
 			if (cache->ip && cache->ip == network.dnsUdpConn[req->sockInd].server)
 			{
 				req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-				req->dp += pQu(req->dp, req->cname);
-				req->dp += pUShort(req->dp, DNS_TYPE_A);
-				req->dp += pUShort(req->dp, DNS_CLASS_IN);
-				req->dp += pULong(req->dp, cfig.lease);
-				req->dp += pUShort(req->dp, 4);
-				req->dp += pIP(req->dp, cache->ip);
+				req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putIP(req->dp, cache->ip, sizeof(req->raw) - (req->dp - req->raw));
 			}
 		}
 	}
@@ -1656,19 +1661,19 @@ void addRRServerA(data5 *req)
 			if (cache->ip && cache->ip != network.dnsUdpConn[req->sockInd].server)
 			{
 				req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-				req->dp += pQu(req->dp, req->cname);
-				req->dp += pUShort(req->dp, DNS_TYPE_A);
-				req->dp += pUShort(req->dp, DNS_CLASS_IN);
-				req->dp += pULong(req->dp, cfig.lease);
-				req->dp += pUShort(req->dp, 4);
-				req->dp += pIP(req->dp, cache->ip);
+				req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+				req->dp += putIP(req->dp, cache->ip, sizeof(req->raw) - (req->dp - req->raw));
 			}
 		}
 	}
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRAny(data5 *req)
+void addRRAny(dnsRequest *req)
 {
 	if (req->qType == QTYPE_A_BARE || req->qType == QTYPE_A_LOCAL || req->qType == QTYPE_A_ZONE)
 		req->iterBegin = dnsCache[currentInd].find(setMapName(req->tempname, sizeof(req->tempname), req->mapname, DNS_TYPE_A));
@@ -1694,33 +1699,33 @@ void addRRAny(data5 *req)
 				case CTYPE_LOCAL_A:
 				case CTYPE_SERVER_A_AUTH:
 				case CTYPE_STATIC_A_AUTH:
-					req->dp += pQu(req->dp, req->cname);
-					req->dp += pUShort(req->dp, DNS_TYPE_A);
-					req->dp += pUShort(req->dp, DNS_CLASS_IN);
-					req->dp += pULong(req->dp, cfig.lease);
-					req->dp += pUShort(req->dp, 4);
-					req->dp += pIP(req->dp, cache->ip);
+					req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putIP(req->dp, cache->ip, sizeof(req->raw) - (req->dp - req->raw));
 					req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
 					break;
 
 				case CTYPE_EXT_CNAME:
-					req->dp += pQu(req->dp, req->cname);
-					req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
-					req->dp += pUShort(req->dp, DNS_CLASS_IN);
-					req->dp += pULong(req->dp, cfig.lease);
-					req->dp += pUShort(req->dp, qLen(cache->hostname));
-					req->dp += pQu(req->dp, cache->hostname);
+					req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, DNS_TYPE_CNAME, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, qLen(cache->hostname), sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putQueryString(req->dp, cache->hostname, sizeof(req->raw) - (req->dp - req->raw));
 					req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
 					break;
 
 				case CTYPE_LOCAL_CNAME:
-					req->dp += pQu(req->dp, req->cname);
-					req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
-					req->dp += pUShort(req->dp, DNS_CLASS_IN);
-					req->dp += pULong(req->dp, cfig.lease);
+					req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, DNS_TYPE_CNAME, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
 					sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->hostname, cfig.zone);
-					req->dp += pUShort(req->dp, qLen(req->cname));
-					req->dp += pQu(req->dp, req->cname);
+					req->dp += putUnsignedShort(req->dp, qLen(req->cname), sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
 					req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
 					break;
 
@@ -1730,10 +1735,10 @@ void addRRAny(data5 *req)
 				case CTYPE_STATIC_PTR_NAUTH:
 				case CTYPE_SERVER_PTR_AUTH:
 				case CTYPE_SERVER_PTR_NAUTH:
-					req->dp += pQu(req->dp, req->cname);
-					req->dp += pUShort(req->dp, DNS_TYPE_PTR);
-					req->dp += pUShort(req->dp, DNS_CLASS_IN);
-					req->dp += pULong(req->dp, cfig.lease);
+					req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, DNS_TYPE_PTR, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
 
 					if (!cache->hostname[0])
 						strcpy_s(req->extbuff, sizeof(req->extbuff), cfig.zone);
@@ -1742,8 +1747,8 @@ void addRRAny(data5 *req)
 					else
 						sprintf_s(req->extbuff,sizeof(req->extbuff), "%s.%s", cache->hostname, cfig.zone);
 
-					req->dp += pUShort(req->dp, qLen(req->extbuff));
-					req->dp += pQu(req->dp, req->extbuff);
+					req->dp += putUnsignedShort(req->dp, qLen(req->extbuff), sizeof(req->raw) - (req->dp - req->raw));
+					req->dp += putQueryString(req->dp, req->extbuff, sizeof(req->raw) - (req->dp - req->raw));
 					req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
 					break;
 			}
@@ -1763,54 +1768,54 @@ void addRRAny(data5 *req)
 	}
 }
 
-void addRRWildA(data5 *req, MYDWORD ip)
+void addRRWildA(dnsRequest *req, MYDWORD ip)
 {
 	req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-	req->dp += pQu(req->dp, req->query);
-	req->dp += pUShort(req->dp, DNS_TYPE_A);
-	req->dp += pUShort(req->dp, DNS_CLASS_IN);
-	req->dp += pULong(req->dp, cfig.lease);
-	req->dp += pUShort(req->dp, 4);
-	req->dp += pIP(req->dp, ip);
+	req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putIP(req->dp, ip, sizeof(req->raw) - (req->dp - req->raw));
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRLocalhostA(data5 *req, data7 *cache)
+void addRRLocalhostA(dnsRequest *req, data7 *cache)
 {
 	if (strcasecmp(req->query, req->mapname))
 	{
 		req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-		req->dp += pQu(req->dp, req->query);
-		req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
-		req->dp += pUShort(req->dp, qLen(req->mapname));
-		req->dp += pQu(req->dp, req->mapname);
+		req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_CNAME, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, qLen(req->mapname), sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putQueryString(req->dp, req->mapname, sizeof(req->raw) - (req->dp - req->raw));
 	}
 
 	req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-	req->dp += pQu(req->dp, req->mapname);
-	req->dp += pUShort(req->dp, DNS_TYPE_A);
-	req->dp += pUShort(req->dp, DNS_CLASS_IN);
-	req->dp += pULong(req->dp, cfig.lease);
-	req->dp += pUShort(req->dp, 4);
-	req->dp += pIP(req->dp, cache->ip);
+	req->dp += putQueryString(req->dp, req->mapname, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putIP(req->dp, cache->ip, sizeof(req->raw) - (req->dp - req->raw));
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRLocalhostPtr(data5 *req, data7 *cache)
+void addRRLocalhostPtr(dnsRequest *req, data7 *cache)
 {
 	req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-	req->dp += pQu(req->dp, req->query);
-	req->dp += pUShort(req->dp, DNS_TYPE_PTR);
-	req->dp += pUShort(req->dp, DNS_CLASS_IN);
-	req->dp += pULong(req->dp, cfig.lease);
-	req->dp += pUShort(req->dp, qLen(cache->hostname));
-	req->dp += pQu(req->dp, cache->hostname);
+	req->dp += putQueryString(req->dp, req->query, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, DNS_TYPE_PTR, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, qLen(cache->hostname), sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putQueryString(req->dp, cache->hostname, sizeof(req->raw) - (req->dp - req->raw));
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRMX(data5 *req)
+void addRRMX(dnsRequest *req)
 {
 	if (cfig.mxCount[currentInd])
 	{
@@ -1821,7 +1826,7 @@ void addRRMX(data5 *req)
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRSOA(data5 *req)
+void addRRSOA(dnsRequest *req)
 {
 	if (cfig.authorized && cfig.expireTime > t)
 	{
@@ -1829,9 +1834,9 @@ void addRRSOA(data5 *req)
 		req->dnsp->header.aa = 1;
 
 		if (req->qType == QTYPE_A_BARE || req->qType == QTYPE_A_LOCAL || req->qType == QTYPE_A_ZONE)
-			req->dp += pQu(req->dp, cfig.zone);
+			req->dp += putQueryString(req->dp, cfig.zone);
 		else if (req->qType == QTYPE_P_LOCAL || req->qType == QTYPE_P_ZONE)
-			req->dp += pQu(req->dp, cfig.authority);
+			req->dp += putQueryString(req->dp, cfig.authority);
 		else
 			return;
 
@@ -1840,30 +1845,30 @@ void addRRSOA(data5 *req)
 		else
 			req->dnsp->header.nscount = htons(htons(req->dnsp->header.nscount) + 1);
 
-		req->dp += pUShort(req->dp, DNS_TYPE_SOA);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_SOA, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
 		char *data = req->dp;
 		req->dp += 2;
-		req->dp += pQu(req->dp, cfig.nsP);
+		req->dp += putQueryString(req->dp, cfig.nsP, sizeof(req->raw) - (req->dp - req->raw));
 		sprintf_s(req->extbuff,sizeof(req->extbuff), "hostmaster.%s", cfig.zone);
-		req->dp += pQu(req->dp, req->extbuff);
+		req->dp += putQueryString(req->dp, req->extbuff, sizeof(req->raw) - (req->dp - req->raw));
 
 		if (req->qType == QTYPE_P_LOCAL || req->qType == QTYPE_P_EXT || req->qType == QTYPE_P_ZONE)
-			req->dp += pULong(req->dp, cfig.serial2);
+			req->dp += putUnsignedLong(req->dp, cfig.serial2, sizeof(req->raw) - (req->dp - req->raw));
 		else
-			req->dp += pULong(req->dp, cfig.serial1);
+			req->dp += putUnsignedLong(req->dp, cfig.serial1, sizeof(req->raw) - (req->dp - req->raw));
 
-		req->dp += pULong(req->dp, cfig.refresh);
-		req->dp += pULong(req->dp, cfig.retry);
-		req->dp += pULong(req->dp, cfig.expire);
-		req->dp += pULong(req->dp, cfig.minimum);
-		pUShort(data, (unsigned short)((req->dp - data) - 2));
+		req->dp += putUnsignedLong(req->dp, cfig.refresh, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.retry, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.expire, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.minimum, sizeof(req->raw) - (req->dp - req->raw));
+		putUnsignedShort(data, (unsigned short)((req->dp - data) - 2));
 	}
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRNS(data5 *req)
+void addRRNS(dnsRequest *req)
 {
 	//printf("%s=%u\n", cfig.ns, cfig.expireTime);
 	if (cfig.authorized && cfig.expireTime > t)
@@ -1874,9 +1879,9 @@ void addRRNS(data5 *req)
 		if (cfig.nsP[0] && (cfig.replication != 2 || cfig.dnsRepl > t))
 		{
 			if (req->qType == QTYPE_A_BARE || req->qType == QTYPE_A_LOCAL || req->qType == QTYPE_A_ZONE)
-				req->dp += pQu(req->dp, cfig.zone);
+				req->dp += putQueryString(req->dp, cfig.zone);
 			else if (req->qType == QTYPE_P_LOCAL || req->qType == QTYPE_P_ZONE)
-				req->dp += pQu(req->dp, cfig.authority);
+				req->dp += putQueryString(req->dp, cfig.authority);
 			else
 				return;
 
@@ -1885,19 +1890,19 @@ void addRRNS(data5 *req)
 			else
 				req->dnsp->header.nscount = htons(htons(req->dnsp->header.nscount) + 1);
 
-			req->dp += pUShort(req->dp, DNS_TYPE_NS);
-			req->dp += pUShort(req->dp, DNS_CLASS_IN);
-			req->dp += pULong(req->dp, cfig.expire);
-			req->dp += pUShort(req->dp, qLen(cfig.nsP));
-			req->dp += pQu(req->dp, cfig.nsP);
+			req->dp += putUnsignedShort(req->dp, DNS_TYPE_NS, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedLong(req->dp, cfig.expire, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, qLen(cfig.nsP), sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putQueryString(req->dp, cfig.nsP, sizeof(req->raw) - (req->dp - req->raw));
 		}
 
 		if (cfig.nsS[0] && (cfig.replication == 2 || cfig.dnsRepl > t))
 		{
 			if (req->qType == QTYPE_A_BARE || req->qType == QTYPE_A_LOCAL || req->qType == QTYPE_A_ZONE)
-				req->dp += pQu(req->dp, cfig.zone);
+				req->dp += putQueryString(req->dp, cfig.zone);
 			else if (req->qType == QTYPE_P_LOCAL || req->qType == QTYPE_P_ZONE)
-				req->dp += pQu(req->dp, cfig.authority);
+				req->dp += putQueryString(req->dp, cfig.authority);
 			else
 				return;
 
@@ -1906,17 +1911,17 @@ void addRRNS(data5 *req)
 			else
 				req->dnsp->header.nscount = htons(htons(req->dnsp->header.nscount) + 1);
 
-			req->dp += pUShort(req->dp, DNS_TYPE_NS);
-			req->dp += pUShort(req->dp, DNS_CLASS_IN);
-			req->dp += pULong(req->dp, cfig.expire);
-			req->dp += pUShort(req->dp, qLen(cfig.nsS));
-			req->dp += pQu(req->dp, cfig.nsS);
+			req->dp += putUnsignedShort(req->dp, DNS_TYPE_NS, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedLong(req->dp, cfig.expire, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, qLen(cfig.nsS), sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putQueryString(req->dp, cfig.nsS, sizeof(req->raw) - (req->dp - req->raw));
 		}
 	}
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRAd(data5 *req)
+void addRRAd(dnsRequest *req)
 {
 	//printf("%s=%u\n", cfig.ns, cfig.expireTime);
 	if (cfig.authorized && cfig.expireTime > t)
@@ -1924,34 +1929,34 @@ void addRRAd(data5 *req)
 		if (cfig.nsP[0] && (cfig.replication != 2 || cfig.dnsRepl > t))
 		{
 			req->dnsp->header.adcount = htons(htons(req->dnsp->header.adcount) + 1);
-			req->dp += pQu(req->dp, cfig.nsP);
+			req->dp += putQueryString(req->dp, cfig.nsP);
 
-			req->dp += pUShort(req->dp, DNS_TYPE_A);
-			req->dp += pUShort(req->dp, DNS_CLASS_IN);
-			req->dp += pULong(req->dp, cfig.lease);
-			req->dp += pUShort(req->dp, 4);
+			req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
 
 			if (cfig.replication)
-				req->dp += pIP(req->dp, cfig.zoneServers[0]);
+				req->dp += putIP(req->dp, cfig.zoneServers[0], sizeof(req->raw) - (req->dp - req->raw));
 			else
-				req->dp += pIP(req->dp, network.listenServers[req->sockInd]);
+				req->dp += putIP(req->dp, network.listenServers[req->sockInd], sizeof(req->raw) - (req->dp - req->raw));
 		}
 
 		if (cfig.nsS[0] && (cfig.replication == 2 || cfig.dnsRepl > t))
 		{
 			req->dnsp->header.adcount = htons(htons(req->dnsp->header.adcount) + 1);
-			req->dp += pQu(req->dp, cfig.nsS);
-			req->dp += pUShort(req->dp, DNS_TYPE_A);
-			req->dp += pUShort(req->dp, DNS_CLASS_IN);
-			req->dp += pULong(req->dp, cfig.lease);
-			req->dp += pUShort(req->dp, 4);
-			req->dp += pIP(req->dp, cfig.zoneServers[1]);
+			req->dp += putQueryString(req->dp, cfig.nsS, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+			req->dp += putIP(req->dp, cfig.zoneServers[1], sizeof(req->raw) - (req->dp - req->raw));
 		}
 	}
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRAOne(data5 *req)
+void addRRAOne(dnsRequest *req)
 {
 	if (data7 *cache = req->iterBegin->second)
 	{
@@ -1964,26 +1969,26 @@ void addRRAOne(data5 *req)
 		else
 			strcpy_s(req->cname, sizeof(req->cname), cache->name);
 
-		req->dp += pQu(req->dp, req->cname);
-		req->dp += pUShort(req->dp, DNS_TYPE_A);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
-		req->dp += pUShort(req->dp, 4);
-		req->dp += pIP(req->dp, cache->ip);
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putIP(req->dp, cache->ip, sizeof(req->raw) - (req->dp - req->raw));
 		//req->bytes = req->dp - req->raw;
 	}
 }
 
-void addRRPtrOne(data5 *req)
+void addRRPtrOne(dnsRequest *req)
 {
 	if (data7 *cache = req->iterBegin->second)
 	{
 		req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
 		sprintf_s(req->cname,sizeof(req->cname), "%s%s", cache->name, arpa);
-		req->dp += pQu(req->dp, req->cname);
-		req->dp += pUShort(req->dp, DNS_TYPE_PTR);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_PTR, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
 
 		if (!cache->hostname[0])
 			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
@@ -1992,14 +1997,14 @@ void addRRPtrOne(data5 *req)
 		else
 			strcpy_s(req->cname, sizeof(req->cname), cache->hostname);
 
-		req->dp += pUShort(req->dp, qLen(req->cname));
-		req->dp += pQu(req->dp, req->cname);
+		req->dp += putUnsignedShort(req->dp, qLen(req->cname), sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
 	}
 
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRSTAOne(data5 *req)
+void addRRSTAOne(dnsRequest *req)
 {
 	if (data7 *cache = req->iterBegin->second)
 	{
@@ -2012,17 +2017,17 @@ void addRRSTAOne(data5 *req)
 		else
 			strcpy_s(req->cname, sizeof(req->cname), cache->name);
 
-		req->dp += pQu(req->dp, req->cname);
-		req->dp += pUShort(req->dp, DNS_TYPE_A);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
-		req->dp += pUShort(req->dp, 4);
-		req->dp += pIP(req->dp, cache->ip);
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, 4, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putIP(req->dp, cache->ip, sizeof(req->raw) - (req->dp - req->raw));
 	}
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRCNOne(data5 *req)
+void addRRCNOne(dnsRequest *req)
 {
 	if (data7 *cache = req->iterBegin->second)
 	{
@@ -2035,10 +2040,10 @@ void addRRCNOne(data5 *req)
 		else
 			sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->name, cfig.zone);
 
-		req->dp += pQu(req->dp, req->cname);
-		req->dp += pUShort(req->dp, DNS_TYPE_CNAME);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
-		req->dp += pULong(req->dp, cfig.lease);
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_CNAME, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
 
 		if (!cache->hostname[0])
 			strcpy_s(req->cname, sizeof(req->cname), cfig.zone);
@@ -2047,23 +2052,23 @@ void addRRCNOne(data5 *req)
 		else
 			sprintf_s(req->cname,sizeof(req->cname), "%s.%s", cache->hostname, cfig.zone);
 
-		req->dp += pUShort(req->dp, qLen(req->cname));
-		req->dp += pQu(req->dp, req->cname);
+		req->dp += putUnsignedShort(req->dp, qLen(req->cname), sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
 	}
 	//req->bytes = req->dp - req->raw;
 }
 
-void addRRMXOne(data5 *req, MYBYTE m)
+void addRRMXOne(dnsRequest *req, MYBYTE m)
 {
-	//req->dp += pQu(req->dp, req->query);
+	//req->dp += putQueryString(req->dp, req->query);
 	req->dnsp->header.ancount = htons(htons(req->dnsp->header.ancount) + 1);
-	req->dp += pQu(req->dp, cfig.zone);
-	req->dp += pUShort(req->dp, DNS_TYPE_MX);
-	req->dp += pUShort(req->dp, DNS_CLASS_IN);
-	req->dp += pULong(req->dp, cfig.lease);
-	req->dp += pUShort(req->dp, (unsigned short)(strlen(cfig.mxServers[currentInd][m].hostname) + 4));
-	req->dp += pUShort(req->dp, cfig.mxServers[currentInd][m].pref);
-	req->dp += pQu(req->dp, cfig.mxServers[currentInd][m].hostname);
+	req->dp += putQueryString(req->dp, cfig.zone, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, DNS_TYPE_MX, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedLong(req->dp, cfig.lease, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, (unsigned short)(strlen(cfig.mxServers[currentInd][m].hostname) + 4), sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putUnsignedShort(req->dp, cfig.mxServers[currentInd][m].pref, sizeof(req->raw) - (req->dp - req->raw));
+	req->dp += putQueryString(req->dp, cfig.mxServers[currentInd][m].hostname, sizeof(req->raw) - (req->dp - req->raw));
 	//req->bytes = req->dp - req->raw;
 }
 
@@ -2625,7 +2630,7 @@ void __cdecl sendHTTP(void *lpParam)
 	return;
 }
 
-void procTCP(data5 *req)
+void procTCP(dnsRequest *req)
 {
 	//debug("procTCP");
 
@@ -2989,7 +2994,7 @@ void procTCP(data5 *req)
 	closesocket(req->sock);
 }
 
-MYWORD sendTCPmess(data5 *req)
+MYWORD sendTCPmess(dnsRequest *req)
 {
 	char logBuff[256];
 	timeval tv1;
@@ -3005,7 +3010,7 @@ MYWORD sendTCPmess(data5 *req)
 		errno = 0;
 		req->dnsp->header.ra = 0;
 		req->bytes = (int)(req->dp - req->raw);
-		pUShort(req->raw, req->bytes - 2);
+		putUnsignedShort(req->raw, req->bytes - 2);
 
 		if (req->bytes == send(req->sock, req->raw, req->bytes, 0))
 			return 1;
@@ -3020,11 +3025,11 @@ MYWORD sendTCPmess(data5 *req)
 	return 0;
 }
 
-MYWORD gDNSMessage(data5 *req, MYBYTE sockInd)
+MYWORD gDNSMessage(dnsRequest *req, MYBYTE sockInd)
 {
 	//debug("gDNSMessage");
 	char logBuff[512];
-	memset(req, 0, sizeof(data5));
+	memset(req, 0, sizeof(dnsRequest));
 	req->sockLen = sizeof(req->remote);
 	errno = 0;
 
@@ -3201,7 +3206,7 @@ MYWORD gDNSMessage(data5 *req, MYBYTE sockInd)
 	return 0;
 }
 
-MYWORD scanloc(data5 *req)
+MYWORD scanloc(dnsRequest *req)
 {
 	//debug("scanloc");
 	char logBuff[512];
@@ -3435,9 +3440,9 @@ MYWORD scanloc(data5 *req)
 		//debug(req->cname);
 		req->qType = makeLocal(req->cname);
 		req->dp = &req->dnsp->data;
-		req->dp += pQu(req->dp, req->cname);
-		req->dp += pUShort(req->dp, DNS_TYPE_A);
-		req->dp += pUShort(req->dp, DNS_CLASS_IN);
+		req->dp += putQueryString(req->dp, req->cname, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_TYPE_A, sizeof(req->raw) - (req->dp - req->raw));
+		req->dp += putUnsignedShort(req->dp, DNS_CLASS_IN, sizeof(req->raw) - (req->dp - req->raw));
 		req->bytes = (int)(req->dp - req->raw);
 		return 0;
 	}
@@ -3453,7 +3458,7 @@ MYWORD scanloc(data5 *req)
 	return 0;
 }
 
-MYWORD fDNSMessage(data5 *req)
+MYWORD fDNSMessage(dnsRequest *req)
 {
 	//debug("fDNSMessage");
 	//debug(req->cname);
@@ -3673,12 +3678,12 @@ MYWORD fDNSMessage(data5 *req)
 	return (nRet);
 }
 
-MYWORD frDNSMessage(data5 *req)
+MYWORD frDNSMessage(dnsRequest *req)
 {
 	//debug("frDNSMessage");
 	char tempbuff[512];
 	if (!req) return 0;
-	memset(req, 0, sizeof(data5));
+	memset(req, 0, sizeof(dnsRequest));
 	req->sockLen = sizeof(req->remote);
 	errno = 0;
 	MYBYTE dnsType = 0;
@@ -3823,7 +3828,7 @@ MYWORD frDNSMessage(data5 *req)
 	return 0;
 }
 
-MYWORD sDNSMessage(data5 *req)
+MYWORD sDNSMessage(dnsRequest *req)
 {
 	//debug("sDNSMessage");
 
@@ -4065,7 +4070,7 @@ void addHostNotFound(char *hostname)
 	}
 }
 
-char* getResult(data5 *req)
+char* getResult(dnsRequest *req)
 {
 	char buff[256];
 	if (!req) return NULL;
@@ -4906,7 +4911,7 @@ void addOptions(data9 *req)
 
 			op.opt_code = DHCP_OPTION_SERVERID;
 			op.size = 4;
-			pIP(op.value, network.dhcpConn[req->sockInd].server);
+			putIP(op.value, network.dhcpConn[req->sockInd].server);
 			pvdata(req, &op);
 
 			op.opt_code = DHCP_OPTION_DOMAINNAME;
@@ -4918,7 +4923,7 @@ void addOptions(data9 *req)
 			{
 				op.opt_code = DHCP_OPTION_IPADDRLEASE;
 				op.size = 4;
-				pULong(op.value, cfig.lease);
+				putUnsignedLong(op.value, cfig.lease);
 				pvdata(req, &op);
 			}
 
@@ -4928,9 +4933,9 @@ void addOptions(data9 *req)
 				op.size = 4;
 
 				if (req->dhcpEntry->rangeInd >= 0)
-					pIP(op.value, cfig.dhcpRanges[(unsigned int)(req->dhcpEntry->rangeInd)].mask);
+					putIP(op.value, cfig.dhcpRanges[(unsigned int)(req->dhcpEntry->rangeInd)].mask);
 				else
-					pIP(op.value, cfig.mask);
+					putIP(op.value, cfig.mask);
 
 				pvdata(req, &op);
 			}
@@ -4944,7 +4949,7 @@ void addOptions(data9 *req)
 			{
 				op.opt_code = DHCP_OPTION_ROUTER;
 				op.size = 4;
-				pIP(op.value, network.dhcpConn[req->sockInd].server);
+				putIP(op.value, network.dhcpConn[req->sockInd].server);
 				pvdata(req, &op);
 			}
 */
@@ -4959,29 +4964,29 @@ void addOptions(data9 *req)
 						if (cfig.replication == 1)
 						{
 							op.size = 8;
-							pIP(op.value, cfig.zoneServers[0]);
-							pIP(op.value + 4, cfig.zoneServers[1]);
+							putIP(op.value, cfig.zoneServers[0]);
+							putIP(op.value + 4, cfig.zoneServers[1]);
 							pvdata(req, &op);
 						}
 						else
 						{
 							op.size = 8;
-							pIP(op.value, cfig.zoneServers[1]);
-							pIP(op.value + 4, cfig.zoneServers[0]);
+							putIP(op.value, cfig.zoneServers[1]);
+							putIP(op.value + 4, cfig.zoneServers[0]);
 							pvdata(req, &op);
 						}
 					}
 					else if (cfig.dnsRepl > t)
 					{
 						op.size = 8;
-						pIP(op.value, cfig.zoneServers[1]);
-						pIP(op.value + 4, cfig.zoneServers[0]);
+						putIP(op.value, cfig.zoneServers[1]);
+						putIP(op.value + 4, cfig.zoneServers[0]);
 						pvdata(req, &op);
 					}
 					else
 					{
 						op.size = 4;
-						pIP(op.value, network.dhcpConn[req->sockInd].server);
+						putIP(op.value, network.dhcpConn[req->sockInd].server);
 						pvdata(req, &op);
 					}
 				}
@@ -4989,7 +4994,7 @@ void addOptions(data9 *req)
 				{
 					op.opt_code = DHCP_OPTION_DNS;
 					op.size = 4;
-					pIP(op.value, cfig.zoneServers[0]);
+					putIP(op.value, cfig.zoneServers[0]);
 					pvdata(req, &op);
 				}
 			}
@@ -5031,7 +5036,7 @@ void pvdata(data9 *req, data3 *op)
 				if (req->lease >= INT_MAX)
 					req->lease = UINT_MAX;
 
-				pULong(op->value, req->lease);
+				putUnsignedLong(op->value, req->lease);
 			}
 			else if (op->opt_code == DHCP_OPTION_REBINDINGTIME)
 				req->rebind = fULong(op->value);
@@ -5249,7 +5254,7 @@ MYDWORD sendRepl(data9 *req)
 
 //	op.opt_code = DHCP_OPTION_SERIAL;
 //	op.size = 4;
-//	pULong(op.value, cfig.serial1);
+//	putUnsignedLong(op.value, cfig.serial1);
 //	pvdata(req, &op);
 
 	*(req->vp) = DHCP_OPTION_END;
@@ -5950,7 +5955,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 					dp++;
 					*dp = 4;
 					dp++;
-					dp += pULong(dp, j);
+					dp += putUnsignedLong(dp, j);
 					buffsize -= 6;
 					//printf("%s=%u=%u\n",opData[op_index].opName,opData[op_index].opType,htonl(j));
 				}
@@ -5983,7 +5988,7 @@ void loadOptions(FILE *f, const char *sectionName, data20 *optionData)
 					dp++;
 					*dp = 2;
 					dp++;
-					dp += pUShort(dp, j);
+					dp += putUnsignedShort(dp, j);
 					buffsize -= 4;
 				}
 				else
@@ -6970,7 +6975,7 @@ void mySplit(char *name, char *value, char *source, char splitChar)
 	//printf("%s %s\n", name, value);
 }
 
-char *strquery(data5 *req)
+char *strquery(dnsRequest *req)
 {
 	strcpy_s(req->extbuff, sizeof(req->extbuff), req->query);
 
@@ -7955,8 +7960,8 @@ MYDWORD getSerial(char *zone)
 	char logBuff[512];
 	char ipbuff[32];
 	MYDWORD serial1 = 0;
-	data5 req;
-	memset(&req, 0, sizeof(data5));
+	dnsRequest req;
+	memset(&req, 0, sizeof(dnsRequest));
 	req.remote.sin_family = AF_INET;
 	req.remote.sin_port = htons(dnsPort);
 	timeval tv1;
@@ -7980,11 +7985,11 @@ MYDWORD getSerial(char *zone)
 	req.dnsp->header.rd = false;
 	req.dnsp->header.xid = (t % USHRT_MAX);
 	req.dp = &req.dnsp->data;
-	req.dp += pQu(req.dp, zone);
-	req.dp += pUShort(req.dp, DNS_TYPE_SOA);
-	req.dp += pUShort(req.dp, DNS_CLASS_IN);
-	req.bytes = (int)(req.dp - req.raw);
-	//pUShort(req.raw, req.bytes - 2);
+	req.dp += putQueryString(req.dp, zone, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putUnsignedShort(req.dp, DNS_TYPE_SOA, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putUnsignedShort(req.dp, DNS_CLASS_IN, sizeof(req.raw) - (req.dp - req.raw));
+	req.bytes = (int)(req.dp - req.raw, sizeof(req.raw) - (req.dp - req.raw));
+	//putUnsignedShort(req.raw, req.bytes - 2);
 
 	if ((req.bytes = sendto(req.sock, req.raw, req.bytes, 0, (sockaddr*)&req.remote, sizeof(req.remote))) <= 0)
 	{
@@ -8055,8 +8060,8 @@ MYDWORD getSerial(char *zone)
 void sendServerName()
 {
 	errno = 0;
-	data5 req;
-	memset(&req, 0, sizeof(data5));
+	dnsRequest req;
+	memset(&req, 0, sizeof(dnsRequest));
 	req.remote.sin_family = AF_INET;
 	req.remote.sin_port = htons(dnsPort);
 	req.remote.sin_addr.s_addr = cfig.zoneServers[0];
@@ -8079,17 +8084,17 @@ void sendServerName()
 	req.dnsp->header.prcount = htons(1);
 	req.dnsp->header.xid = (t % USHRT_MAX);
 	req.dp = &req.dnsp->data;
-	req.dp += pQu(req.dp, cfig.zone);
-	req.dp += pUShort(req.dp, DNS_TYPE_SOA);
-	req.dp += pUShort(req.dp, DNS_CLASS_IN);
-	req.dp += pQu(req.dp, cfig.servername_fqn);
-	req.dp += pUShort(req.dp, DNS_TYPE_A);
-	req.dp += pUShort(req.dp, DNS_CLASS_IN);
-	req.dp += pULong(req.dp, 0);
-	req.dp += pUShort(req.dp, 4);
-	req.dp += pIP(req.dp, cfig.zoneServers[1]);
+	req.dp += putQueryString(req.dp, cfig.zone, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putUnsignedShort(req.dp, DNS_TYPE_SOA, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putUnsignedShort(req.dp, DNS_CLASS_IN, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putQueryString(req.dp, cfig.servername_fqn, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putUnsignedShort(req.dp, DNS_TYPE_A, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putUnsignedShort(req.dp, DNS_CLASS_IN, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putUnsignedLong(req.dp, 0, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putUnsignedShort(req.dp, 4, sizeof(req.raw) - (req.dp - req.raw));
+	req.dp += putIP(req.dp, cfig.zoneServers[1], sizeof(req.raw) - (req.dp - req.raw));
 	req.bytes = (int)(req.dp - req.raw);
-	//pUShort(req.raw, req.bytes - 2);
+	//putUnsignedShort(req.raw, req.bytes - 2);
 
 	if ((req.bytes = sendto(req.sock, req.raw, req.bytes, 0, (sockaddr*)&req.remote, sizeof(req.remote))) <= 0)
 	{
@@ -8375,7 +8380,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 	char *data;
 	char *dp;
 	MYDWORD ip;
-	data5 req;
+	dnsRequest req;
 	data7 *cache = NULL;
 
 	memset(&lump, 0, sizeof(data71));
@@ -8405,7 +8410,7 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 		dnsCache[ind].insert(pair<string, data7*>(cache->mapname, cache));
 	}
 
-	memset(&req, 0, sizeof(data5));
+	memset(&req, 0, sizeof(dnsRequest));
 	req.sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	if (req.sock == INVALID_SOCKET)
@@ -8443,11 +8448,11 @@ MYDWORD getZone(MYBYTE ind, char *zone)
 		req.dnsp->header.qdcount = htons(1);
 		req.dnsp->header.xid = (t % USHRT_MAX);
 		req.dp = &req.dnsp->data;
-		req.dp += pQu(req.dp, zone);
-		req.dp += pUShort(req.dp, DNS_TYPE_AXFR);
-		req.dp += pUShort(req.dp, DNS_CLASS_IN);
+		req.dp += putQueryString(req.dp, zone, sizeof(req.raw) - (req.dp - req.raw));
+		req.dp += putUnsignedShort(req.dp, DNS_TYPE_AXFR, sizeof(req.raw) - (req.dp - req.raw));
+		req.dp += putUnsignedShort(req.dp, DNS_CLASS_IN, sizeof(req.raw) - (req.dp - req.raw));
 		req.bytes = (int)(req.dp - req.raw);
-		pUShort(req.raw, req.bytes - 2);
+		putUnsignedShort(req.raw, req.bytes - 2);
 
 		if (send(req.sock, req.raw, req.bytes, 0) < req.bytes)
 		{
@@ -8707,10 +8712,10 @@ bool getSecondary()
 	char *data = NULL;
 	char *dp = NULL;
 	MYWORD rr = 0;
-	data5 req;
+	dnsRequest req;
 	//MYDWORD serial = 0;
 
-	memset(&req, 0, sizeof(data5));
+	memset(&req, 0, sizeof(dnsRequest));
 	req.sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	if (req.sock == INVALID_SOCKET)
@@ -8747,11 +8752,11 @@ bool getSecondary()
 		req.dnsp->header.qdcount = htons(1);
 		req.dnsp->header.xid = (t % USHRT_MAX);
 		req.dp = &req.dnsp->data;
-		req.dp += pQu(req.dp, cfig.authority);
-		req.dp += pUShort(req.dp, DNS_TYPE_AXFR);
-		req.dp += pUShort(req.dp, DNS_CLASS_IN);
+		req.dp += putQueryString(req.dp, cfig.authority, sizeof(req.raw) - (req.dp - req.raw));
+		req.dp += putUnsignedShort(req.dp, DNS_TYPE_AXFR, sizeof(req.raw) - (req.dp - req.raw));
+		req.dp += putUnsignedShort(req.dp, DNS_CLASS_IN, sizeof(req.raw) - (req.dp - req.raw));
 		req.bytes = (int)(req.dp - req.raw);
-		pUShort(req.raw, (req.bytes - 2));
+		putUnsignedShort(req.raw, (req.bytes - 2));
 
 		if (send(req.sock, req.raw, req.bytes, 0) < req.bytes)
 		{
@@ -9985,9 +9990,9 @@ void __cdecl init(void *lpParam)
 						op.size = 4;
 
 						if (cfig.replication == 1)
-							pIP(op.value, cfig.zoneServers[0]);
+							putIP(op.value, cfig.zoneServers[0]);
 						else
-							pIP(op.value, cfig.zoneServers[1]);
+							putIP(op.value, cfig.zoneServers[1]);
 
 						pvdata(&token, &op);
 					}
@@ -11273,7 +11278,7 @@ void logDNSMess(char *logBuff, MYBYTE logLevel)
 	}
 }
 
-void logDNSMess(data5 *req, char *logBuff, MYBYTE logLevel)
+void logDNSMess(dnsRequest *req, char *logBuff, MYBYTE logLevel)
 {
 	if (verbatim)
 		printf("%s\n", logBuff);
@@ -11291,7 +11296,7 @@ void logDNSMess(data5 *req, char *logBuff, MYBYTE logLevel)
 	}
 }
 
-void logTCPMess(data5 *req, char *logBuff, MYBYTE logLevel)
+void logTCPMess(dnsRequest *req, char *logBuff, MYBYTE logLevel)
 {
 	if (verbatim)
 		printf("%s\n", logBuff);
