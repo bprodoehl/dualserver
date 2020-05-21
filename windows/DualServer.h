@@ -44,6 +44,7 @@ using namespace std;
 #define MAX_TCP_CLIENTS 16
 #define MAX_WILD_HOSTS 125
 #define MAX_HOSTNAME_STR_SIZE 64
+#define MAX_HOST_SECTIONS 8
 
 #define RCODE_NOERROR 		0
 #define RCODE_FORMATERROR	1

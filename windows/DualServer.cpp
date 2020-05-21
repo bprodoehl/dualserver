@@ -9481,76 +9481,84 @@ void __cdecl init(void *lpParam)
 			}
 		}
 
-		if (cfig.replication != 2 && (f = openSection("DNS_HOSTS", 1)))
+		if (cfig.replication != 2)
 		{
-			while (readSection(raw, f))
+			for (MYBYTE i = 1; i <= MAX_HOST_SECTIONS; i++)
 			{
-				mySplit(name, value, raw, '=');
-
-				if (name[0] && value[0])
+				if ((f = openSection("DNS_HOSTS", i)))
 				{
-					if (chkQu(name) && !isIP(name))
+					logDNSMess(logBuff, 1);
+					while (readSection(raw, f))
 					{
-						MYDWORD ip;
-						inet_pton(AF_INET, value, &ip);
-						MYBYTE nameType = makeLocal(name);
-						bool ipLocal = isLocal(ip);
+						mySplit(name, value, raw, '=');
 
-						if (!strcasecmp(value, "0.0.0.0"))
+						if (name[0] && value[0])
 						{
-							addHostNotFound(name);
-							continue;
-						}
-						else if (!ip)
-						{
-							sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] Invalid Entry %s ignored", raw);
-							logDNSMess(logBuff, 1);
-							continue;
-						}
+							if (chkQu(name) && !isIP(name))
+							{
+								logDNSMess(logBuff, 1);
+								MYDWORD ip;
+								inet_pton(AF_INET, value, &ip);
+								MYBYTE nameType = makeLocal(name);
+								bool ipLocal = isLocal(ip);
 
-						switch (nameType)
-						{
-							case QTYPE_A_ZONE:
-							case QTYPE_A_BARE:
-							case QTYPE_A_LOCAL:
-								add2Cache(name, ip, INT_MAX, CTYPE_STATIC_A_AUTH, 0);
-								break;
-
-							default:
-								if (cfig.replication)
+								if (!strcasecmp(value, "0.0.0.0"))
 								{
-									sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] forward entry for %s not in Forward Zone, ignored", raw);
+									addHostNotFound(name);
+									continue;
+								}
+								else if (!ip)
+								{
+									sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] Invalid Entry %s ignored", raw);
+									logDNSMess(logBuff, 1);
+									continue;
+								}
+
+								switch (nameType)
+								{
+								case QTYPE_A_ZONE:
+								case QTYPE_A_BARE:
+								case QTYPE_A_LOCAL:
+									add2Cache(name, ip, INT_MAX, CTYPE_STATIC_A_AUTH, 0);
+									break;
+
+								default:
+									if (cfig.replication)
+									{
+										sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] forward entry for %s not in Forward Zone, ignored", raw);
+										logDNSMess(logBuff, 1);
+									}
+									else
+										add2Cache(name, ip, INT_MAX, CTYPE_STATIC_A_NAUTH, 0);
+
+									break;
+								}
+
+								if (ipLocal)
+								{
+									add2Cache(name, ip, INT_MAX, 0, CTYPE_STATIC_PTR_AUTH);
+									holdIP(ip);
+								}
+								else if (cfig.replication)
+								{
+									sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] reverse entry for %s not in Reverse Zone, ignored", raw);
 									logDNSMess(logBuff, 1);
 								}
 								else
-									add2Cache(name, ip, INT_MAX, CTYPE_STATIC_A_NAUTH, 0);
-
-								break;
-						}
-
-						if (ipLocal)
-						{
-							add2Cache(name, ip, INT_MAX, 0, CTYPE_STATIC_PTR_AUTH);
-							holdIP(ip);
-						}
-						else if (cfig.replication)
-						{
-							sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] reverse entry for %s not in Reverse Zone, ignored", raw);
-							logDNSMess(logBuff, 1);
+									add2Cache(name, ip, INT_MAX, 0, CTYPE_STATIC_PTR_NAUTH);
+							}
+							else
+							{
+								sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] Invalid Entry: %s ignored", raw);
+								logDNSMess(logBuff, 1);
+							}
 						}
 						else
-							add2Cache(name, ip, INT_MAX, 0, CTYPE_STATIC_PTR_NAUTH);
+						{
+							sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS], Missing value, entry %s ignored", raw);
+							logDNSMess(logBuff, 1);
+						}
 					}
-					else
-					{
-						sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS] Invalid Entry: %s ignored", raw);
-						logDNSMess(logBuff, 1);
-					}
-				}
-				else
-				{
-					sprintf_s(logBuff, sizeof(logBuff), "Section [DNS_HOSTS], Missing value, entry %s ignored", raw);
-					logDNSMess(logBuff, 1);
 				}
 			}
 		}
