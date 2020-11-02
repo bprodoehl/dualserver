@@ -157,9 +157,4 @@
   <ItemGroup>
     <Manifest Include="SupportedOS.manifest" />
   </ItemGroup>
-  <ItemDefinitionGroup Condition="'$(DualServerUseRaygun)'=='true'">
-    <ClCompile>
-		<PreprocessorDefinitions>USE_RAYGUN;RAYGUN_KEY=%DualServerRaygunKey%;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemDefinitionGroup>  
 </Project>

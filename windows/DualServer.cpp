@@ -752,30 +752,8 @@ void uninstallService()
 	}
 }
 
-#ifdef USE_RAYGUN
-typedef void(__cdecl *raygunSetup)(const char*, const char*);
-#endif
-
 int main(int argc, TCHAR* argv[])
 {
-#ifdef USE_RAYGUN
-	HINSTANCE hGetProcIDDLL = LoadLibrary("raygun4cpp.dll");
-
-	if (!hGetProcIDDLL) {
-		std::cout << "could not load the raygun library : " << GetLastError() << std::endl;
-	}
-	else
-	{
-		raygunSetup funci = (raygunSetup)GetProcAddress(hGetProcIDDLL, "startVectoredHandler");
-		if (!funci) {
-			std::cout << "could not locate the function : " << GetLastError() << std::endl;
-		}
-		else
-		{
-			funci(sVersionNumber, RAYGUN_KEY);
-		}
-	}
-#endif
 
 	if (IsWindowsXPOrGreater())
 	{
