@@ -9465,7 +9465,6 @@ void __cdecl init(void *lpParam)
 			{
 				if ((f = openSection("DNS_HOSTS", i)))
 				{
-					logDNSMess(logBuff, 1);
 					while (readSection(raw, f))
 					{
 						mySplit(name, value, raw, '=');
@@ -9474,7 +9473,6 @@ void __cdecl init(void *lpParam)
 						{
 							if (chkQu(name) && !isIP(name))
 							{
-								logDNSMess(logBuff, 1);
 								MYDWORD ip;
 								inet_pton(AF_INET, value, &ip);
 								MYBYTE nameType = makeLocal(name);
